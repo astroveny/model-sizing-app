@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+data
+uploads
+*.log
+.DS_Store
+coverage
+.vscode
+.idea
