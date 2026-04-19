@@ -173,7 +173,7 @@
 - **Verify:** `npm run typecheck` passes; store can be imported and used in a test component
 - **Refs:** PRD §5.1
 
-### P0.7 — Project persistence wiring
+### ☑ P0.7 — Project persistence wiring
 - **Action:** Implement CRUD for projects: `createProject`, `listProjects`, `loadProject`, `saveProject` in `lib/db/projects.ts`. Autosave Zustand store to SQLite (debounced 500ms) when any field changes.
 - **Deliverable:** `lib/db/projects.ts`; autosave hook in store
 - **Verify:** Create a project, change a field, reload browser, field value persists

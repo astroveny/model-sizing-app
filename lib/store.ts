@@ -399,10 +399,9 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
   setProjects: (projects) => set({ projects }),
 
   saveProject: () => {
-    // Autosave implementation wired in P0.7
-    const { activeProject } = get();
-    if (!activeProject) return;
-    // no-op skeleton — P0.7 will attach the DB write here
+    // DB write is driven by useAutosave hook (debounced 500 ms).
+    // This method exists so updateField can signal a save without
+    // importing server-only code into the client store.
   },
 
   updateField: (path, value) => {
