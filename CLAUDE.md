@@ -22,9 +22,9 @@ Before any non-trivial work, read these:
 - **Never overwrite `PRD.md` or `docs/*.md`** without first proposing the change in chat. These are reviewed documents.
 
 ## Tech stack (locked unless PRD changes)
-
-- Next.js 16 + React 19 + TypeScript + App Router
-- Tailwind v4 (CSS-based config via `@theme` blocks in `app/globals.css`)
+latest versions 
+- Next.js  + React  + TypeScript + App Router
+- Tailwind  (CSS-based config via `@theme` blocks in `app/globals.css`)
 - Zustand (state), Drizzle + better-sqlite3 (DB), Zod (validation)
 - shadcn/ui (components), lucide-react (icons), next-themes (light/dark)
 - @react-pdf/renderer + docx (exports)
