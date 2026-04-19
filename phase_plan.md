@@ -10,6 +10,7 @@
     - [P0.6 — Zustand store skeleton](#p06--zustand-store-skeleton)
     - [P0.7 — Project persistence wiring](#p07--project-persistence-wiring)
     - [P0.8 — Minimal UI: project list + create + detail shell](#p08--minimal-ui-project-list--create--detail-shell)
+    - [P0.8b — Light/dark mode theming](#p08b--lightdark-mode-theming)
     - [P0.9 — Dockerfile (multi-stage)](#p09--dockerfile-multi-stage)
     - [P0.10 — docker-compose.yml](#p010--docker-composeyml)
     - [P0.11 — Environment template](#p011--environment-template)
@@ -186,6 +187,22 @@
 - **Deliverable:** two pages, one layout
 - **Verify:** Can create project, navigate into it, see tab bar
 - **Refs:** PRD §6
+
+### P0.8b — Light/dark mode theming
+- **Action:**
+  - Install `next-themes`
+  - Wrap `app/layout.tsx` with `<ThemeProvider attribute="class" defaultTheme="system" enableSystem>`
+  - Create `components/ThemeToggle.tsx` — icon button (sun/moon from `lucide-react`) that cycles light → dark → system
+  - Place toggle in the top-right of the root layout header so it's visible on every page
+  - Extend `tailwind.config.ts` with `darkMode: 'class'` and dark-mode color tokens
+  - Verify all shadcn/ui primitives already added in P0.3 render correctly in both modes
+- **Deliverable:** `components/ThemeToggle.tsx`, themed root layout, updated Tailwind config
+- **Verify:**
+  - Toggle cycles through light / dark / system
+  - Preference persists across reloads (next-themes handles this via localStorage)
+  - No flash-of-wrong-theme on page load
+  - All pages (project list, project detail, Discovery/RFI/Build/Export shells from P0.8) respect the theme
+- **Refs:** shadcn/ui theming docs; next-themes README
 
 ### P0.9 — Dockerfile (multi-stage)
 - **Action:** Create `Dockerfile` with three stages (deps → build → runtime) on `node:20-alpine`. Expose 3000. Start with `npm run start`.
