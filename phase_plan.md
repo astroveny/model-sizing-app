@@ -121,13 +121,13 @@
 
 **Exit criteria:** `docker compose up` starts the app; can create a project, refresh the browser, see it in the list.
 
-### P0.1 — Initialize Next.js project
+### ☑ P0.1 — Initialize Next.js project
 - **Action:** `npx create-next-app@latest ml-sizer --typescript --tailwind --app --eslint --src-dir=false --import-alias "@/*"`
 - **Deliverable:** `package.json`, `next.config.ts`, `tsconfig.json`, `tailwind.config.ts`, base `app/` directory
 - **Verify:** `npm run dev` serves the default page at :3000
 - **Refs:** PRD §4.1
 
-### P0.2 — Install core dependencies
+### ☑ P0.2 — Install core dependencies
 - **Action:** Install:
   - `zustand` (state)
   - `drizzle-orm` + `better-sqlite3` + `drizzle-kit` (DB)
@@ -138,7 +138,7 @@
 - **Verify:** `npm install` completes without errors; `npm run typecheck` passes
 - **Refs:** PRD §4.1
 
-### P0.3 — Install shadcn/ui
+### ☑ P0.3 — Install shadcn/ui
 - **Action:** `npx shadcn@latest init`; add initial primitives: `button`, `input`, `card`, `tabs`, `dialog`, `label`, `select`, `textarea`, `switch`, `tooltip`
 - **Deliverable:** `components/ui/*` populated; `components.json`
 - **Verify:** import a Button in `app/page.tsx` and render it
