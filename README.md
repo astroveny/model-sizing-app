@@ -1,5 +1,43 @@
 # Model Sizing App
 
+- [Model Sizing App](#model-sizing-app)
+  - [Intro](#intro)
+  - [Why this exists](#why-this-exists)
+  - [Features (v1)](#features-v1)
+    - [Sizing coverage (v1)](#sizing-coverage-v1)
+  - [Requirements](#requirements)
+  - [Quick start — Docker (recommended)](#quick-start--docker-recommended)
+    - [Sharing with your team](#sharing-with-your-team)
+    - [Data persistence](#data-persistence)
+    - [Common Docker commands](#common-docker-commands)
+  - [Quick start — Local Node.js (for development)](#quick-start--local-nodejs-for-development)
+  - [Configuration](#configuration)
+    - [LLM provider](#llm-provider)
+    - [Storage paths (Docker only)](#storage-paths-docker-only)
+  - [Project structure](#project-structure)
+  - [Usage walkthrough](#usage-walkthrough)
+    - [1. Create a project](#1-create-a-project)
+    - [2. Discovery](#2-discovery)
+    - [3. (Optional) Import an RFP](#3-optional-import-an-rfp)
+    - [4. Build](#4-build)
+    - [5. Export](#5-export)
+  - [Extending the tool](#extending-the-tool)
+    - [Add a new GPU to the catalog](#add-a-new-gpu-to-the-catalog)
+    - [Add Explain \& Example content for a field](#add-explain--example-content-for-a-field)
+    - [Add a new LLM provider](#add-a-new-llm-provider)
+    - [Add a new server SKU](#add-a-new-server-sku)
+  - [Development](#development)
+    - [Running tests](#running-tests)
+  - [Roadmap](#roadmap)
+  - [Troubleshooting](#troubleshooting)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Links](#links)
+
+
+## Intro
+[Back to ToC](#model-sizing-app)
+
 **A local-first tool for sizing and architecting ML/GenAI deployments.**
 
 Guides you through discovery, RFP/RFI analysis, and architecture build-out across four stack layers — Hardware, Infrastructure Platform, Model Platform, and Application — and produces a shareable sizing proposal (PDF, Word, JSON BoM).
@@ -22,6 +60,7 @@ It is **not** a deployment tool, a benchmarking suite, or a cloud marketplace. I
 ---
 
 ## Features (v1)
+[Back to ToC](#model-sizing-app)
 
 - **Discovery section** — capture client requirements across all four layers, with an Explain & Example component next to every field to help clients new to model deployment
 - **RFI section** — paste or upload an RFP, extract requirements with an LLM, map them to discovery, score qualification, draft response sections
@@ -42,6 +81,7 @@ It is **not** a deployment tool, a benchmarking suite, or a cloud marketplace. I
 ---
 
 ## Requirements
+[Back to ToC](#model-sizing-app)
 
 Pick one of:
 
@@ -99,6 +139,7 @@ docker compose pull && docker compose up -d   # update to latest image
 ---
 
 ## Quick start — Local Node.js (for development)
+[Back to ToC](#model-sizing-app)
 
 ```bash
 git clone <repo-url> ml-sizer
@@ -121,6 +162,7 @@ npm run start
 ---
 
 ## Configuration
+[Back to ToC](#model-sizing-app)
 
 All configuration is done via `.env` (copy from `.env.example`).
 
@@ -155,7 +197,7 @@ volumes:
 ---
 
 ## Project structure
-
+[Back to ToC](#model-sizing-app)
 ```
 ml-sizer/
 ├── PRD.md                  # product requirements (living document — read this)
@@ -211,7 +253,7 @@ Generate:
 ---
 
 ## Extending the tool
-
+[Back to ToC](#model-sizing-app)
 ### Add a new GPU to the catalog
 Edit `data/gpus.json`. Each entry needs `vram_gb`, `fp16_tflops`, `fp8_tflops`, `memory_bandwidth_gbps`, `tdp_watts`, `interconnect`, `list_price_usd`. Sizing formulas pick it up automatically.
 
@@ -256,7 +298,7 @@ Test fixtures in `tests/fixtures/sample-projects.json` cover Llama 70B, Mistral 
 ---
 
 ## Roadmap
-
+[Back to ToC](#model-sizing-app)
 Current scope is v1 (see PRD §3). On the roadmap:
 
 - **v2** — training & fine-tuning workload modules
@@ -310,7 +352,7 @@ Internal / proprietary. Not for redistribution.
 ---
 
 ## Links
-
+[Back to ToC](#model-sizing-app)
 - **[PRD.md](./PRD.md)** — full product requirements, data model, formulas, phases
 - **[docs/sizing-math.md](./docs/sizing-math.md)** — formula derivations + citations
 - **[docs/adding-a-gpu.md](./docs/adding-a-gpu.md)** — extending the GPU catalog
