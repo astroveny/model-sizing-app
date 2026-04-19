@@ -204,7 +204,7 @@
   - All pages (project list, project detail, Discovery/RFI/Build/Export shells from P0.8) respect the theme
 - **Refs:** shadcn/ui theming docs; next-themes README
 
-### P0.9 — Dockerfile (multi-stage)
+### ☑ P0.9 — Dockerfile (multi-stage)
 - **Action:** Create `Dockerfile` with three stages (deps → build → runtime) on `node:20-alpine`. Expose 3000. Start with `npm run start`.
 - **Deliverable:** `Dockerfile`
 - **Verify:** `docker build -t ml-sizer .` succeeds; image is < 500 MB

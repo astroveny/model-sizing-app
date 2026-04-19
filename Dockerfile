@@ -27,17 +27,27 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-# Only copy what's needed to run
-COPY --from=builder /app/.next ./.next
+# Standalone output includes its own minimal node_modules
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/next.config.* ./
 
-# Data + uploads volumes (see docker-compose.yml)
+# Static data catalogs (JSON — not the SQLite DB, which lives on a volume)
+COPY --from=builder /app/data/gpus.json ./data/gpus.json
+COPY --from=builder /app/data/servers.json ./data/servers.json
+COPY --from=builder /app/data/instances.json ./data/instances.json
+COPY --from=builder /app/data/throughput.json ./data/throughput.json
+COPY --from=builder /app/data/models.json ./data/models.json
+COPY --from=builder /app/data/explain ./data/explain
+
+# Migration files (applied at startup via instrumentation.ts)
+COPY --from=builder /app/lib/db/migrations ./lib/db/migrations
+
+# DB + uploads live on volumes — create mount points
 RUN mkdir -p /app/data /app/uploads
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
