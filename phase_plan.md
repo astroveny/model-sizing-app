@@ -167,7 +167,7 @@
 - **Verify:** `npm run db:migrate` creates tables; inspect with `npm run db:studio`
 - **Refs:** PRD §5.2
 
-### P0.6 — Zustand store skeleton
+### ☑ P0.6 — Zustand store skeleton
 - **Action:** Create `lib/store.ts` with the `Project` type from PRD §5.1 (types only, empty default state). Expose `useProjectStore`, `loadProject`, `saveProject`, `updateField`.
 - **Deliverable:** `lib/store.ts` with typed store
 - **Verify:** `npm run typecheck` passes; store can be imported and used in a test component
