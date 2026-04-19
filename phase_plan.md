@@ -144,7 +144,7 @@
 - **Verify:** import a Button in `app/page.tsx` and render it
 - **Refs:** PRD §4.1
 
-### P0.4 — Create folder structure
+### ☑ P0.4 — Create folder structure
 - **Action:** Create empty directories matching PRD §10:
   ```
   app/project/[id]/{discovery,rfi,build,export}/
@@ -161,7 +161,7 @@
 - **Verify:** `tree -d` matches PRD §10
 - **Refs:** PRD §10
 
-### P0.5 — Set up Drizzle + SQLite
+### ☑ P0.5 — Set up Drizzle + SQLite
 - **Action:** Create `lib/db/schema.ts` with tables from PRD §5.2 (`projects`, `rfp_uploads`, `explain_custom`, `audit_log`). Include `description` column on `projects`. Create `lib/db/client.ts` instantiating the DB connection against `data/ml-sizer.db`. Configure `drizzle.config.ts`.
 - **Deliverable:** schema file, client, config, `npm run db:migrate` script in package.json
 - **Verify:** `npm run db:migrate` creates tables; inspect with `npm run db:studio`

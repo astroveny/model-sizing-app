@@ -1,4 +1,5 @@
 @AGENTS.md
+@PHASE_PLAN.md
 
 # model-sizing-app
 
@@ -12,6 +13,7 @@ Before any non-trivial work, read these:
 2. **`PHASE_PLAN.md`** — numbered build steps (P0.1 … P6.10). Each step has action, deliverable, verify criteria, and refs back to PRD sections. When asked to do work, map it to a step ID.
 3. **`docs/sizing-math.md`** — formula derivations with numbered citations [1]–[12]. Cite as `// Ref: [4]` in source code comments.
 4. **`docs/adding-a-gpu.md`**, **`docs/adding-explain-content.md`**, **`docs/llm-provider-guide.md`** — extension guides for catalogs, ExplainBox content, and LLM providers.
+5. **At session start, always read `PHASE_PLAN.md` to determine the current step.**
 
 ## Working style
 
