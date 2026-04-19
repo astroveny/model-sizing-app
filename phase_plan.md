@@ -179,7 +179,7 @@
 - **Verify:** Create a project, change a field, reload browser, field value persists
 - **Refs:** PRD §6.1
 
-### P0.8 — Minimal UI: project list + create + detail shell
+### ☑ P0.8 — Minimal UI: project list + create + detail shell
 - **Action:**
   - `app/page.tsx` — project list with "New Project" button
   - `app/project/[id]/layout.tsx` — tab bar (Discovery / RFI / Build / Export)
@@ -188,7 +188,7 @@
 - **Verify:** Can create project, navigate into it, see tab bar
 - **Refs:** PRD §6
 
-### P0.8b — Light/dark mode theming
+### ☑ P0.8b — Light/dark mode theming
 - **Action:**
   - Install `next-themes`
   - Wrap `app/layout.tsx` with `<ThemeProvider attribute="class" defaultTheme="system" enableSystem>`
