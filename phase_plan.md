@@ -520,73 +520,73 @@
 
 **Exit criteria:** Paste a sample RFP, get structured requirements, map to Discovery, get qualification score, generate draft response.
 
-### P4.1 — RFI page shell
+### ☑ P4.1 — RFI page shell
 - **Action:** `app/project/[id]/rfi/page.tsx` with 4 zones: Input → Extracted → Mapping → Qualification/Response.
 - **Deliverable:** page
 - **Refs:** PRD §6.2
 
-### P4.2 — LLM provider abstraction
+### ☑ P4.2 — LLM provider abstraction
 - **Action:** `lib/llm/provider.ts` interface per `docs/llm-provider-guide.md`. `lib/llm/anthropic.ts` implementation. Factory in `getLlmProvider()`.
 - **Deliverable:** abstraction + Anthropic impl
 - **Verify:** smoke test: `getLlmProvider().complete({messages:[{role:'user',content:'hi'}]})` returns text
 - **Refs:** docs/llm-provider-guide.md, PRD §8
 
-### P4.3 — LLM API route
+### ☑ P4.3 — LLM API route
 - **Action:** `app/api/llm/route.ts`: server-side proxy (keeps keys off client). Accepts `{system, messages, maxTokens, temperature, json}`. Calls `getLlmProvider()`.
 - **Deliverable:** route + client helper in `lib/llm/client.ts`
 - **Verify:** browser can POST to `/api/llm` and get response
 - **Refs:** PRD §8
 
-### P4.4 — RFP paste flow
+### ☑ P4.4 — RFP paste flow
 - **Action:** Textarea component; "Extract" button triggers LLM call with the extraction prompt.
 - **Deliverable:** `components/rfi/RfpPaster.tsx`
 - **Refs:** PRD §6.2
 
-### P4.5 — RFP upload flow
+### ☑ P4.5 — RFP upload flow
 - **Action:** File upload endpoint `app/api/upload/route.ts`; supports PDF and DOCX; extracts text server-side (pdf-parse, mammoth); stores file path in `rfp_uploads` table.
 - **Deliverable:** `components/rfi/RfpUploader.tsx` + upload route
 - **Verify:** upload a PDF, text extracted and displayed
 - **Refs:** PRD §6.2
 
-### P4.6 — Extraction prompt
+### ☑ P4.6 — Extraction prompt
 - **Action:** `lib/llm/prompts/extract-rfp.ts` with `PROMPT_VERSION`. Returns structured JSON: requirements[], timelines[], evaluationCriteria[], mandatoryItems[]. Each requirement has layer and maps to Discovery fieldId.
 - **Deliverable:** prompt file
 - **Refs:** docs/llm-provider-guide.md §6
 
-### P4.7 — Extraction result UI
+### ☑ P4.7 — Extraction result UI
 - **Action:** `components/rfi/RequirementsList.tsx`: editable list of extracted requirements with layer tags and mandatory flags.
 - **Deliverable:** component
 - **Refs:** PRD §6.2
 
-### P4.8 — Mapping + Apply to Discovery
+### ☑ P4.8 — Mapping + Apply to Discovery
 - **Action:** For each extracted requirement with `mapsToDiscoveryField`, show "Apply" button. Bulk "Apply all" button.
 - **Deliverable:** mapping action in store
 - **Verify:** apply populates Discovery; navigating to Discovery shows values
 - **Refs:** PRD §6.2 acceptance
 
-### P4.9 — Qualification panel
+### ☑ P4.9 — Qualification panel
 - **Action:** `components/rfi/QualificationPanel.tsx`: fit score (0–100), strengths, risks, win probability, go/no-go toggle. Deterministic scoring from completeness + constraints.
 - **Deliverable:** component + `lib/sizing/qualification.ts`
 - **Refs:** PRD §6.2
 
-### P4.10 — Draft response generator
+### ☑ P4.10 — Draft response generator
 - **Action:** `components/rfi/DraftResponse.tsx`: section per layer (Hardware, Infra, Model Platform, Application, Executive Summary). Uses LLM with `lib/llm/prompts/draft-response.ts`.
 - **Deliverable:** component + prompt
 - **Verify:** generates reasonable draft for sample project
 - **Refs:** PRD §6.2
 
-### P4.11 — OpenAI-compatible adapter (Gemma/Kimi/Nemotron)
+### ☑ P4.11 — OpenAI-compatible adapter (Gemma/Kimi/Nemotron)
 - **Action:** `lib/llm/openai-compatible.ts`. Supports `OPENAI_COMPATIBLE_BASE_URL/API_KEY/MODEL`. Tested with at least one real endpoint (Ollama is easiest for local test).
 - **Deliverable:** adapter
 - **Verify:** switch `LLM_PROVIDER=openai-compatible`, extraction still works
 - **Refs:** docs/llm-provider-guide.md §3.2
 
-### P4.12 — Retry + error handling
+### ☑ P4.12 — Retry + error handling
 - **Action:** `lib/llm/retry.ts` with exponential backoff on `LlmTransientError`; `LlmRateLimitError` respects `retryAfterMs`.
 - **Deliverable:** retry utility + wired into API route
 - **Refs:** docs/llm-provider-guide.md §8
 
-### P4.13 — Phase 4 integration test
+### ☑ P4.13 — Phase 4 integration test
 - **Action:** Paste a realistic sample RFP (prepared fixture). Verify extraction, mapping, qualification, response draft all work end-to-end.
 - **Deliverable:** `tests/fixtures/sample-rfp.txt`; test result in CHANGELOG
 - **Refs:** PRD §9 Phase 4 exit

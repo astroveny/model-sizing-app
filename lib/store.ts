@@ -87,6 +87,7 @@ export type ExtractedRequirement = {
   layer: "hardware" | "infra" | "model-platform" | "application" | "general";
   mandatory: boolean;
   mapsToDiscoveryField?: string;
+  extractedValue?: unknown;
 };
 
 export type RfiState = {

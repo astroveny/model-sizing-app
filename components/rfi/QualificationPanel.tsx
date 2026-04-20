@@ -1,0 +1,109 @@
+"use client";
+
+import { useMemo } from "react";
+import { useProjectStore } from "@/lib/store";
+import { computeQualification } from "@/lib/sizing/qualification";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const WIN_COLOR = {
+  high:   "text-emerald-600 dark:text-emerald-400",
+  medium: "text-amber-600   dark:text-amber-400",
+  low:    "text-red-600     dark:text-red-400",
+};
+
+export function QualificationPanel() {
+  const discovery     = useProjectStore((s) => s.activeProject?.discovery);
+  const requirements  = useProjectStore((s) => s.activeProject?.rfi.extracted.requirements ?? []);
+  const goNoGo        = useProjectStore((s) => s.activeProject?.rfi.qualification.goNoGo);
+  const updateField   = useProjectStore((s) => s.updateField);
+
+  const qual = useMemo(() => {
+    if (!discovery) return null;
+    return computeQualification(discovery, requirements);
+  }, [discovery, requirements]);
+
+  if (!qual) return null;
+
+  const WinIcon = qual.winProbability === "high" ? TrendingUp
+    : qual.winProbability === "medium" ? Minus
+    : TrendingDown;
+
+  return (
+    <div className="rounded-lg border">
+      <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
+        <h3 className="text-sm font-semibold">Qualification</h3>
+        <span className={cn("flex items-center gap-1 text-sm font-semibold", WIN_COLOR[qual.winProbability])}>
+          <WinIcon className="h-4 w-4" />
+          {qual.winProbability.toUpperCase()} win probability
+        </span>
+      </div>
+
+      <div className="px-4 py-3 space-y-4">
+        {/* Fit score */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-muted-foreground">Fit score</span>
+            <span className="text-sm font-semibold tabular-nums">{qual.fitScore}/100</span>
+          </div>
+          <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <div
+              className={cn("h-full rounded-full transition-all",
+                qual.fitScore >= 75 ? "bg-emerald-500" : qual.fitScore >= 50 ? "bg-amber-500" : "bg-red-500"
+              )}
+              style={{ width: `${qual.fitScore}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Strengths */}
+        {qual.strengths.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">Strengths</p>
+            <ul className="space-y-1">
+              {qual.strengths.map((s, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex gap-1.5">
+                  <span className="text-emerald-500 shrink-0">✓</span>{s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Risks */}
+        {qual.risks.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">Risks</p>
+            <ul className="space-y-1">
+              {qual.risks.map((r, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex gap-1.5">
+                  <span className="text-amber-500 shrink-0">⚠</span>{r}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Go / No-go toggle */}
+        <div className="flex gap-2 pt-1">
+          {(["go", "no-go", "undecided"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => updateField("rfi.qualification.goNoGo", v)}
+              className={cn(
+                "flex-1 rounded-md border py-1.5 text-xs font-medium transition-colors",
+                goNoGo === v
+                  ? v === "go"    ? "bg-emerald-600 text-white border-emerald-600"
+                  : v === "no-go" ? "bg-red-600 text-white border-red-600"
+                  : "bg-muted text-foreground"
+                  : "hover:bg-muted"
+              )}
+            >
+              {v === "go" ? "Go" : v === "no-go" ? "No-Go" : "Undecided"}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
