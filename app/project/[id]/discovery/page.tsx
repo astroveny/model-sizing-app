@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WorkloadForm } from "@/components/discovery/WorkloadForm";
 
 const TABS = [
   { id: "workload", label: "Workload" },
@@ -30,7 +31,7 @@ export default function DiscoveryPage() {
 
         <div className="flex-1 overflow-auto">
           <TabsContent value="workload" className="m-0 h-full">
-            <TabShell label="Workload" />
+            <WorkloadForm />
           </TabsContent>
           <TabsContent value="hardware" className="m-0 h-full">
             <TabShell label="Hardware" />

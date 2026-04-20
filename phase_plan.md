@@ -267,7 +267,7 @@
 - **Verify:** All five tabs reachable; empty state shown per tab
 - **Refs:** PRD §6.1
 
-### P1.4 — Workload tab form
+### ☑ P1.4 — Workload tab form
 - **Action:** `components/discovery/WorkloadForm.tsx`: model fields (family, name, params, quantization, context, architecture, MoE active params) + load fields (concurrent users, rps, TTFT target, ITL target, end-to-end P50/P95, avg input/output tokens, burst multiplier, uptime SLA, streaming).
 - **Deliverable:** component; fields wired to store
 - **Verify:** Change a value, reload, value persists
