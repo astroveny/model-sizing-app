@@ -601,40 +601,40 @@
 
 **Exit criteria:** All three formats produce complete documents reflecting current state.
 
-### P5.1 — Export page shell
+### ☑ P5.1 — Export page shell
 - **Action:** `app/project/[id]/export/page.tsx` with 3 export buttons + preview pane.
 - **Deliverable:** page
 - **Refs:** PRD §6.4
 
-### P5.2 — JSON BoM schema + export
+### ☑ P5.2 — JSON BoM schema + export
 - **Action:** `lib/export/bom-schema.ts` (JSON Schema definition), `app/api/export/bom/route.ts` returning BoM JSON.
 - **Deliverable:** schema + route
 - **Verify:** download; validate against schema with ajv
 - **Refs:** PRD §6.4
 
-### P5.3 — PDF components
+### ☑ P5.3 — PDF components
 - **Action:** `lib/export/pdf.tsx` with `@react-pdf/renderer`. Sections: cover, exec summary, per-layer sizing, BoM table, assumptions, appendix.
 - **Deliverable:** PDF component tree
 - **Refs:** PRD §6.4
 
-### P5.4 — PDF export route
+### ☑ P5.4 — PDF export route
 - **Action:** `app/api/export/pdf/route.ts`: renders PDF server-side, returns as download.
 - **Deliverable:** route
 - **Verify:** download works, PDF renders properly in Preview/Acrobat
 - **Refs:** PRD §6.4
 
-### P5.5 — Word (DOCX) export
+### ☑ P5.5 — Word (DOCX) export
 - **Action:** `lib/export/docx.ts` using `docx` npm library. Same sections as PDF. `app/api/export/docx/route.ts`.
 - **Deliverable:** generator + route
 - **Verify:** open in Microsoft Word; sections are editable; styles applied
 - **Refs:** PRD §6.4
 
-### P5.6 — PDF preview in UI
+### ☑ P5.6 — PDF preview in UI
 - **Action:** `components/export/PdfPreview.tsx`: client-side preview using same components as server-side render (via `<PDFViewer>` from `@react-pdf/renderer`).
 - **Deliverable:** component
 - **Refs:** PRD §6.4
 
-### P5.7 — Phase 5 integration test
+### ☑ P5.7 — Phase 5 integration test
 - **Action:** Export all 3 formats from the sample project. Verify content matches current state; no stale data.
 - **Deliverable:** noted in CHANGELOG
 - **Refs:** PRD §9 Phase 5 exit

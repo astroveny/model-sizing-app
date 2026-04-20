@@ -25,6 +25,10 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P1.10: discovery progress bar (15-field tracking) + Build gate with missing-field list
 - P1.11: Ask Claude button deferred to P6.1 (alert placeholder)
 - P1.12: sample fixture at tests/fixtures/sample-projects.json; production build passes
+- P2.1–P2.15: full sizing engine (memory, prefill, decode, sharding, optimizations, patterns, capacity, notes); 22-test suite green; vitest config with @/* alias
+- P3.1–P3.14: Build page with HardwarePanel, InfraPanel, ModelPlatformPanel, ApplicationPanel, SummaryTotals, VendorComparison, EngineNotes, RackLayout SVG, ArchitectureDiagram SVG; override mechanism; .gitignore fix for components/build/
+- P4.1–P4.13: RFI section with LLM provider abstraction (Anthropic + OpenAI-compatible), retry/backoff, RFP paste+upload, extraction prompt, RequirementsList with Apply actions, QualificationPanel, DraftResponse; Claude 4 temperature deprecation fix
+- P5.1–P5.7: Export section — JSON BoM schema + route, PDF (react-pdf/renderer), DOCX (docx library), export API routes, export page with PDF preview (dynamic PDFViewer) and BoM summary table; typecheck clean
 
 ### Changed
 - (nothing yet)
