@@ -1,1 +1,58 @@
-{ "entries": [] }
+{
+  "entries": [
+    {
+      "fieldId": "discovery.application.apiGateway",
+      "title": "API Gateway",
+      "explain": "The reverse proxy and API management layer in front of the inference servers. Handles rate limiting, authentication, routing, load balancing, and observability. Kong and APISIX are the most popular open-source options. Envoy is lower-level but highly programmable. Cloud-native options (AWS API Gateway, Azure API Management) reduce ops overhead for cloud deployments. None is acceptable for purely internal or air-gapped environments.",
+      "example": "A GPUaaS platform serving external developers needs Kong or APISIX for API key management, per-key rate limiting, usage metering, and request logging. An internal chatbot accessed only by employees may need no API gateway at all.",
+      "customerFriendlyHint": "Is this API exposed to external users, or just internal teams?",
+      "relatedFields": ["discovery.application.auth", "discovery.application.rateLimiting"]
+    },
+    {
+      "fieldId": "discovery.application.auth",
+      "title": "Authentication",
+      "explain": "How callers authenticate to the inference API. **API Key** is simplest — good for internal tools and developer platforms. **OIDC/OAuth 2.0** integrates with enterprise SSO (Okta, Azure AD) — required for user-identity-aware rate limiting or audit trails. **JWT** is stateless and common for microservice-to-microservice auth. **mTLS** is the highest security option — required for some regulated environments. None is appropriate only for localhost/isolated internal networks.",
+      "example": "An enterprise internal deployment where employees authenticate via Okta should use OIDC. A developer API platform where external developers create accounts should use API keys. A regulated financial services deployment might require mTLS for all service-to-service communication.",
+      "customerFriendlyHint": "How will users or systems prove their identity before they can use the AI API?",
+      "relatedFields": ["discovery.application.auditLogging", "discovery.application.apiGateway"]
+    },
+    {
+      "fieldId": "discovery.application.rateLimiting",
+      "title": "Rate Limiting",
+      "explain": "Throttling requests per user or API key to prevent any single caller from consuming all GPU capacity. Critical for multi-tenant deployments and GPUaaS platforms. Rate limits protect SLAs for other tenants and prevent runaway costs. Implemented at the API gateway level, typically as requests/minute and tokens/minute per key.",
+      "example": "A GPUaaS platform might limit each API key to 100 RPM and 100K tokens/minute. Without rate limiting, one aggressive user can monopolize GPU capacity and cause latency spikes for all other tenants.",
+      "customerFriendlyHint": "Should individual users be limited in how much they can use the AI per minute or hour?",
+      "relatedFields": ["discovery.application.apiGateway", "discovery.application.metering"]
+    },
+    {
+      "fieldId": "discovery.application.uiRequired",
+      "title": "UI Required",
+      "explain": "Whether a user-facing chat interface or admin console is part of this deployment. A UI adds a separate frontend service to the architecture — sizing requirements (CPU, memory) are modest but it adds another component to maintain. Common options: Open WebUI (open-source ChatGPT-like UI), custom React app, or embedding into an existing portal.",
+      "example": "An internal chatbot for employees almost always needs a UI. A developer API platform accessed programmatically does not. A hybrid: the API is exposed directly, but an admin console shows usage analytics.",
+      "customerFriendlyHint": "Will end users interact with the AI through a web interface, or will developers call the API directly?",
+      "relatedFields": ["discovery.application.auth"]
+    },
+    {
+      "fieldId": "discovery.application.auditLogging",
+      "title": "Audit Logging",
+      "explain": "Recording all prompts, completions, user identities, and timestamps for compliance or review purposes. Required for HIPAA, FedRAMP, SOC2, and most regulated industries. Audit logs can be large — a high-throughput deployment logging full prompt/completion pairs may generate terabytes of data per month. Consider retention, encryption, and access control requirements.",
+      "example": "A healthcare application using LLMs for clinical note summarization typically requires audit logging of all inputs and outputs for HIPAA compliance, with encrypted storage and 7-year retention.",
+      "customerFriendlyHint": "Is there a compliance requirement to record every conversation the AI has?",
+      "relatedFields": ["discovery.application.auth", "discovery.constraints.compliance"],
+      "commonMistakes": [
+        "Underestimating storage costs for audit logs at scale — 1M requests/day × 2KB avg = ~2GB/day, ~700GB/year before compression."
+      ]
+    },
+    {
+      "fieldId": "discovery.application.metering",
+      "title": "Metering",
+      "explain": "Token-level usage tracking for billing or chargeback. Required for GPUaaS and SaaS deployment patterns where usage is monetized. Metering records input tokens, output tokens, model version, user/tenant, and timestamp per request. This data feeds billing engines and usage analytics dashboards. Adds a small latency overhead (5–10ms) for the metering write path.",
+      "example": "A GPUaaS provider charges $0.0002/1K input tokens and $0.0008/1K output tokens. Metering records every request's token counts and associates them with the API key for monthly invoicing.",
+      "customerFriendlyHint": "Will you need to track exactly how many tokens each user or team consumes, for billing or internal chargeback?",
+      "relatedFields": ["discovery.application.rateLimiting", "discovery.application.apiGateway"],
+      "commonMistakes": [
+        "Enabling metering for an internal tool with no billing requirement — it adds overhead and storage cost for no benefit."
+      ]
+    }
+  ]
+}

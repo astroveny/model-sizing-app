@@ -1,1 +1,177 @@
-{ "entries": [] }
+{
+  "entries": [
+    {
+      "fieldId": "discovery.model.family",
+      "title": "Model Family",
+      "explain": "The model family groups architecturally similar models (e.g. Llama, Mistral, Qwen). It determines which catalog metadata the sizing engine pulls — layer counts, hidden dimensions, KV head counts — which feed directly into memory and latency calculations.",
+      "example": "A Llama-3.1-70B and a Llama-3.1-8B share the same family ('llama') but different parameter counts. Selecting the family first narrows the parameter choices and auto-fills known architecture values.",
+      "customerFriendlyHint": "Which AI model are you planning to run? We'll look up its architecture for you.",
+      "relatedFields": ["discovery.model.name", "discovery.model.params"]
+    },
+    {
+      "fieldId": "discovery.model.name",
+      "title": "Model Name",
+      "explain": "The specific model checkpoint being deployed. This is used to look up exact architecture metadata (KV heads, hidden size, layers) from the model catalog. Accurate metadata is critical — GQA KV head counts directly affect KV cache VRAM calculations.",
+      "example": "Llama-3.1-70B has 8 KV heads (GQA) vs 64 query heads. A naive calculation using 64 heads overestimates KV cache by 8×. Using the correct model name avoids this.",
+      "customerFriendlyHint": "What's the exact model checkpoint you want to deploy? (e.g. Llama-3.1-70B-Instruct)",
+      "relatedFields": ["discovery.model.family", "discovery.model.params"]
+    },
+    {
+      "fieldId": "discovery.model.params",
+      "title": "Parameters (billions)",
+      "explain": "Total parameter count in billions. This is the primary driver of model VRAM — a rough rule is `params × bytes_per_param`. At FP16 (2 bytes/param), a 70B model needs ~140 GB just for weights, before KV cache. Parameter count also drives compute requirements for prefill.",
+      "example": "70B at FP16 = 140 GB weights. 70B at FP8 = 70 GB. 7B at FP16 = 14 GB — fits on a single A100-80GB with room for KV cache.",
+      "customerFriendlyHint": "How big is the model? Usually written as '7B', '70B', or '405B' in the model name.",
+      "relatedFields": ["discovery.model.quantization", "discovery.model.architecture"],
+      "commonMistakes": [
+        "Using active parameter count for MoE models instead of total — they have very different VRAM requirements.",
+        "Entering the full number (e.g. 70000) instead of billions (70)."
+      ]
+    },
+    {
+      "fieldId": "discovery.model.quantization",
+      "title": "Quantization",
+      "explain": "The numeric precision used to store model weights. **FP16** is the modern default. **FP8** halves memory with minor quality loss on Hopper/MI300X GPUs. **INT8** is aggressive; **INT4** reduces VRAM to ~25% of FP16 but quality degrades noticeably. Lower precision reduces both VRAM footprint and memory bandwidth per token.",
+      "example": "70B at FP16 = 140 GB (needs 2× H100-80GB). At FP8 = 70 GB (fits on 1× MI300X-192GB). At INT4 = ~35 GB (fits on a single L40S-48GB).",
+      "customerFriendlyHint": "Lower precision = smaller and faster, but with some quality tradeoff. Do you have a preference, or should we recommend one?",
+      "relatedFields": ["discovery.model.params", "discovery.modelPlatform.optimizations.fp8KvCache"],
+      "commonMistakes": [
+        "Choosing INT4 without validating output quality on the actual use case.",
+        "Assuming FP8 is natively supported on pre-Hopper NVIDIA GPUs — it requires H100/H200/B200 or MI300X."
+      ]
+    },
+    {
+      "fieldId": "discovery.model.contextLength",
+      "title": "Context Length (tokens)",
+      "explain": "The maximum number of tokens in a single request (input + output combined). KV cache size scales linearly with context length — a 128K context requires 32× the KV cache VRAM of 4K. Long contexts force either more VRAM per GPU, more tensor parallelism, or smaller batch sizes.",
+      "example": "At 4K context, a Llama-70B FP16 KV cache per request is ~1.6 GB. At 128K context it is ~51 GB per request — meaning you can serve very few concurrent requests before VRAM is exhausted.",
+      "customerFriendlyHint": "How long can the conversation or document be in total? For reference, 1,000 words ≈ 750 tokens.",
+      "relatedFields": ["discovery.load.avgInputTokens", "discovery.load.avgOutputTokens"],
+      "commonMistakes": [
+        "Setting context length to the model's theoretical maximum when real requests are much shorter — this overestimates VRAM.",
+        "Confusing context length (max window) with output length (tokens generated)."
+      ]
+    },
+    {
+      "fieldId": "discovery.model.architecture",
+      "title": "Architecture",
+      "explain": "Dense models activate all parameters for every token. Mixture-of-Experts (MoE) models activate only a subset of expert layers per token, making compute cost closer to a smaller dense model while retaining the knowledge of a larger one. MoE models require all expert weights in VRAM but have much lower FLOP/token.",
+      "example": "Mixtral 8x22B has 141B total parameters but only ~39B active per token. VRAM = 141B model; compute (TTFT, ITL) behaves like ~39B dense.",
+      "customerFriendlyHint": "Is this a standard model or a 'mixture of experts' model like Mixtral or DeepSeek?",
+      "relatedFields": ["discovery.model.moeActiveParams", "discovery.model.params"]
+    },
+    {
+      "fieldId": "discovery.model.moeActiveParams",
+      "title": "MoE Active Parameters (billions)",
+      "explain": "For MoE models, the number of parameters activated per token. This value drives compute estimates — TTFT and ITL calculations use active params. Total params still determine VRAM. Getting this right prevents large errors in latency predictions.",
+      "example": "DeepSeek-V3: 671B total, ~37B active. Mixtral 8x7B: 47B total, ~13B active. Using total params for compute overestimates TTFT by 10–18×.",
+      "customerFriendlyHint": "This is usually listed in the model card. For DeepSeek-V3 it's ~37B; for Mixtral 8x7B it's ~13B.",
+      "relatedFields": ["discovery.model.params", "discovery.model.architecture"],
+      "commonMistakes": [
+        "Using total params for compute estimates on MoE — this overestimates TTFT and ITL by 5–18×."
+      ]
+    },
+    {
+      "fieldId": "discovery.load.concurrentUsers",
+      "title": "Concurrent Users",
+      "explain": "The number of users making inference requests simultaneously at peak load. This drives replica count — not total user base. A 10,000-user product with 100 peak concurrent needs far less hardware than one with 1,000 concurrent. Each active streaming request holds a KV cache slot for its full generation duration.",
+      "example": "A 500-person internal chatbot: 20–50 concurrent at peak. A consumer-facing API: 500–2,000 concurrent at peak from a much larger base.",
+      "customerFriendlyHint": "At the busiest moment, how many people would be waiting for a response at the same time?",
+      "relatedFields": ["discovery.load.requestsPerSecond", "discovery.load.peakBurstMultiplier"],
+      "commonMistakes": [
+        "Using total user count instead of peak simultaneous users — overestimates hardware by 10–100×.",
+        "Forgetting that each streaming request holds a KV slot for the full generation, not just one token."
+      ]
+    },
+    {
+      "fieldId": "discovery.load.requestsPerSecond",
+      "title": "Requests per Second",
+      "explain": "Sustained throughput at steady state. Combined with average output tokens, this determines total tokens/sec the system must generate. RPS complements concurrent users — together they let the engine compute the right batch size and replica count.",
+      "example": "10 RPS × 256 avg output tokens = 2,560 output tokens/sec. If an H100 at TP=4 delivers ~3,000 tokens/sec for this model, one replica handles steady state.",
+      "customerFriendlyHint": "How many requests per second do you expect during normal operation?",
+      "relatedFields": ["discovery.load.concurrentUsers", "discovery.load.avgOutputTokens"]
+    },
+    {
+      "fieldId": "discovery.load.avgInputTokens",
+      "title": "Avg Input Tokens",
+      "explain": "Average token count of the prompt (system prompt + user message + any retrieved context). Input length drives prefill compute (TTFT) and KV cache size. RAG workflows typically have much longer inputs due to retrieved document chunks.",
+      "example": "Simple chat message: 50–200 tokens. RAG query with 3 chunks at 500 tokens each: 1,500–2,000 tokens. Document summarization: 8,000–32,000 tokens.",
+      "customerFriendlyHint": "How long is the typical question or document you're sending to the model?",
+      "relatedFields": ["discovery.load.avgOutputTokens", "discovery.model.contextLength"],
+      "commonMistakes": [
+        "Forgetting to include the system prompt in the input count.",
+        "RAG workflows often have 2–5× token amplification from retrieved chunks."
+      ]
+    },
+    {
+      "fieldId": "discovery.load.avgOutputTokens",
+      "title": "Avg Output Tokens",
+      "explain": "Average token count of the generated response. Output length directly drives decode time and tokens/sec throughput requirements. Longer outputs mean more decode steps, more time holding a KV cache slot, and lower effective batch size.",
+      "example": "Yes/no classification: ~5 tokens. Chat response: 100–500 tokens. Detailed report: 1,000–4,000 tokens. At 50ms ITL, every 1,000 extra output tokens adds 50 seconds to end-to-end latency.",
+      "customerFriendlyHint": "How long is a typical response from the model?",
+      "relatedFields": ["discovery.load.avgInputTokens", "discovery.load.targetLatencyP95Ms"]
+    },
+    {
+      "fieldId": "discovery.load.targetLatencyP50Ms",
+      "title": "End-to-End P50 Target (ms)",
+      "explain": "Median end-to-end latency — the time from request submission to receiving the full response. P50 is the expected user experience for half of all requests. For streaming, users perceive TTFT as the primary UX signal, so P50 end-to-end matters most for non-streaming or batch use cases.",
+      "example": "Internal chatbot: P50 of 3–5 seconds is usually fine. Real-time code completion: P50 under 1 second is typically required.",
+      "customerFriendlyHint": "What's an acceptable wait time for a typical response?",
+      "relatedFields": ["discovery.load.targetLatencyP95Ms", "discovery.load.targetTTFTMs"]
+    },
+    {
+      "fieldId": "discovery.load.targetLatencyP95Ms",
+      "title": "End-to-End P95 Target (ms)",
+      "explain": "95th percentile end-to-end latency — the worst-case experience for 95% of users. This drives headroom and replica count decisions. The gap between P50 and P95 reveals variance tolerance. A tight P95 relative to P50 requires more spare capacity.",
+      "example": "P50=3s, P95=8s: acceptable for most internal tools. P50=500ms, P95=1,000ms: required for interactive code generation. P95 more than 3× P50 usually signals batching contention or too few replicas at burst.",
+      "customerFriendlyHint": "At worst, how long can a user wait before getting frustrated?",
+      "relatedFields": ["discovery.load.targetLatencyP50Ms", "discovery.load.peakBurstMultiplier"],
+      "commonMistakes": [
+        "Setting P95 equal to P50 — in practice there is always variance. Budget at least 2× P50 for P95."
+      ]
+    },
+    {
+      "fieldId": "discovery.load.targetTTFTMs",
+      "title": "Target TTFT (ms)",
+      "explain": "Time-to-first-token: the time from request submission to receiving the first output token. TTFT is dominated by prefill compute and scales with input token count and model size. For streaming applications this is the most important UX metric — it determines how quickly the user sees the response start.",
+      "example": "Llama-70B on H100 TP=4 with 2,000 input tokens: ~180ms TTFT. With 32,000 input tokens: ~2,800ms. RAG queries with long contexts can feel slow even on fast hardware.",
+      "customerFriendlyHint": "How quickly does the user need to see the first word appear after submitting?",
+      "relatedFields": ["discovery.load.avgInputTokens", "discovery.load.targetITLMs"],
+      "commonMistakes": [
+        "Optimizing for ITL when users are actually complaining about TTFT — they're different bottlenecks."
+      ]
+    },
+    {
+      "fieldId": "discovery.load.targetITLMs",
+      "title": "Target ITL (ms)",
+      "explain": "Inter-token latency: the time between successive output tokens during streaming decode. This determines how smooth streaming feels. ITL is driven by memory bandwidth — how fast the GPU can read model weights — not raw FLOPS. At 50ms ITL, text streams at ~20 tokens/sec.",
+      "example": "Human reading speed: ~4–5 tokens/sec (250ms ITL). Comfortable streaming: 15–30 tokens/sec (33–66ms ITL). IDE code completion: <20ms ITL to feel instant.",
+      "customerFriendlyHint": "Does the streaming text need to feel smooth and fast, or is a slower drip acceptable?",
+      "relatedFields": ["discovery.load.targetTTFTMs", "discovery.load.streaming"]
+    },
+    {
+      "fieldId": "discovery.load.peakBurstMultiplier",
+      "title": "Peak Burst Multiplier",
+      "explain": "The ratio of peak load to sustained load. A 2× multiplier means the system must handle twice the average RPS for short bursts. This drives over-provisioning — a system sized exactly for average load will queue and violate P95 SLAs during bursts.",
+      "example": "Internal tool used 9–5: 1.5× burst at 9am. Consumer API hit by a viral post: 3–5× burst. Batch processing pipeline: 1× (fully predictable).",
+      "customerFriendlyHint": "Does usage spike at certain times, like first thing in the morning or after a product launch?",
+      "relatedFields": ["discovery.load.concurrentUsers", "discovery.load.requestsPerSecond"]
+    },
+    {
+      "fieldId": "discovery.load.uptimeSla",
+      "title": "Uptime SLA (%)",
+      "explain": "The availability target as a percentage. Higher SLAs require redundancy — active-active replicas, multi-AZ deployments — which increases hardware cost. The jump from 99% to 99.9% roughly doubles operational complexity; 99.99% requires a fundamentally different architecture.",
+      "example": "99% = ~87 hours downtime/year (OK for dev/internal). 99.9% = ~8.7 hours/year (N+1 replicas required). 99.99% = ~52 minutes/year (active-active, multi-region).",
+      "customerFriendlyHint": "How much downtime per year can the business tolerate?",
+      "relatedFields": ["discovery.load.concurrentUsers"]
+    },
+    {
+      "fieldId": "discovery.load.streaming",
+      "title": "Streaming",
+      "explain": "Whether the API returns tokens as they are generated (server-sent events) or waits for the full response. Streaming dramatically improves perceived latency — users see output immediately — but requires clients to handle incremental chunks. Non-streaming simplifies clients but feels slow for long outputs.",
+      "example": "A chat interface almost always benefits from streaming. A batch document processing pipeline doesn't need it. A code completion IDE plugin needs streaming to feel instant.",
+      "customerFriendlyHint": "Should the response appear word-by-word as it's generated, like ChatGPT?",
+      "relatedFields": ["discovery.load.targetTTFTMs", "discovery.load.targetITLMs"]
+    }
+  ]
+}

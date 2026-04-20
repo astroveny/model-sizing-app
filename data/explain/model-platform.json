@@ -1,1 +1,105 @@
-{ "entries": [] }
+{
+  "entries": [
+    {
+      "fieldId": "discovery.modelPlatform.inferenceServer",
+      "title": "Inference Server",
+      "explain": "The software that loads the model, manages KV cache, and serves requests. **vLLM** is the most popular open-source option — fast, actively developed, supports most models. **TGI** (Hugging Face) is well-integrated with the HF ecosystem. **TensorRT-LLM** delivers NVIDIA-specific maximum throughput but requires compilation. **SGLang** is strong for complex multi-turn and structured output workflows. **Triton** is best for multi-model serving and ensemble pipelines.",
+      "example": "For a standard Llama deployment with no special requirements, vLLM is the default choice. For maximum throughput on H100 with FP8 quantization, TensorRT-LLM often outperforms vLLM by 20–40%.",
+      "customerFriendlyHint": "Does your team have a preferred framework for running AI models, or should we recommend one?",
+      "relatedFields": ["discovery.modelPlatform.optimizations.continuousBatching"],
+      "commonMistakes": [
+        "Choosing TensorRT-LLM without accounting for the compilation step — model updates require recompilation which can take 1–4 hours."
+      ]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.modelRegistry",
+      "title": "Model Registry",
+      "explain": "Where model weights and versions are stored and versioned. Hugging Face Hub is the default for open models. MLflow adds experiment tracking. S3/object storage is common for air-gapped or cost-sensitive setups. A model registry enables versioning, rollback, A/B testing, and audit of what model version is serving traffic.",
+      "example": "A production deployment should have model weights versioned — if the model is updated and quality degrades, you need a fast rollback path. Hugging Face Hub versioning or an S3 prefix convention both work.",
+      "customerFriendlyHint": "Where do you store and manage different versions of your AI models?",
+      "relatedFields": ["discovery.infra.airGapped"]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.caching",
+      "title": "KV Cache Backend",
+      "explain": "Response caching at the semantic or exact-match level. Redis exact-match caching returns instant responses for repeated identical prompts — very effective for FAQ-style workloads. Semantic caching returns cached results for semantically similar prompts using embeddings. Both reduce GPU load for repetitive queries but add infrastructure complexity.",
+      "example": "A customer service bot with 1,000 common questions might see 30–40% cache hit rate with semantic caching, cutting GPU requirements by the same fraction. A creative writing assistant with highly varied prompts will see near-zero cache hits.",
+      "customerFriendlyHint": "Do users often ask the same or very similar questions? Caching can dramatically reduce compute costs.",
+      "relatedFields": ["discovery.modelPlatform.optimizations.prefixCaching"]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.multiModelServing",
+      "title": "Multi-Model Serving",
+      "explain": "Running multiple model checkpoints on a shared GPU pool. Enables efficient resource sharing when multiple models are needed (e.g. a 7B chat model + a 70B reasoning model + an embedding model) but none requires dedicated capacity. Requires infrastructure like Triton or KServe that can dynamically load/unload models.",
+      "example": "A platform serving 5 different fine-tuned variants of the same base model can share a GPU pool with dynamic loading, rather than dedicating separate GPUs to each. At low traffic, 2 GPUs might serve all 5 variants; at peak, the pool scales out.",
+      "customerFriendlyHint": "Will you be running multiple different AI models, or just one?",
+      "relatedFields": ["discovery.modelPlatform.inferenceServer"]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.abTesting",
+      "title": "A/B Testing",
+      "explain": "Splitting traffic between model versions to compare quality or performance. Required when releasing model updates gradually or running controlled experiments. Adds routing logic at the gateway level. Typically implemented via weighted routing in the API gateway or a dedicated model serving framework.",
+      "example": "Rolling out a new fine-tuned model: send 5% of traffic to the new version, monitor quality metrics for 48 hours, then increase to 50% before full cutover. Requires the infrastructure to run both versions simultaneously.",
+      "customerFriendlyHint": "Will you need to test different model versions against each other before fully switching over?",
+      "relatedFields": ["discovery.modelPlatform.modelRegistry", "discovery.application.apiGateway"]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.optimizations.continuousBatching",
+      "title": "Continuous Batching",
+      "explain": "Continuous batching (also called iteration-level scheduling) allows new requests to join a batch between decode steps, rather than waiting for all requests in the current batch to finish. This dramatically improves GPU utilization — without it, GPUs sit idle waiting for the slowest request in a batch. Modern inference servers (vLLM, TGI) enable this by default.",
+      "example": "Without continuous batching, a batch of 8 requests where one generates 2,000 tokens holds 7 others waiting even after they finish. With continuous batching, finished slots are immediately filled with new requests.",
+      "customerFriendlyHint": "This is usually on by default — leave it enabled unless you have a specific reason not to.",
+      "relatedFields": ["discovery.modelPlatform.inferenceServer"]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.optimizations.flashAttention",
+      "title": "FlashAttention",
+      "explain": "A fused CUDA kernel for attention computation that reduces HBM reads/writes by computing attention in tiles that fit in SRAM. FlashAttention reduces memory bandwidth pressure during prefill, improving TTFT especially for long contexts. It's on by default in modern inference servers and requires no user action.",
+      "example": "For a 32K context prefill, FlashAttention reduces memory reads for attention by ~8–16× vs naive attention, cutting TTFT by 30–50% on H100.",
+      "customerFriendlyHint": "This is a hardware-level optimization that's on by default — no action needed.",
+      "relatedFields": ["discovery.load.avgInputTokens", "discovery.load.targetTTFTMs"]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.optimizations.chunkedPrefill",
+      "title": "Chunked Prefill",
+      "explain": "Splits long prefill sequences into smaller chunks processed across multiple decode steps. This prevents a single long-context request from blocking the decode of other requests in the batch (head-of-line blocking). The result is more consistent TTFT across requests of varying input lengths.",
+      "example": "Without chunked prefill, a single 32K-token request blocks 50ms of batch time for all other requests. With chunked prefill, it is processed in 4K-token chunks interleaved with decode steps, reducing TTFT variance for shorter concurrent requests.",
+      "customerFriendlyHint": "Reduces TTFT jitter when some requests have much longer prompts than others — recommended for mixed workloads.",
+      "relatedFields": ["discovery.load.targetTTFTMs", "discovery.load.avgInputTokens"]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.optimizations.prefixCaching",
+      "title": "Prefix Caching",
+      "explain": "Caches the KV cache for repeated prompt prefixes (e.g. a long system prompt shared by all requests). On cache hit, prefill of the cached prefix is skipped entirely, dramatically reducing TTFT for workloads with a shared system prompt. Especially powerful for RAG systems where document context is reused across queries.",
+      "example": "A RAG system with a 2,000-token context window reused across all queries: prefix caching reduces effective prefill per request from 2,000 tokens to the ~100-token user query alone — a 20× TTFT reduction on hits.",
+      "customerFriendlyHint": "If many requests share the same long system prompt or document context, this can dramatically speed things up.",
+      "relatedFields": ["discovery.load.avgInputTokens", "discovery.modelPlatform.caching"],
+      "commonMistakes": [
+        "Expecting prefix caching to help when prompts are highly variable — it only works when prefixes are actually repeated."
+      ]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.optimizations.fp8KvCache",
+      "title": "FP8 KV Cache",
+      "explain": "Stores the KV cache in FP8 precision instead of FP16, halving KV cache VRAM at negligible quality cost on supported GPUs (H100/H200/B200/MI300X). This doubles the number of concurrent requests that fit in VRAM, or allows longer contexts at the same GPU count. One of the highest-impact optimizations available.",
+      "example": "A Llama-70B at FP16 with 4K context uses ~1.6 GB KV cache per request. With FP8 KV cache it is ~0.8 GB — doubling max concurrent requests from 50 to 100 on the same hardware.",
+      "customerFriendlyHint": "Strongly recommended if you're using H100, H200, or MI300X — it effectively doubles concurrent capacity.",
+      "relatedFields": ["discovery.model.quantization", "discovery.load.concurrentUsers"],
+      "commonMistakes": [
+        "Enabling FP8 KV cache on A100 or older GPUs — native FP8 is not supported and will fall back to software emulation."
+      ]
+    },
+    {
+      "fieldId": "discovery.modelPlatform.optimizations.speculativeDecoding",
+      "title": "Speculative Decoding",
+      "explain": "Uses a small draft model to generate candidate tokens, then verifies them in parallel with the main model. On acceptance, multiple tokens are produced per forward pass, increasing effective decode throughput by 1.5–2.5× for typical workloads. Acceptance rate depends on how well the draft model predicts the main model's output.",
+      "example": "A 70B main model with a 7B draft model might achieve 70–80% token acceptance rate, delivering ~1.8× decode throughput improvement. This is effectively free throughput gain if you have VRAM to run the draft model.",
+      "customerFriendlyHint": "Boosts how fast the model generates text — worth enabling if you have spare VRAM.",
+      "relatedFields": ["discovery.load.targetITLMs", "discovery.load.avgOutputTokens"],
+      "commonMistakes": [
+        "Enabling speculative decoding without accounting for the draft model's VRAM requirements.",
+        "Expecting the same speedup across all tasks — speculative decoding helps less on highly creative or varied outputs."
+      ]
+    }
+  ]
+}

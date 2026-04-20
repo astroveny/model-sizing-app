@@ -1,1 +1,46 @@
-{ "entries": [] }
+{
+  "entries": [
+    {
+      "fieldId": "discovery.infra.orchestrator",
+      "title": "Orchestrator",
+      "explain": "The workload management system that schedules and runs inference containers. Kubernetes is the default for most production deployments and has the richest ecosystem (KubeFlow, KServe, NVIDIA GPU Operator). Ray is popular for Python-native ML teams. Slurm is common in HPC/research environments. Bare metal skips orchestration entirely, trading flexibility for simplicity.",
+      "example": "A team running microservices on Kubernetes can add GPU inference nodes and use KServe for model serving with minimal new tooling. A research lab already on Slurm can run vLLM jobs directly without Kubernetes overhead.",
+      "customerFriendlyHint": "Does your team already use Kubernetes, or do you have a different system for running workloads?",
+      "relatedFields": ["discovery.infra.existingCluster", "discovery.infra.gitops"]
+    },
+    {
+      "fieldId": "discovery.infra.existingCluster",
+      "title": "Existing Cluster",
+      "explain": "Whether the customer already has infrastructure (servers, cluster, cloud accounts) that will be used for this deployment. Existing infrastructure affects the sizing approach — we size GPU nodes to add, not the full stack. It also constrains orchestrator choice (you can't easily switch from Slurm to Kubernetes mid-deployment).",
+      "example": "A customer with an existing 100-node Kubernetes cluster needs only GPU node pool additions and model serving components. A greenfield customer needs everything sized: servers, networking, storage, orchestration.",
+      "customerFriendlyHint": "Do you already have servers or cloud infrastructure that the AI system will run on?"
+    },
+    {
+      "fieldId": "discovery.infra.airGapped",
+      "title": "Air-Gapped",
+      "explain": "An air-gapped environment has no outbound internet access. This affects every layer: model weights must be mirrored internally (no Hugging Face downloads), container images must come from a private registry, and all dependencies must be pre-packaged. Air-gapped deployments add significant ops overhead and typically require a dedicated model registry.",
+      "example": "A defense or financial services customer may require air-gapped deployment for data sovereignty. This means setting up an internal model registry (Artifactory, Harbor), mirroring all container images, and shipping model weights on physical media or via a dedicated transfer process.",
+      "customerFriendlyHint": "Does this deployment need to work completely offline, with no internet access?",
+      "relatedFields": ["discovery.modelPlatform.modelRegistry"],
+      "commonMistakes": [
+        "Underestimating the ops overhead of air-gapped — model weight updates alone can require a formal change process."
+      ]
+    },
+    {
+      "fieldId": "discovery.infra.gitops",
+      "title": "GitOps",
+      "explain": "GitOps tools (Argo CD, Flux) manage Kubernetes manifests via Git, enabling declarative, auditable deployments. For regulated environments or teams with strict change control, GitOps is often required. It adds deployment pipeline complexity but provides rollback, diff, and audit trail capabilities.",
+      "example": "A financial services customer using Argo CD can require all model serving config changes to go through a pull request approval process, with automatic rollback on health check failure.",
+      "customerFriendlyHint": "Does your team require all infrastructure changes to go through Git and a review process?",
+      "relatedFields": ["discovery.infra.orchestrator"]
+    },
+    {
+      "fieldId": "discovery.infra.observability",
+      "title": "Observability Stack",
+      "explain": "The monitoring and metrics tooling already in place. Selecting existing tools avoids duplication — the sizing adds GPU metrics exporters (DCGM), inference metrics (vLLM Prometheus endpoints), and dashboards to whatever is already there. Prometheus + Grafana is the most common open-source stack; Datadog and New Relic are common SaaS options.",
+      "example": "A team already running Prometheus + Grafana just needs the NVIDIA DCGM exporter and vLLM metrics endpoint added. A Datadog shop can use the DCGM Datadog integration instead of standing up a new Prometheus.",
+      "customerFriendlyHint": "What monitoring tools does your team already use?",
+      "relatedFields": ["discovery.infra.orchestrator"]
+    }
+  ]
+}

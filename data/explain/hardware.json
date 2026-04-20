@@ -1,1 +1,80 @@
-{ "entries": [] }
+{
+  "entries": [
+    {
+      "fieldId": "discovery.hardware.preferredVendor",
+      "title": "Preferred GPU Vendor",
+      "explain": "NVIDIA and AMD are the two primary GPU vendors for LLM inference. NVIDIA (H100/H200/B200) has the most mature software ecosystem (CUDA, TensorRT-LLM, vLLM optimizations). AMD (MI300X/MI325X) often offers more VRAM per GPU and competitive pricing, but ecosystem maturity is catching up. Selecting 'No preference' triggers a side-by-side comparison in the Build section.",
+      "example": "MI300X has 192 GB HBM3 vs H100's 80 GB. A 70B FP16 model fits on a single MI300X but needs 2× H100. However, H100's NVLink fabric and mature TensorRT-LLM optimizations can close the throughput gap.",
+      "customerFriendlyHint": "Do you have an existing vendor relationship or preference, or should we show you both options?",
+      "relatedFields": ["discovery.hardware.preferredGpu"],
+      "commonMistakes": [
+        "Assuming NVIDIA is always faster — AMD MI300X often wins on memory-bound workloads like large-batch decode."
+      ]
+    },
+    {
+      "fieldId": "discovery.hardware.preferredGpu",
+      "title": "Preferred GPU",
+      "explain": "A specific GPU SKU to target (e.g. H100-SXM-80GB, MI300X, L40S). Leave blank to let the sizing engine recommend the best fit given other constraints. Specifying a GPU locks the calculation to that hardware's specs — useful when the customer has existing inventory or a specific procurement in progress.",
+      "example": "A customer with existing H100 PCIe cards (cheaper, lower interconnect bandwidth than SXM) will get different tensor parallelism recommendations than one with H100 SXM in DGX.",
+      "customerFriendlyHint": "Do you already have specific GPUs in mind, or should we recommend?",
+      "relatedFields": ["discovery.hardware.preferredVendor"]
+    },
+    {
+      "fieldId": "discovery.hardware.cooling",
+      "title": "Cooling",
+      "explain": "High-density GPU servers (especially H100/H200 SXM) generate 10–14 kW per server. Air cooling typically handles up to ~30–40 kW per rack. Liquid cooling (direct liquid cooling or rear-door heat exchangers) is required for high-density deployments and is standard for DGX/HGX systems. Liquid cooling also reduces cooling energy cost by 30–50%.",
+      "example": "A 4× H100-SXM server draws ~10.2 kW. Three servers in a standard rack = ~30 kW — at the limit of air cooling. Moving to liquid cooling enables 6–8 servers per rack and significantly reduces PUE.",
+      "customerFriendlyHint": "Does your data center support water-cooled server racks, or is it air-cooled only?",
+      "relatedFields": ["discovery.constraints.powerBudgetKw", "discovery.constraints.rackUnitsAvailable"]
+    },
+    {
+      "fieldId": "discovery.hardware.networking",
+      "title": "Networking Fabric",
+      "explain": "Inter-node networking is critical when tensor parallelism spans multiple servers. InfiniBand NDR (400G) is the gold standard for TP>8 across nodes. RoCE 100G is sufficient for most TP=2–4 configurations. 25G Ethernet is only viable for pipeline parallelism where inter-node traffic is low. The wrong fabric can make multi-node inference impractical due to all-reduce bandwidth bottlenecks.",
+      "example": "Llama-405B at TP=16 across 2 nodes requires ~320 GB/s all-reduce bandwidth. InfiniBand NDR provides 400 Gb/s per link; with 8 links per server, this is achievable. 100G RoCE (8 links = 800 Gb/s total) can also work but with higher latency overhead.",
+      "customerFriendlyHint": "What high-speed networking is available in the data center?",
+      "relatedFields": ["discovery.hardware.preferredGpu"],
+      "commonMistakes": [
+        "Using standard 10G/25G Ethernet for multi-node tensor parallel inference — the bandwidth is 10–40× too low."
+      ]
+    },
+    {
+      "fieldId": "discovery.constraints.powerBudgetKw",
+      "title": "Power Budget (kW)",
+      "explain": "Total available power (in kilowatts) for GPU compute servers. This is often the binding constraint in existing data centers. A single H100 SXM server draws ~10.2 kW; an 8-GPU DGX H100 draws ~10.2 kW. Power budget determines max GPU count regardless of space.",
+      "example": "A 200 kW power allocation can fit ~19 DGX H100 systems (152 H100 GPUs). The same space with more power could fit twice as many GPUs — power is often the real bottleneck, not rack space.",
+      "customerFriendlyHint": "How many kilowatts of power can be dedicated to the AI servers?",
+      "relatedFields": ["discovery.hardware.cooling", "discovery.constraints.rackUnitsAvailable"],
+      "commonMistakes": [
+        "Forgetting to include cooling overhead — a 10 kW server in an air-cooled DC may need 3–5 kW of cooling power on top."
+      ]
+    },
+    {
+      "fieldId": "discovery.constraints.rackUnitsAvailable",
+      "title": "Rack Units Available",
+      "explain": "Total rack units (1U = 44.45mm) available across all racks for GPU servers. A standard 42U rack holds 4–5 GPU servers (each 8U). Rack space is often less constrained than power, but in shared colocations it can be the binding limit.",
+      "example": "3 full racks × 42U = 126U. At 8U per DGX H100, that's 15 servers (120 H100 GPUs). If power is 200 kW, that's the binding constraint at 10.2 kW/server.",
+      "customerFriendlyHint": "How many rack units (total) are available for the GPU servers?",
+      "relatedFields": ["discovery.constraints.powerBudgetKw"]
+    },
+    {
+      "fieldId": "discovery.constraints.budgetCapex",
+      "title": "CapEx Budget (USD)",
+      "explain": "One-time capital expenditure ceiling for hardware procurement. GPU server pricing: a DGX H100 (8× H100 SXM) lists at ~$300–400K. A single H100 SXM module is ~$30–40K. CapEx constraints often force trade-offs — fewer higher-VRAM GPUs (MI300X) vs more lower-VRAM GPUs (H100 PCIe).",
+      "example": "$1M CapEx: ~3 DGX H100 (24 H100 GPUs) or ~5 MI300X servers (40 MI300X GPUs at ~$200K/server). Very different VRAM profiles with similar total compute.",
+      "customerFriendlyHint": "What's the maximum one-time hardware spend available for this project?",
+      "relatedFields": ["discovery.constraints.budgetOpexMonthly"]
+    },
+    {
+      "fieldId": "discovery.constraints.budgetOpexMonthly",
+      "title": "Monthly OpEx Budget (USD)",
+      "explain": "Ongoing monthly spend ceiling — typically cloud instance costs for cloud deployments, or colocation + power + maintenance for on-prem. For cloud, GPU instance costs dominate: an AWS p5.48xlarge (8× H100 SXM) is ~$98/hr (~$71K/month at full utilization). OpEx budgets often make cloud uneconomical for sustained inference at scale.",
+      "example": "$50K/month on AWS: ~500 hours of p5.48xlarge, or ~2 always-on instances. At the same cost, on-prem amortized over 3 years often provides 5–10× the GPU compute.",
+      "customerFriendlyHint": "What's the monthly cloud or hosting budget for this workload?",
+      "relatedFields": ["discovery.constraints.budgetCapex"],
+      "commonMistakes": [
+        "Comparing cloud $/hour to on-prem list price without accounting for utilization, amortization, and power costs."
+      ]
+    }
+  ]
+}

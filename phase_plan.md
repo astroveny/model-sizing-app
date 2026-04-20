@@ -297,7 +297,7 @@
 - **Verify:** as P1.4
 - **Refs:** PRD §5.1
 
-### P1.9 — Seed ExplainBox content (round 1)
+### ☑ P1.9 — Seed ExplainBox content (round 1)
 - **Action:** Author `data/explain/workload.json`, `hardware.json`, `infra.json`, `model-platform.json`, `application.json` with entries for **every** field. Minimum: `explain` + `example`. Target: full schema per `docs/adding-explain-content.md`.
 - **Deliverable:** 5 JSON files, ~40–60 entries total
 - **Verify:** Every field in Discovery shows populated ExplainBox
