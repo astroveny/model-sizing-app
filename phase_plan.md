@@ -285,7 +285,7 @@
 - **Verify:** as P1.4
 - **Refs:** PRD §5.1
 
-### P1.7 — Model Platform tab form
+### ☑ P1.7 — Model Platform tab form
 - **Action:** `components/discovery/ModelPlatformForm.tsx`: inference server, model registry, multi-model serving, caching, A/B testing, optimizations (speculative, prefix caching, FP8 KV, chunked prefill, continuous batching, FlashAttention).
 - **Deliverable:** component
 - **Verify:** as P1.4
