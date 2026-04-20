@@ -303,7 +303,7 @@
 - **Verify:** Every field in Discovery shows populated ExplainBox
 - **Refs:** docs/adding-explain-content.md
 
-### P1.10 — Required-field validation gate
+### ☑ P1.10 — Required-field validation gate
 - **Action:** Discovery progress bar; Build section disabled until Zod validation passes on the minimum required set (model.name, model.params, model.quantization, load.concurrentUsers, load.avgInputTokens, load.avgOutputTokens, load.targetEndToEnd).
 - **Deliverable:** validation hook + UI gate
 - **Verify:** Build tab shows "Complete Discovery first" banner when required fields missing

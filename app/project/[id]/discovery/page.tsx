@@ -6,6 +6,8 @@ import { HardwareForm } from "@/components/discovery/HardwareForm";
 import { InfraForm } from "@/components/discovery/InfraForm";
 import { ModelPlatformForm } from "@/components/discovery/ModelPlatformForm";
 import { ApplicationForm } from "@/components/discovery/ApplicationForm";
+import { useDiscoveryValidation } from "@/lib/hooks/useDiscoveryValidation";
+import { CheckCircle2 } from "lucide-react";
 
 const TABS = [
   { id: "workload", label: "Workload" },
@@ -16,9 +18,31 @@ const TABS = [
 ] as const;
 
 export default function DiscoveryPage() {
+  const { progressPct, filledCount, totalCount, isReadyForBuild } =
+    useDiscoveryValidation();
+
   return (
     <div className="flex flex-col h-full">
-      <Tabs defaultValue="workload" className="flex flex-col h-full">
+      {/* Progress bar */}
+      <div className="px-6 py-3 border-b bg-muted/30 flex items-center gap-3">
+        <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-300"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+        <span className="text-xs text-muted-foreground whitespace-nowrap">
+          {filledCount} / {totalCount} fields
+        </span>
+        {isReadyForBuild && (
+          <span className="flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Ready for Build
+          </span>
+        )}
+      </div>
+
+      <Tabs defaultValue="workload" className="flex flex-col flex-1 min-h-0">
         <div className="border-b px-6">
           <TabsList className="h-10 bg-transparent p-0 gap-0">
             {TABS.map((tab) => (
@@ -51,15 +75,6 @@ export default function DiscoveryPage() {
           </TabsContent>
         </div>
       </Tabs>
-    </div>
-  );
-}
-
-function TabShell({ label }: { label: string }) {
-  return (
-    <div className="p-6 text-sm text-muted-foreground">
-      <p className="font-medium text-foreground mb-1">{label}</p>
-      <p>Form coming in Phase 1.</p>
     </div>
   );
 }
