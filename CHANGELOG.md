@@ -17,6 +17,14 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P0.11: .env.example with all LLM provider vars and DATABASE_PATH
 - P0.12: .gitignore covering node_modules, .next, DB files, uploads, secrets; fixed .env.example negation ordering so it is tracked by git
 - P0.13: smoke test passed — docker compose up, create project, restart, project persists
+- P1.1: full DiscoveryState Zod schemas + validateDiscoveryRequired() gate
+- P1.2: ExplainBox component with Explain/Example tabs, Ask Claude placeholder, missing-entry fallback
+- P1.3: Discovery page with 5 underline-style tabs (Workload/Hardware/Infra/Model Platform/Application)
+- P1.4–P1.8: all five Discovery forms wired to Zustand store with sticky ExplainBox sidebar
+- P1.9: 48 ExplainBox entries across 5 JSON files covering every Discovery field
+- P1.10: discovery progress bar (15-field tracking) + Build gate with missing-field list
+- P1.11: Ask Claude button deferred to P6.1 (alert placeholder)
+- P1.12: sample fixture at tests/fixtures/sample-projects.json; production build passes
 
 ### Changed
 - (nothing yet)

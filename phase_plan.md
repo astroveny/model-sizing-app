@@ -309,13 +309,13 @@
 - **Verify:** Build tab shows "Complete Discovery first" banner when required fields missing
 - **Refs:** PRD §6.1 acceptance criteria
 
-### P1.11 — Defer "Ask Claude" button (placeholder)
+### ☑ P1.11 — Defer "Ask Claude" button (placeholder)
 - **Action:** Button renders but calls `alert('Coming in P6')`. Full wiring deferred to Phase 6.
 - **Deliverable:** placeholder hookup
 - **Verify:** clicking button shows deferred message
 - **Refs:** PRD §6.5
 
-### P1.12 — Phase 1 integration test
+### ☑ P1.12 — Phase 1 integration test
 - **Action:** Fill out a complete sample project (Llama 70B, 50 concurrent, FP16, on-prem, vLLM, K8s, Kong, OIDC). Confirm all five tabs, all fields editable, all ExplainBoxes render. Close/reopen — state intact.
 - **Deliverable:** noted in CHANGELOG + `tests/fixtures/sample-projects.json` entry
 - **Verify:** as described

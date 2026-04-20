@@ -1,0 +1,71 @@
+[
+  {
+    "_description": "Phase 1 integration test — Llama 3.1 70B, on-prem, vLLM, K8s",
+    "name": "Llama-70B Internal Chatbot",
+    "customer": "Acme Corp",
+    "workloadType": "inference",
+    "deploymentPattern": "internal-inference",
+    "deploymentTarget": "on-prem",
+    "discovery": {
+      "model": {
+        "family": "llama",
+        "name": "Llama-3.1-70B-Instruct",
+        "params": 70,
+        "quantization": "FP16",
+        "contextLength": 8192,
+        "architecture": "dense"
+      },
+      "load": {
+        "concurrentUsers": 50,
+        "requestsPerSecond": 10,
+        "targetLatencyP50Ms": 5000,
+        "targetLatencyP95Ms": 10000,
+        "targetTTFTMs": 500,
+        "targetITLMs": 50,
+        "avgInputTokens": 512,
+        "avgOutputTokens": 256,
+        "peakBurstMultiplier": 2,
+        "uptimeSla": 99.9,
+        "streaming": true
+      },
+      "constraints": {
+        "compliance": []
+      },
+      "hardware": {
+        "preferredVendor": "nvidia",
+        "cooling": "liquid",
+        "networking": "400G"
+      },
+      "infra": {
+        "orchestrator": "kubernetes",
+        "existingCluster": false,
+        "airGapped": false,
+        "gitops": "argocd",
+        "observability": ["prometheus", "grafana"]
+      },
+      "modelPlatform": {
+        "inferenceServer": "vllm",
+        "modelRegistry": "huggingface",
+        "multiModelServing": false,
+        "caching": "none",
+        "abTesting": false,
+        "optimizations": {
+          "speculativeDecoding": false,
+          "prefixCaching": true,
+          "fp8KvCache": false,
+          "chunkedPrefill": true,
+          "continuousBatching": true,
+          "flashAttention": true
+        }
+      },
+      "application": {
+        "apiGateway": "kong",
+        "auth": "oidc",
+        "rateLimiting": true,
+        "uiRequired": true,
+        "auditLogging": false,
+        "metering": false
+      }
+    }
+  }
+]
