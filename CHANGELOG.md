@@ -16,6 +16,7 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P0.10: docker-compose.yml with volume mounts and health check
 - P0.11: .env.example with all LLM provider vars and DATABASE_PATH
 - P0.12: .gitignore covering node_modules, .next, DB files, uploads, secrets; fixed .env.example negation ordering so it is tracked by git
+- P0.13: smoke test passed — docker compose up, create project, restart, project persists
 
 ### Changed
 - (nothing yet)

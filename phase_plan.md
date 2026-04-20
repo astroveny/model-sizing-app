@@ -244,7 +244,7 @@
 
 **Exit criteria:** Complete full Discovery for a sample Llama-70B inference project; every field has working ExplainBox content; state persists.
 
-### P1.1 — Discovery types + Zod schemas
+### ☑ P1.1 — Discovery types + Zod schemas
 - **Action:** Expand `lib/store.ts` with full `DiscoveryState` type from PRD §5.1. Create `lib/utils/validation.ts` with Zod schemas matching every field (required/optional, ranges).
 - **Deliverable:** types + validators
 - **Verify:** `npm run typecheck`; unit test validates rejection of bad input
