@@ -273,7 +273,7 @@
 - **Verify:** Change a value, reload, value persists
 - **Refs:** PRD §5.1 DiscoveryState.model/load
 
-### P1.5 — Hardware tab form
+### ☑ P1.5 — Hardware tab form
 - **Action:** `components/discovery/HardwareForm.tsx`: preferred vendor, preferred GPU, cooling, networking, plus constraint fields (power budget kW, rack units, budget capex/opex).
 - **Deliverable:** component
 - **Verify:** as P1.4

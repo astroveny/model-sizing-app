@@ -2,6 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorkloadForm } from "@/components/discovery/WorkloadForm";
+import { HardwareForm } from "@/components/discovery/HardwareForm";
 
 const TABS = [
   { id: "workload", label: "Workload" },
@@ -34,7 +35,7 @@ export default function DiscoveryPage() {
             <WorkloadForm />
           </TabsContent>
           <TabsContent value="hardware" className="m-0 h-full">
-            <TabShell label="Hardware" />
+            <HardwareForm />
           </TabsContent>
           <TabsContent value="infra" className="m-0 h-full">
             <TabShell label="Infra" />
