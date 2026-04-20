@@ -62,10 +62,10 @@ It is **not** a deployment tool, a benchmarking suite, or a cloud marketplace. I
 ## Features (v1)
 [Back to ToC](#model-sizing-app)
 
-- **Discovery section** — capture client requirements across all four layers, with an Explain & Example component next to every field to help clients new to model deployment
+- **Discovery section** — capture client requirements across all four layers, with an Explain & Example component next to every field; **Ask Claude** generates a project-tailored explanation on demand
 - **RFI section** — paste or upload an RFP, extract requirements with an LLM, map them to discovery, score qualification, draft response sections
-- **Build section** — auto-computed sizing across Hardware, Infra, Model Platform, and Application layers; manual overrides; NVIDIA vs AMD side-by-side comparison
-- **Export** — PDF proposal, Word doc, JSON Bill-of-Materials
+- **Build section** — auto-computed sizing across Hardware, Infra, Model Platform, and Application layers; manual overrides; NVIDIA vs AMD side-by-side comparison; **"Why this choice?"** button on each panel for LLM-powered reasoning
+- **Export** — PDF proposal, Word doc, JSON Bill-of-Materials; in-browser PDF preview
 - **Reactive state** — change a value anywhere, all sections update instantly
 - **Docker-first** — `docker compose up` and you're running; easy to share with your team
 

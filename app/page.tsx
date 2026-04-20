@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { listProjects } from "@/lib/db/projects";
 import { NewProjectButton } from "@/components/NewProjectButton";
+import { Cpu } from "lucide-react";
 
 export default function HomePage() {
   const projects = listProjects();
@@ -15,11 +16,17 @@ export default function HomePage() {
       </header>
       <main className="flex-1 p-6">
         {projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-center gap-3">
-            <p className="text-muted-foreground">No projects yet.</p>
-            <p className="text-sm text-muted-foreground">
-              Click <strong>New Project</strong> to get started.
-            </p>
+          <div className="flex flex-col items-center justify-center h-64 text-center gap-4">
+            <div className="rounded-full bg-muted p-4">
+              <Cpu className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-medium">No projects yet</p>
+              <p className="text-sm text-muted-foreground max-w-xs">
+                Create a project to start sizing a ML/GenAI inference deployment.
+              </p>
+            </div>
+            <NewProjectButton />
           </div>
         ) : (
           <ul className="grid gap-3 max-w-2xl">

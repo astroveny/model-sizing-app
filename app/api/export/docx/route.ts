@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getProject } from "@/lib/db/projects";
 import { buildBomExport } from "@/lib/export/build-bom-export";
 import { buildDocx } from "@/lib/export/docx";
+import { writeAudit } from "@/lib/db/audit";
 
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("projectId");
@@ -15,6 +16,7 @@ export async function GET(req: NextRequest) {
   try {
     const docxBuffer = await buildDocx(project, bom);
 
+    writeAudit("export.docx", { projectId: id }, id);
     return new NextResponse(new Uint8Array(docxBuffer), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

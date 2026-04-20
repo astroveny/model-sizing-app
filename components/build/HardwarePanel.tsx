@@ -2,6 +2,8 @@
 
 import type { BuildDerivedResult } from "@/lib/hooks/useBuildDerived";
 import { getBestServer } from "@/lib/sizing/catalog";
+import { ExplainSizingButton } from "./ExplainSizingButton";
+import { useProjectStore } from "@/lib/store";
 
 type Props = { result: BuildDerivedResult };
 
@@ -20,6 +22,8 @@ function Row({ label, value, sub }: { label: string; value: string; sub?: string
 export function HardwarePanel({ result }: Props) {
   const { input, sharding, capacity, memory } = result;
   const server = getBestServer(input.gpu.id);
+  const project = useProjectStore((s) => s.activeProject);
+  const endToEndMs = result.optimizations.adjustedTtftMs + result.optimizations.adjustedItlMs * input.avgOutputTokens;
 
   return (
     <div className="rounded-lg border">
@@ -43,6 +47,28 @@ export function HardwarePanel({ result }: Props) {
           sub={sharding.interconnectRecommendation.interNode !== "none"
             ? `Inter-node: ${sharding.interconnectRecommendation.interNode}`
             : "Single-node (no inter-node fabric required)"} />
+      </div>
+      <div className="px-4 pb-3">
+        <ExplainSizingButton context={{
+          panel: "hardware",
+          modelName: project?.discovery.model.name ?? input.gpu.model,
+          paramsB: input.paramsB,
+          quantization: input.quantization,
+          concurrentUsers: input.concurrentUsers,
+          gpuModel: input.gpu.model,
+          totalGpus: capacity.totalGpus,
+          serverCount: capacity.serverCount,
+          replicas: capacity.replicas,
+          tensorParallelism: sharding.tensorParallelism,
+          pipelineParallelism: sharding.pipelineParallelism,
+          ttftMs: result.optimizations.adjustedTtftMs,
+          itlMs: result.optimizations.adjustedItlMs,
+          endToEndMs,
+          powerKw: capacity.powerKw,
+          capexUsd: capacity.capexUsd,
+          deploymentPattern: project?.deploymentPattern ?? "internal-inference",
+          inferenceServer: project?.discovery.modelPlatform.inferenceServer ?? "vllm",
+        }} />
       </div>
     </div>
   );

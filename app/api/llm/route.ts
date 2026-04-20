@@ -3,6 +3,7 @@ import { getLlmProvider } from "@/lib/llm/factory";
 import { withRetry } from "@/lib/llm/retry";
 import type { LlmCompleteParams } from "@/lib/llm/provider";
 import { LlmFatalError } from "@/lib/llm/provider";
+import { writeAudit } from "@/lib/db/audit";
 
 export async function POST(req: NextRequest) {
   let params: LlmCompleteParams;
@@ -16,9 +17,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "messages array is required" }, { status: 400 });
   }
 
+  const projectId = req.headers.get("x-project-id") ?? undefined;
+
   try {
     const provider = getLlmProvider();
     const result = await withRetry(() => provider.complete(params));
+    writeAudit("llm.call", { inputTokens: result.inputTokens, outputTokens: result.outputTokens }, projectId);
     return NextResponse.json(result);
   } catch (err) {
     if (err instanceof LlmFatalError) {

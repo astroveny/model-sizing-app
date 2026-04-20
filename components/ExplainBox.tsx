@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { HelpCircle, Sparkles, AlertTriangle, Link2 } from "lucide-react";
+import { HelpCircle, Sparkles, AlertTriangle, Link2, Loader2, RotateCcw } from "lucide-react";
 import { getExplainEntry } from "@/lib/explain/loader";
 import { useProjectStore } from "@/lib/store";
+import { llmComplete } from "@/lib/llm/client";
+import { EXPLAIN_FIELD_SYSTEM, buildExplainFieldPrompt } from "@/lib/llm/prompts/explain-field";
 
 type Props = {
   fieldId: string;
@@ -13,19 +16,73 @@ type Props = {
 };
 
 export function ExplainBox({ fieldId, label }: Props) {
-  const explainOverrides = useProjectStore(
-    (s) => s.activeProject?.explainOverrides
-  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const { activeProject, updateField } = useProjectStore((s) => ({
+    activeProject: s.activeProject,
+    updateField: s.updateField,
+  }));
+
+  const explainOverrides = activeProject?.explainOverrides;
   const entry = getExplainEntry(fieldId, explainOverrides);
+  const isOverridden = !!explainOverrides?.[fieldId];
 
   const title = entry?.title ?? label ?? fieldId;
+
+  async function handleAskClaude() {
+    if (!activeProject) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const ctx = {
+        fieldId,
+        fieldLabel: label ?? fieldId,
+        projectName: activeProject.name,
+        customer: activeProject.customer,
+        modelName: activeProject.discovery.model.name,
+        concurrentUsers: activeProject.discovery.load.concurrentUsers,
+        deploymentPattern: activeProject.deploymentPattern,
+      };
+
+      const result = await llmComplete({
+        system: EXPLAIN_FIELD_SYSTEM,
+        messages: [{ role: "user", content: buildExplainFieldPrompt(ctx) }],
+        maxTokens: 400,
+        json: true,
+      });
+
+      const parsed = JSON.parse(result.text) as { explain?: string; example?: string };
+      if (!parsed.explain || !parsed.example) throw new Error("Unexpected response shape");
+
+      updateField(`explainOverrides.${fieldId}`, {
+        fieldId,
+        explain: parsed.explain,
+        example: parsed.example,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "LLM call failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleReset() {
+    updateField(`explainOverrides.${fieldId}`, undefined);
+    setError(null);
+  }
 
   return (
     <div className="rounded-lg border bg-muted/40 p-3 text-sm">
       <div className="mb-2 flex items-center gap-1.5 font-medium text-muted-foreground">
         <HelpCircle className="h-3.5 w-3.5 shrink-0" />
         <span className="truncate">{title}</span>
+        {isOverridden && (
+          <span className="ml-auto text-[10px] font-normal text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded">
+            AI
+          </span>
+        )}
       </div>
 
       {entry ? (
@@ -90,16 +147,37 @@ export function ExplainBox({ fieldId, label }: Props) {
         </p>
       )}
 
-      <div className="mt-2 border-t pt-2">
+      {error && (
+        <p className="mt-2 text-xs text-destructive">{error}</p>
+      )}
+
+      <div className="mt-2 border-t pt-2 flex items-center gap-1">
         <Button
           variant="ghost"
           size="sm"
           className="h-6 gap-1.5 px-2 text-xs text-muted-foreground"
-          onClick={() => alert("Ask Claude coming in Phase 6 (P6.1)")}
+          disabled={loading || !activeProject}
+          onClick={handleAskClaude}
         >
-          <Sparkles className="h-3 w-3" />
-          Ask Claude
+          {loading ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Sparkles className="h-3 w-3" />
+          )}
+          {loading ? "Asking Claude…" : "Ask Claude"}
         </Button>
+
+        {isOverridden && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 gap-1.5 px-2 text-xs text-muted-foreground"
+            onClick={handleReset}
+          >
+            <RotateCcw className="h-3 w-3" />
+            Reset
+          </Button>
+        )}
       </div>
     </div>
   );

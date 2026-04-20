@@ -648,52 +648,52 @@
 
 **Exit criteria:** Tool is demo-ready for internal team onboarding.
 
-### P6.1 — "Ask Claude" in ExplainBox
+### ☑ P6.1 — "Ask Claude" in ExplainBox
 - **Action:** Wire the button from P1.11. `lib/llm/prompts/explain-field.ts`. Returns customer-tailored explanation using current project context (workload, customer, industry). Editable result saved to `explainOverrides`.
 - **Deliverable:** feature complete
 - **Refs:** PRD §6.5, docs/adding-explain-content.md §8
 
-### P6.2 — "Explain this sizing" in Build
+### ☑ P6.2 — "Explain this sizing" in Build
 - **Action:** Button on each Build panel: "Why this choice?" Sends Discovery + Build derived state + panel focus to LLM. Returns natural-language explanation.
 - **Deliverable:** component + `lib/llm/prompts/explain-sizing.ts`
 - **Refs:** PRD §8.4
 
-### P6.3 — Improved architecture diagram
+### ☑ P6.3 — Improved architecture diagram
 - **Action:** Replace basic boxes with a proper layered diagram: gateway → model platform → sharding topology → hardware. Show data flow arrows.
 - **Deliverable:** enhanced `ArchitectureDiagram.tsx`
 - **Refs:** PRD §6.3
 
-### P6.4 — Improved rack diagram
+### ☑ P6.4 — Improved rack diagram
 - **Action:** Proper rack visualization with servers stacked correctly, labels, power draw.
 - **Deliverable:** enhanced `RackLayout.tsx`
 - **Refs:** PRD §6.3
 
-### P6.5 — Loading states
+### ☑ P6.5 — Loading states
 - **Action:** Every async action (LLM calls, exports, autosave) has a spinner or skeleton. No blank screens.
 - **Deliverable:** loading states audit
 - **Refs:** UX
 
-### P6.6 — Error states
+### ☑ P6.6 — Error states
 - **Action:** LLM failure, DB failure, export failure — all handled with a user-facing message + retry.
 - **Deliverable:** error boundary + toast system (e.g., sonner)
 - **Refs:** UX
 
-### P6.7 — Empty states
+### ☑ P6.7 — Empty states
 - **Action:** "No projects yet" screen with a CTA. "Complete Discovery to see sizing" in Build. "Upload an RFP or paste text" in RFI.
 - **Deliverable:** empty-state components
 - **Refs:** UX
 
-### P6.8 — Documentation sweep
+### ☑ P6.8 — Documentation sweep
 - **Action:** Update README with any drift; verify all docs/ links work; add GIFs or screenshots to README.
 - **Deliverable:** updated docs
 - **Refs:** all docs
 
-### P6.9 — Audit log hookup
+### ☑ P6.9 — Audit log hookup
 - **Action:** Every LLM call + project mutation writes to `audit_log` table. Simple Admin page to view (Phase 6 or later).
 - **Deliverable:** `lib/db/audit.ts`
 - **Refs:** PRD §5.2
 
-### P6.10 — Phase 6 demo dry-run
+### ☑ P6.10 — Phase 6 demo dry-run
 - **Action:** Full end-to-end walkthrough: create project, import RFP, complete Discovery, review Build, export PDF. Notes for any friction.
 - **Deliverable:** demo script in `docs/demo-script.md`
 - **Refs:** PRD §9 Phase 6 exit

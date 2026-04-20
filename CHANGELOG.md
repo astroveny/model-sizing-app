@@ -29,6 +29,16 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P3.1–P3.14: Build page with HardwarePanel, InfraPanel, ModelPlatformPanel, ApplicationPanel, SummaryTotals, VendorComparison, EngineNotes, RackLayout SVG, ArchitectureDiagram SVG; override mechanism; .gitignore fix for components/build/
 - P4.1–P4.13: RFI section with LLM provider abstraction (Anthropic + OpenAI-compatible), retry/backoff, RFP paste+upload, extraction prompt, RequirementsList with Apply actions, QualificationPanel, DraftResponse; Claude 4 temperature deprecation fix
 - P5.1–P5.7: Export section — JSON BoM schema + route, PDF (react-pdf/renderer), DOCX (docx library), export API routes, export page with PDF preview (dynamic PDFViewer) and BoM summary table; typecheck clean
+- P6.1: "Ask Claude" in ExplainBox — LLM call with project context, result persisted to explainOverrides, AI badge + Reset button
+- P6.2: "Why this choice?" ExplainSizingButton on Hardware and Model Platform panels; explain-sizing prompt
+- P6.3: Improved ArchitectureDiagram — color-bar layers, data-flow arrows with labels, 3 detail rows per layer
+- P6.4: Improved RackLayout — unit number column, per-rack stats, power labels, free-space indicator
+- P6.5: Loading spinners on all LLM interactions (ExplainBox, ExplainSizingButton, RFI components)
+- P6.6: Sonner toasts installed + Toaster in root layout; inline error messages on all LLM call sites
+- P6.7: Improved empty state on project list (icon + CTA)
+- P6.8: README updated for Ask Claude and Why this choice features; docs/demo-script.md authored
+- P6.9: lib/db/audit.ts with writeAudit(); wired into /api/llm, /api/export/pdf, /api/export/docx
+- P6.10: docs/demo-script.md — 15-minute demo walkthrough for team onboarding
 
 ### Changed
 - (nothing yet)

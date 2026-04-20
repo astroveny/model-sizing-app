@@ -5,104 +5,166 @@ import { getBestServer } from "@/lib/sizing/catalog";
 
 type Props = { result: BuildDerivedResult };
 
-const UNIT_PX = 14;      // px per rack unit
-const RACK_WIDTH = 140;  // px
-const RACK_UNITS = 42;   // standard rack height
+const UNIT_PX = 13;
+const RACK_WIDTH = 160;
+const RACK_UNITS = 42;
+const LABEL_W = 28; // unit number column width
 
 export function RackLayout({ result }: Props) {
   const { capacity, input } = result;
   const server = getBestServer(input.gpu.id);
   const serverU = server?.rack_units ?? 4;
   const count = capacity.serverCount;
+  const powerPerServer = server ? (server.tdp_watts / 1000).toFixed(1) : "?";
 
-  // Rack count needed
-  const unitsPerRack = RACK_UNITS;
-  const racksNeeded = Math.ceil((count * serverU) / unitsPerRack);
+  const racksNeeded = Math.ceil((count * serverU) / RACK_UNITS);
+  let globalServer = 0;
+
   const racks = Array.from({ length: racksNeeded }, (_, ri) => {
-    const servers: { label: string; u: number }[] = [];
-    let remaining = unitsPerRack;
-    let si = ri * Math.floor(unitsPerRack / serverU);
-    while (remaining >= serverU && si < count) {
-      servers.push({ label: `Server ${si + 1}`, u: serverU });
-      remaining -= serverU;
-      si++;
+    const servers: { label: string; gpus: number; u: number }[] = [];
+    let used = 0;
+    while (used + serverU <= RACK_UNITS && globalServer < count) {
+      servers.push({
+        label: `S${globalServer + 1}`,
+        gpus: count > 0 ? Math.ceil(capacity.totalGpus / count) : 0,
+        u: serverU,
+      });
+      used += serverU;
+      globalServer++;
     }
-    return servers;
+    return { servers, usedU: used };
   });
+
+  const rackH = RACK_UNITS * UNIT_PX;
 
   return (
     <div className="rounded-lg border">
-      <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
+      <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-sm font-semibold">Rack Layout</h3>
-        <span className="text-xs text-muted-foreground">
-          {count} server{count !== 1 ? "s" : ""} · {racksNeeded} rack{racksNeeded !== 1 ? "s" : ""} · {server?.rack_units ?? "?"}U each
-        </span>
+        <div className="flex gap-3 text-xs text-muted-foreground">
+          <span>{count} server{count !== 1 ? "s" : ""}</span>
+          <span>{racksNeeded} rack{racksNeeded !== 1 ? "s" : ""}</span>
+          <span>{serverU}U / server</span>
+          <span>{capacity.powerKw.toFixed(1)} kW total</span>
+        </div>
       </div>
+
       <div className="p-4 overflow-x-auto">
-        <div className="flex gap-6">
-          {racks.map((rackServers, ri) => (
-            <div key={ri} className="flex flex-col items-center gap-1">
-              <span className="text-xs text-muted-foreground mb-1">Rack {ri + 1}</span>
-              <svg
-                width={RACK_WIDTH}
-                height={RACK_UNITS * UNIT_PX + 2}
-                className="border rounded"
-                aria-label={`Rack ${ri + 1}`}
-              >
-                {/* Rack background */}
-                <rect x={0} y={0} width={RACK_WIDTH} height={RACK_UNITS * UNIT_PX} fill="var(--muted)" />
+        <div className="flex gap-8 items-start">
+          {racks.map((rack, ri) => (
+            <div key={ri} className="flex flex-col items-center gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">Rack {ri + 1}</span>
+              <div className="flex gap-0">
+                {/* Unit number column */}
+                <svg width={LABEL_W} height={rackH + 2} className="shrink-0">
+                  {Array.from({ length: RACK_UNITS }, (_, u) => (
+                    u % 5 === 0 ? (
+                      <text key={u} x={LABEL_W - 4} y={u * UNIT_PX + UNIT_PX / 2 + 3}
+                        textAnchor="end" fontSize={7} fill="var(--muted-foreground)" fontFamily="monospace">
+                        {u + 1}U
+                      </text>
+                    ) : null
+                  ))}
+                </svg>
 
-                {/* Unit markers */}
-                {Array.from({ length: RACK_UNITS }, (_, u) => (
-                  <line
-                    key={u}
-                    x1={0} y1={u * UNIT_PX}
-                    x2={RACK_WIDTH} y2={u * UNIT_PX}
-                    stroke="var(--border)" strokeWidth={0.5} opacity={0.5}
-                  />
-                ))}
+                {/* Rack body */}
+                <svg
+                  width={RACK_WIDTH} height={rackH + 2}
+                  className="border border-border rounded"
+                  aria-label={`Rack ${ri + 1}`}
+                >
+                  {/* Background */}
+                  <rect x={0} y={0} width={RACK_WIDTH} height={rackH} fill="var(--muted)" opacity={0.4} />
 
-                {/* Servers */}
-                {rackServers.reduce<{ el: React.ReactNode[]; y: number }>(
-                  (acc, srv, si) => {
-                    const h = srv.u * UNIT_PX - 2;
-                    acc.el.push(
-                      <g key={si}>
-                        <rect
-                          x={4} y={acc.y + 1}
-                          width={RACK_WIDTH - 8} height={h}
-                          rx={2}
-                          fill="#3b82f6" fillOpacity={0.8}
-                          stroke="#1d4ed8" strokeWidth={0.5}
-                        />
-                        <text
-                          x={RACK_WIDTH / 2} y={acc.y + h / 2 + 5}
-                          textAnchor="middle"
-                          fontSize={9} fill="white" fontFamily="monospace"
-                        >
-                          {srv.label}
-                        </text>
-                        <text
-                          x={RACK_WIDTH / 2} y={acc.y + h / 2 + 16}
-                          textAnchor="middle"
-                          fontSize={7.5} fill="rgba(255,255,255,0.7)" fontFamily="monospace"
-                        >
-                          {input.gpu.model}
-                        </text>
-                      </g>
-                    );
-                    acc.y += srv.u * UNIT_PX;
-                    return acc;
-                  },
-                  { el: [], y: 0 }
-                ).el}
-              </svg>
+                  {/* Rack unit grid lines */}
+                  {Array.from({ length: RACK_UNITS + 1 }, (_, u) => (
+                    <line key={u}
+                      x1={0} y1={u * UNIT_PX}
+                      x2={RACK_WIDTH} y2={u * UNIT_PX}
+                      stroke="var(--border)" strokeWidth={u % 5 === 0 ? 0.8 : 0.3} opacity={0.6}
+                    />
+                  ))}
+
+                  {/* Server blocks */}
+                  {rack.servers.reduce<{ els: React.ReactNode[]; y: number }>(
+                    (acc, srv, si) => {
+                      const h = srv.u * UNIT_PX - 2;
+                      const gpuCount = count > 0 ? Math.ceil(capacity.totalGpus / count) : 0;
+                      acc.els.push(
+                        <g key={si}>
+                          {/* Server body */}
+                          <rect
+                            x={3} y={acc.y + 1}
+                            width={RACK_WIDTH - 6} height={h}
+                            rx={3}
+                            fill="#3b82f6" fillOpacity={0.85}
+                            stroke="#1e40af" strokeWidth={0.8}
+                          />
+                          {/* Server label */}
+                          <text
+                            x={RACK_WIDTH / 2} y={acc.y + h / 2 - 2}
+                            textAnchor="middle" fontSize={9}
+                            fill="white" fontWeight="600" fontFamily="monospace"
+                          >
+                            {srv.label}
+                          </text>
+                          <text
+                            x={RACK_WIDTH / 2} y={acc.y + h / 2 + 9}
+                            textAnchor="middle" fontSize={7.5}
+                            fill="rgba(255,255,255,0.75)" fontFamily="sans-serif"
+                          >
+                            {gpuCount}× {input.gpu.model}
+                          </text>
+                          <text
+                            x={RACK_WIDTH / 2} y={acc.y + h / 2 + 19}
+                            textAnchor="middle" fontSize={7}
+                            fill="rgba(255,255,255,0.6)" fontFamily="sans-serif"
+                          >
+                            {powerPerServer} kW
+                          </text>
+                        </g>
+                      );
+                      acc.y += srv.u * UNIT_PX;
+                      return acc;
+                    },
+                    { els: [], y: 0 }
+                  ).els}
+
+                  {/* Empty space indicator */}
+                  {rack.usedU < RACK_UNITS && (
+                    <text
+                      x={RACK_WIDTH / 2} y={rack.usedU * UNIT_PX + 20}
+                      textAnchor="middle" fontSize={8}
+                      fill="var(--muted-foreground)" fontFamily="sans-serif"
+                    >
+                      {RACK_UNITS - rack.usedU}U free
+                    </text>
+                  )}
+                </svg>
+              </div>
+
+              {/* Per-rack stats */}
+              <div className="text-center space-y-0.5">
+                <p className="text-xs text-muted-foreground">
+                  {rack.servers.length} server{rack.servers.length !== 1 ? "s" : ""}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {(rack.servers.length * parseFloat(powerPerServer)).toFixed(1)} kW
+                </p>
+              </div>
             </div>
           ))}
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          {count} × {server?.model ?? "server"} · {serverU}U each · {capacity.powerKw.toFixed(1)} kW total
-        </p>
+
+        {/* Legend */}
+        <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-blue-500 opacity-85" />
+            <span>{server?.model ?? "GPU server"}</span>
+          </div>
+          <span>{serverU}U per server</span>
+          <span>{input.gpu.vram_gb * (count > 0 ? Math.ceil(capacity.totalGpus / count) : 0)} GB VRAM/server</span>
+        </div>
       </div>
     </div>
   );

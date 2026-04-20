@@ -2,6 +2,7 @@
 
 import { useProjectStore } from "@/lib/store";
 import type { BuildDerivedResult } from "@/lib/hooks/useBuildDerived";
+import { ExplainSizingButton } from "./ExplainSizingButton";
 
 type Props = { result: BuildDerivedResult };
 
@@ -31,7 +32,8 @@ function LatencyBar({ valueMs, targetMs }: { valueMs: number; targetMs: number }
 }
 
 export function ModelPlatformPanel({ result }: Props) {
-  const modelPlatform = useProjectStore((s) => s.activeProject?.discovery.modelPlatform);
+  const project = useProjectStore((s) => s.activeProject);
+  const modelPlatform = project?.discovery.modelPlatform;
   const { sharding, prefill, decode, optimizations, capacity, input } = result;
 
   if (!modelPlatform) return null;
@@ -88,6 +90,28 @@ export function ModelPlatformPanel({ result }: Props) {
         <Row label="Confidence"         value={result.confidence.toUpperCase()}
           highlight={result.confidence === "low"} />
         <Row label="Optimizations"      value={opts || "None enabled"} />
+      </div>
+      <div className="px-4 pb-3">
+        <ExplainSizingButton context={{
+          panel: "model-platform",
+          modelName: project?.discovery.model.name ?? "",
+          paramsB: input.paramsB,
+          quantization: input.quantization,
+          concurrentUsers: input.concurrentUsers,
+          gpuModel: input.gpu.model,
+          totalGpus: capacity.totalGpus,
+          serverCount: capacity.serverCount,
+          replicas: capacity.replicas,
+          tensorParallelism: sharding.tensorParallelism,
+          pipelineParallelism: sharding.pipelineParallelism,
+          ttftMs: optimizations.adjustedTtftMs,
+          itlMs: optimizations.adjustedItlMs,
+          endToEndMs,
+          powerKw: capacity.powerKw,
+          capexUsd: capacity.capexUsd,
+          deploymentPattern: project?.deploymentPattern ?? "internal-inference",
+          inferenceServer: modelPlatform?.inferenceServer ?? "vllm",
+        }} />
       </div>
     </div>
   );

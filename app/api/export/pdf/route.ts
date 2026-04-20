@@ -4,6 +4,7 @@ import { buildBomExport } from "@/lib/export/build-bom-export";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const ReactPDF = require("@react-pdf/renderer") as typeof import("@react-pdf/renderer");
 import { SizingPdfDocument } from "@/lib/export/pdf";
+import { writeAudit } from "@/lib/db/audit";
 import React from "react";
 
 export async function GET(req: NextRequest) {
@@ -20,6 +21,7 @@ export async function GET(req: NextRequest) {
       React.createElement(SizingPdfDocument, { project, bom }) as Parameters<typeof ReactPDF.renderToBuffer>[0]
     );
 
+    writeAudit("export.pdf", { projectId: id }, id);
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
