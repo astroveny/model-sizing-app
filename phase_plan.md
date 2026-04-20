@@ -250,7 +250,7 @@
 - **Verify:** `npm run typecheck`; unit test validates rejection of bad input
 - **Refs:** PRD §5.1
 
-### P1.2 — ExplainBox component
+### ☑ P1.2 — ExplainBox component
 - **Action:** Build `components/ExplainBox.tsx` with:
   - `fieldId` prop
   - Two tabs: Explain / Example (shadcn Tabs)
