@@ -11,8 +11,8 @@ node_modules/
 # Next.js
 .next/
 out/
-build/
 dist/
+# Note: "build/" intentionally NOT ignored — components/build/ must be tracked
 
 # Production
 *.tsbuildinfo

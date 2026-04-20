@@ -435,77 +435,77 @@
 
 **Exit criteria:** Changing any Discovery field reflects in Build within 1s; overrides persist; NVIDIA vs AMD comparison renders.
 
-### P3.1 — Build page shell
+### ☑ P3.1 — Build page shell
 - **Action:** `app/project/[id]/build/page.tsx` with 4 layer panels + summary totals + engine notes area.
 - **Deliverable:** page
 - **Verify:** page renders with empty panels when Discovery incomplete
 - **Refs:** PRD §6.3
 
-### P3.2 — Derived state subscription
+### ☑ P3.2 — Derived state subscription
 - **Action:** Hook: `useBuildDerived()` subscribes to Discovery state and calls `computeBuild()`. Memoized; recomputes only on relevant change.
 - **Deliverable:** `lib/hooks/useBuildDerived.ts`
 - **Verify:** changing Discovery field updates Build within 500ms
 - **Refs:** PRD §6.3 acceptance
 
-### P3.3 — Hardware panel
+### ☑ P3.3 — Hardware panel
 - **Action:** `components/build/HardwarePanel.tsx`: GPU model + count, server model + count, CPU + RAM, storage, networking. Override inputs beside each derived field.
 - **Deliverable:** component
 - **Refs:** PRD §5.1 BuildDerived.hardware
 
-### P3.4 — Infra panel
+### ☑ P3.4 — Infra panel
 - **Action:** `components/build/InfraPanel.tsx`: orchestrator, node pools, load balancer, monitoring stack.
 - **Deliverable:** component
 - **Refs:** PRD §5.1 BuildDerived.infra
 
-### P3.5 — Model Platform panel
+### ☑ P3.5 — Model Platform panel
 - **Action:** `components/build/ModelPlatformPanel.tsx`: server, replicas, TP/PP/EP, KV cache, max batch, latency estimates (TTFT, ITL, end-to-end), interconnect recommendation.
 - **Deliverable:** component
 - **Refs:** PRD §5.1 BuildDerived.modelPlatform
 
-### P3.6 — Application panel
+### ☑ P3.6 — Application panel
 - **Action:** `components/build/ApplicationPanel.tsx`: gateway, auth, rate limits, metering (conditional on GPUaaS/SaaS).
 - **Deliverable:** component
 - **Refs:** PRD §5.1 BuildDerived.application
 
-### P3.7 — Summary totals
+### ☑ P3.7 — Summary totals
 - **Action:** `components/build/SummaryTotals.tsx`: total GPUs, servers, power kW, rack units, capex, monthly opex. Positioned at top.
 - **Deliverable:** component
 - **Refs:** PRD §5.1 BuildState.totals
 
-### P3.8 — Override handling
+### ☑ P3.8 — Override handling
 - **Action:** Overrides stored in `BuildState.overrides`. When present, take precedence over derived. UI shows override badge.
 - **Deliverable:** override mechanism; persists to SQLite
 - **Verify:** override a value, reload, override persists, derived re-computes when inputs change but override holds.
 - **Refs:** PRD §6.3 acceptance
 
-### P3.9 — Vendor comparison view
+### ☑ P3.9 — Vendor comparison view
 - **Action:** When Discovery `hardware.preferredVendor === 'either'`, show NVIDIA-best vs AMD-best side-by-side with deltas (GPU count, cost, power, decode throughput).
 - **Deliverable:** `components/build/VendorComparison.tsx`
 - **Verify:** toggle preferredVendor to "either"; comparison renders; toggle to "nvidia"; comparison hides
 - **Refs:** PRD §6.3
 
-### P3.10 — Engine notes surface
+### ☑ P3.10 — Engine notes surface
 - **Action:** Notes rendered in an expandable card per panel. Category pills (info/warning/recommendation).
 - **Deliverable:** notes component integrated into each panel
 - **Refs:** PRD §6.3
 
-### P3.11 — BoM generation
+### ☑ P3.11 — BoM generation
 - **Action:** `lib/sizing/bom.ts`: transforms BuildDerived into `BomItem[]` with pricing from catalogs. Total capex = sum of unit prices × qty.
 - **Deliverable:** `lib/sizing/bom.ts` + tests
 - **Verify:** BoM sum matches SummaryTotals.capexUsd
 - **Refs:** PRD §5.1 BomItem
 
-### P3.12 — Rack layout diagram (basic)
+### ☑ P3.12 — Rack layout diagram (basic)
 - **Action:** `components/build/diagrams/RackLayout.tsx`: simple SVG showing N servers × rack units. No 3D, just boxes.
 - **Deliverable:** component
 - **Refs:** PRD §6.3
 
-### P3.13 — Architecture diagram (basic)
+### ☑ P3.13 — Architecture diagram (basic)
 - **Action:** `components/build/diagrams/ArchitectureDiagram.tsx`: four stacked boxes (App → Model Platform → Infra → Hardware) with labels from current Build.
 - **Deliverable:** component
 - **Refs:** PRD §6.3
 
-### P3.14 — Phase 3 integration test
+### ☑ P3.14 — Phase 3 integration test
 - **Action:** Using Phase 1 sample project, go to Build, verify everything renders, change 3 Discovery values, watch Build update, override 2 values, reload, state intact.
 - **Deliverable:** recorded in CHANGELOG
 - **Refs:** PRD §9 Phase 3 exit

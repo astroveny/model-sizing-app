@@ -367,14 +367,16 @@ type ProjectStore = {
   projects: Project[];
   activeProject: Project | null;
 
-  // Load a project into the active slot
   loadProject: (project: Project) => void;
-  // Set the full project list (used after DB fetch)
   setProjects: (projects: Project[]) => void;
-  // Persist the active project (autosave wiring in P0.7)
   saveProject: () => void;
-  // Deep-path field update on the active project, e.g. 'discovery.model.name'
   updateField: (path: string, value: unknown) => void;
+  // Set a build override (key = arbitrary label, value = override value)
+  setBuildOverride: (key: string, value: unknown) => void;
+  // Clear one override by key
+  clearBuildOverride: (key: string) => void;
+  // Clear all overrides
+  clearAllBuildOverrides: () => void;
 };
 
 function setDeep(obj: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
@@ -415,5 +417,23 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
     updated.updatedAt = new Date().toISOString();
     set({ activeProject: updated });
     get().saveProject();
+  },
+
+  setBuildOverride: (key, value) => {
+    const { activeProject } = get();
+    if (!activeProject) return;
+    get().updateField(`build.overrides.${key}`, value);
+  },
+
+  clearBuildOverride: (key) => {
+    const { activeProject } = get();
+    if (!activeProject) return;
+    const overrides = { ...activeProject.build.overrides };
+    delete (overrides as Record<string, unknown>)[key];
+    get().updateField("build.overrides", overrides);
+  },
+
+  clearAllBuildOverrides: () => {
+    get().updateField("build.overrides", {});
   },
 }));
