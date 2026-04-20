@@ -361,54 +361,54 @@
 - **Verify:** loader + at least 10 models
 - **Refs:** docs/sizing-math.md §2.2 (GQA math depends on accurate kv_heads)
 
-### P2.6 — Memory footprint calculator
+### ☑ P2.6 — Memory footprint calculator
 - **Action:** `lib/sizing/memory.ts`: implements §7.1.1 formulas — `vramModel`, `kvCachePerRequest` (with GQA awareness), `vramTotal`. Pure function.
 - **Deliverable:** `lib/sizing/memory.ts` + unit tests
 - **Verify:** Test fixtures: Llama 70B FP16 ≈ 140 GB model; Mixtral 8x22B active math correct; FP8 KV halves cache.
 - **Refs:** docs/sizing-math.md §2
 
-### P2.7 — Prefill calculator
+### ☑ P2.7 — Prefill calculator
 - **Action:** `lib/sizing/prefill.ts`: implements §7.1.2 — prefill FLOPS, TTFT, MFU application, FP8 adjustments.
 - **Deliverable:** `lib/sizing/prefill.ts` + tests
 - **Verify:** Llama 70B with 2000-token prefill on H100 TP=4 returns TTFT in ~180ms ± 20ms (per PRD §7.7 worked example)
 - **Refs:** docs/sizing-math.md §3
 
-### P2.8 — Decode calculator
+### ☑ P2.8 — Decode calculator
 - **Action:** `lib/sizing/decode.ts`: implements §7.1.3 — bytes-per-token read, ITL, MBU application, batching-aware overrides via throughput table.
 - **Deliverable:** `lib/sizing/decode.ts` + tests
 - **Verify:** Llama 70B on H100 TP=4 returns ITL ~17ms ± 3ms (per PRD §7.7)
 - **Refs:** docs/sizing-math.md §4
 
-### P2.9 — Sharding decision logic
+### ☑ P2.9 — Sharding decision logic
 - **Action:** `lib/sizing/sharding.ts`: implements §7.1.4 — TP/PP/EP decision tree, overhead factors, interconnect recommendation.
 - **Deliverable:** `lib/sizing/sharding.ts` + tests
 - **Verify:** 70B on 80GB H100 → TP=4 PP=1; 405B on 80GB H100 → TP=8 PP=2; 70B on MI300X 192GB → TP=1.
 - **Refs:** docs/sizing-math.md §5
 
-### P2.10 — Capacity calculator (replicas + totals)
+### ☑ P2.10 — Capacity calculator (replicas + totals)
 - **Action:** `lib/sizing/capacity.ts`: §7.1.5 — replicas from throughput, total GPUs, server count, rack units, power.
 - **Deliverable:** `lib/sizing/capacity.ts` + tests
 - **Verify:** 50 concurrent users, 500 output tokens, 8s target → sensible replica count for reference worked example
 - **Refs:** docs/sizing-math.md §6
 
-### P2.11 — Optimization modifiers
+### ☑ P2.11 — Optimization modifiers
 - **Action:** `lib/sizing/optimizations.ts`: applies §7.6 multipliers — speculative decoding throughput boost, FP8 KV cache size, prefix caching prefill reduction, etc.
 - **Deliverable:** `lib/sizing/optimizations.ts` + tests
 - **Verify:** enabling FP8 KV halves `vram_kv_total`; enabling spec decoding multiplies decode throughput by ~1.8
 - **Refs:** PRD §7.6
 
-### P2.12 — Deployment-pattern adjustments
+### ☑ P2.12 — Deployment-pattern adjustments
 - **Action:** `lib/sizing/patterns.ts`: applies §7.3 multipliers per deployment pattern (internal 1.0, external API 1.2, GPUaaS 1.3, SaaS 1.25) plus flags extra subsystems (metering, MIG, etc.).
 - **Deliverable:** `lib/sizing/patterns.ts` + tests
 - **Refs:** PRD §7.3, docs/sizing-math.md §7
 
-### P2.13 — Public sizing API
+### ☑ P2.13 — Public sizing API
 - **Action:** `lib/sizing/index.ts` exports `computeBuild(discovery): BuildDerived`. Orchestrates memory → sharding → prefill → decode → optimizations → patterns → capacity. Returns `BuildDerived` + engine notes.
 - **Deliverable:** `lib/sizing/index.ts`
 - **Verify:** End-to-end test matching PRD §7.7 worked example within 10%
 - **Refs:** PRD §7.1
 
-### P2.14 — Unit test suite
+### ☑ P2.14 — Unit test suite
 - **Action:** `tests/sizing/*.test.ts` with 5 end-to-end scenarios hand-calculated:
   1. Llama 3.1 70B FP16 on H100 (PRD §7.7 worked example)
   2. Mistral 7B INT4 on L40S (edge low-end)
@@ -419,7 +419,7 @@
 - **Verify:** `npm test` all green
 - **Refs:** PRD §9 Phase 2 exit criteria
 
-### P2.15 — Engine notes generator
+### ☑ P2.15 — Engine notes generator
 - **Action:** Notes surfaced during sizing: "chose TP=4 because...", "MI300X would save N GPUs...", "consider FP8 KV cache to double concurrent capacity".
 - **Deliverable:** `lib/sizing/notes.ts`
 - **Verify:** 5 test scenarios each produce at least 2 useful notes
