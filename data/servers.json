@@ -1,4 +1,81 @@
 {
-  "_TODO": "Populate during Phase 2 step P2.2",
-  "servers": []
+  "servers": [
+    {
+      "id": "dell-xe9680",
+      "vendor": "Dell",
+      "model": "PowerEdge XE9680",
+      "max_gpus": 8,
+      "supported_gpu_ids": ["h100-sxm", "h200-sxm", "a100-80gb", "a100-40gb"],
+      "rack_units": 8,
+      "tdp_watts": 10200,
+      "list_price_usd": 300000,
+      "notes": "8x H100 SXM reference server. Most common H100 platform outside DGX."
+    },
+    {
+      "id": "hpe-cray-xd670",
+      "vendor": "HPE",
+      "model": "Cray XD670",
+      "max_gpus": 8,
+      "supported_gpu_ids": ["h100-sxm", "h200-sxm", "a100-80gb"],
+      "rack_units": 8,
+      "tdp_watts": 10000,
+      "list_price_usd": 290000,
+      "notes": "HPE liquid-cooled 8x H100 SXM platform. Common in HPC/supercomputing environments."
+    },
+    {
+      "id": "smc-as-8125gs",
+      "vendor": "Supermicro",
+      "model": "AS-8125GS-TNMR2",
+      "max_gpus": 8,
+      "supported_gpu_ids": ["h100-pcie", "a100-80gb", "a100-40gb", "l40s"],
+      "rack_units": 8,
+      "tdp_watts": 6000,
+      "list_price_usd": 60000,
+      "notes": "Cost-effective 8x PCIe GPU server. Good for H100 PCIe or L40S deployments."
+    },
+    {
+      "id": "nvidia-dgx-h100",
+      "vendor": "NVIDIA",
+      "model": "DGX H100",
+      "max_gpus": 8,
+      "supported_gpu_ids": ["h100-sxm"],
+      "rack_units": 10,
+      "tdp_watts": 10200,
+      "list_price_usd": 350000,
+      "notes": "NVIDIA reference DGX H100. 8x H100 SXM with full NVLink 4 fabric and NVSwitch."
+    },
+    {
+      "id": "nvidia-dgx-h200",
+      "vendor": "NVIDIA",
+      "model": "DGX H200",
+      "max_gpus": 8,
+      "supported_gpu_ids": ["h200-sxm"],
+      "rack_units": 10,
+      "tdp_watts": 10200,
+      "list_price_usd": 380000,
+      "notes": "NVIDIA reference DGX H200. 8x H200 SXM. Drop-in upgrade from DGX H100."
+    },
+    {
+      "id": "nvidia-hgx-b200",
+      "vendor": "NVIDIA",
+      "model": "HGX B200",
+      "max_gpus": 8,
+      "supported_gpu_ids": ["b200-sxm"],
+      "rack_units": 10,
+      "tdp_watts": 14400,
+      "list_price_usd": 500000,
+      "notes": "Blackwell HGX platform. 8x B200 SXM with NVLink 5. Requires liquid cooling."
+    },
+    {
+      "id": "amd-mi300x-server",
+      "vendor": "AMD / OEM",
+      "model": "MI300X 8-GPU Server (reference)",
+      "max_gpus": 8,
+      "supported_gpu_ids": ["mi300x", "mi325x"],
+      "rack_units": 8,
+      "tdp_watts": 8000,
+      "list_price_usd": 200000,
+      "notes": "Generic reference 8x MI300X/MI325X OAM server (Dell, Gigabyte, Supermicro variants). Pricing varies significantly."
+    }
+  ]
 }

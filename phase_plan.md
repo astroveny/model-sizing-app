@@ -331,31 +331,31 @@
 
 **Exit criteria:** Engine returns BuildState matching hand-calculated expectations within 10% for 5 representative scenarios.
 
-### P2.1 — GPU catalog data
+### ☑ P2.1 — GPU catalog data
 - **Action:** Author `data/gpus.json` per `docs/adding-a-gpu.md` schema. Include: H100-SXM, H100-PCIe, H200, B200, A100-40GB, A100-80GB, L40S, MI300X, MI325X.
 - **Deliverable:** `data/gpus.json` with 9+ entries
 - **Verify:** loader parses; each entry has required fields
 - **Refs:** docs/adding-a-gpu.md, PRD §7.4
 
-### P2.2 — Server catalog data
+### ☑ P2.2 — Server catalog data
 - **Action:** Author `data/servers.json`: Dell XE9680, HPE Cray XD670, SMC AS-8125GS-TNMR2, NVIDIA DGX H100, NVIDIA DGX H200, NVIDIA HGX B200 reference. Fields: max_gpus, supported_gpu_ids[], rack_units, tdp_watts, list_price_usd.
 - **Deliverable:** `data/servers.json` with 6+ entries
 - **Verify:** loader + type check
 - **Refs:** PRD §7.5
 
-### P2.3 — Cloud instance catalog data
+### ☑ P2.3 — Cloud instance catalog data
 - **Action:** Author `data/instances.json`: AWS p5.48xlarge (8×H100), Azure ND H100 v5, GCP A3 High, AWS p4de, Azure ND A100 v4.
 - **Deliverable:** `data/instances.json`
 - **Verify:** loader + type check
 - **Refs:** PRD §3.1
 
-### P2.4 — Throughput lookup table
+### ☑ P2.4 — Throughput lookup table
 - **Action:** Author `data/throughput.json` keyed by `(gpu_id, model_size_bucket, quantization, batch_size) → tokens_per_sec`. Source from published benchmarks (NVIDIA, MLPerf, vLLM). Buckets: 7B, 13B, 34B, 70B, 140B, 405B. Flag gaps with `null` + `confidence: "low"`.
 - **Deliverable:** `data/throughput.json`
 - **Verify:** coverage report: at least 60% of bucket combinations populated for H100, H200, MI300X
 - **Refs:** PRD §7.2, docs/sizing-math.md §4
 
-### P2.5 — Model catalog data
+### ☑ P2.5 — Model catalog data
 - **Action:** Author `data/models.json` with known-model metadata: Llama 3.1 (8B/70B/405B), Mistral 7B, Mixtral 8x7B/8x22B, Qwen 2.5 (7B/32B/72B), Gemma 2 (9B/27B), DeepSeek-V3. Per entry: params, layers, hidden_size, num_kv_heads, head_dim, architecture (dense/moe), active_params.
 - **Deliverable:** `data/models.json`
 - **Verify:** loader + at least 10 models

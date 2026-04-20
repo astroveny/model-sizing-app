@@ -1,4 +1,64 @@
 {
-  "_TODO": "Populate during Phase 2 step P2.3",
-  "instances": []
+  "instances": [
+    {
+      "id": "aws-p5-48xlarge",
+      "provider": "aws",
+      "instance_type": "p5.48xlarge",
+      "gpu_id": "h100-sxm",
+      "gpu_count": 8,
+      "vcpus": 192,
+      "memory_gb": 2048,
+      "network_gbps": 3200,
+      "on_demand_usd_per_hr": 98.32,
+      "notes": "8x H100 SXM. 3.2 Tbps EFA networking. Best AWS option for large-model inference."
+    },
+    {
+      "id": "aws-p4de-24xlarge",
+      "provider": "aws",
+      "instance_type": "p4de.24xlarge",
+      "gpu_id": "a100-80gb",
+      "gpu_count": 8,
+      "vcpus": 96,
+      "memory_gb": 1152,
+      "network_gbps": 400,
+      "on_demand_usd_per_hr": 40.96,
+      "notes": "8x A100 80GB. Previous-gen but widely available. Good cost/performance for established workloads."
+    },
+    {
+      "id": "azure-nd-h100-v5",
+      "provider": "azure",
+      "instance_type": "Standard_ND96isr_H100_v5",
+      "gpu_id": "h100-sxm",
+      "gpu_count": 8,
+      "vcpus": 96,
+      "memory_gb": 900,
+      "network_gbps": 3200,
+      "on_demand_usd_per_hr": 98.0,
+      "notes": "Azure ND H100 v5. 8x H100 SXM with InfiniBand NDR 400G. Azure equivalent of p5.48xlarge."
+    },
+    {
+      "id": "azure-nd-a100-v4",
+      "provider": "azure",
+      "instance_type": "Standard_ND96amsr_A100_v4",
+      "gpu_id": "a100-80gb",
+      "gpu_count": 8,
+      "vcpus": 96,
+      "memory_gb": 900,
+      "network_gbps": 1600,
+      "on_demand_usd_per_hr": 32.77,
+      "notes": "8x A100 80GB. Azure's previous-gen large GPU instance."
+    },
+    {
+      "id": "gcp-a3-high",
+      "provider": "gcp",
+      "instance_type": "a3-highgpu-8g",
+      "gpu_id": "h100-sxm",
+      "gpu_count": 8,
+      "vcpus": 208,
+      "memory_gb": 1872,
+      "network_gbps": 3200,
+      "on_demand_usd_per_hr": 98.32,
+      "notes": "GCP A3 High. 8x H100 SXM. 3.2 Tbps GPU-to-GPU interconnect via NVLink + GPUDirect RDMA."
+    }
+  ]
 }

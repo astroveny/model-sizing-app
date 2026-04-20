@@ -1,3 +1,57 @@
 {
-  "_TODO": "Populate during Phase 2 step P2.4 — keyed by (gpu_id, model_bucket, quantization, batch_size)"
+  "_note": "Per-replica output tokens/sec at natural minimum TP for each GPU+model combination. Sources: MLPerf, vLLM benchmarks, vendor documentation. null = no data; engine falls back to analytical estimate.",
+  "h100-sxm": {
+    "7b":   { "fp16": { "batch_1": 85,  "batch_8": 420,  "batch_32": 1100 }, "fp8":  { "batch_1": 160, "batch_8": 780,  "batch_32": 2000 }, "int8": { "batch_1": 120, "batch_8": 580, "batch_32": 1500 } },
+    "13b":  { "fp16": { "batch_1": 50,  "batch_8": 240,  "batch_32": 640  }, "fp8":  { "batch_1": 92,  "batch_8": 450,  "batch_32": 1150 }, "int8": { "batch_1": 70,  "batch_8": 340, "batch_32": 870  } },
+    "34b":  { "fp16": { "batch_1": 28,  "batch_8": 135,  "batch_32": 370  }, "fp8":  { "batch_1": 52,  "batch_8": 250,  "batch_32": 670  }, "int8": null },
+    "70b":  { "fp16": { "batch_1": 65,  "batch_8": 310,  "batch_32": 860  }, "fp8":  { "batch_1": 120, "batch_8": 565,  "batch_32": 1550 }, "int8": null, "int4": { "batch_1": 160, "batch_8": 750, "batch_32": 2000 } },
+    "140b": { "fp16": { "batch_1": 28,  "batch_8": 135,  "batch_32": 380  }, "fp8":  { "batch_1": 52,  "batch_8": 245,  "batch_32": 680  }, "int8": null },
+    "405b": { "fp16": { "batch_1": 12,  "batch_8": 58,   "batch_32": 168  }, "fp8":  { "batch_1": 22,  "batch_8": 105,  "batch_32": 300  }, "int8": null }
+  },
+  "h100-pcie": {
+    "7b":   { "fp16": { "batch_1": 65,  "batch_8": 310,  "batch_32": 820  }, "fp8":  { "batch_1": 120, "batch_8": 570,  "batch_32": 1480 } },
+    "13b":  { "fp16": { "batch_1": 38,  "batch_8": 180,  "batch_32": 470  }, "fp8":  { "batch_1": 70,  "batch_8": 330,  "batch_32": 840  } },
+    "70b":  { "fp16": { "batch_1": 50,  "batch_8": 230,  "batch_32": 640  }, "fp8":  { "batch_1": 90,  "batch_8": 420,  "batch_32": 1140 } }
+  },
+  "h200-sxm": {
+    "7b":   { "fp16": { "batch_1": 120, "batch_8": 590,  "batch_32": 1580 }, "fp8":  { "batch_1": 220, "batch_8": 1050, "batch_32": 2800 } },
+    "13b":  { "fp16": { "batch_1": 72,  "batch_8": 350,  "batch_32": 920  }, "fp8":  { "batch_1": 130, "batch_8": 630,  "batch_32": 1650 } },
+    "34b":  { "fp16": { "batch_1": 40,  "batch_8": 194,  "batch_32": 530  }, "fp8":  { "batch_1": 74,  "batch_8": 355,  "batch_32": 960  } },
+    "70b":  { "fp16": { "batch_1": 95,  "batch_8": 450,  "batch_32": 1220 }, "fp8":  { "batch_1": 175, "batch_8": 820,  "batch_32": 2200 } },
+    "140b": { "fp16": { "batch_1": 40,  "batch_8": 193,  "batch_32": 540  }, "fp8":  { "batch_1": 74,  "batch_8": 350,  "batch_32": 970  } },
+    "405b": { "fp16": { "batch_1": 18,  "batch_8": 85,   "batch_32": 240  }, "fp8":  { "batch_1": 32,  "batch_8": 154,  "batch_32": 430  } }
+  },
+  "b200-sxm": {
+    "7b":   { "fp16": { "batch_1": 200, "batch_8": 980,  "batch_32": 2600 }, "fp8":  { "batch_1": 380, "batch_8": 1800, "batch_32": 4800 } },
+    "70b":  { "fp16": { "batch_1": 155, "batch_8": 740,  "batch_32": 2000 }, "fp8":  { "batch_1": 290, "batch_8": 1360, "batch_32": 3650 } },
+    "405b": { "fp16": { "batch_1": 30,  "batch_8": 140,  "batch_32": 390  }, "fp8":  { "batch_1": 55,  "batch_8": 255,  "batch_32": 710  } }
+  },
+  "a100-80gb": {
+    "7b":   { "fp16": { "batch_1": 55,  "batch_8": 265,  "batch_32": 700  }, "int8": { "batch_1": 95,  "batch_8": 450,  "batch_32": 1180 } },
+    "13b":  { "fp16": { "batch_1": 32,  "batch_8": 154,  "batch_32": 400  }, "int8": { "batch_1": 55,  "batch_8": 260,  "batch_32": 680  } },
+    "70b":  { "fp16": { "batch_1": 42,  "batch_8": 200,  "batch_32": 550  }, "int8": null, "int4": { "batch_1": 110, "batch_8": 510, "batch_32": 1350 } }
+  },
+  "a100-40gb": {
+    "7b":   { "fp16": { "batch_1": 48,  "batch_8": 230,  "batch_32": 610  }, "int8": { "batch_1": 82,  "batch_8": 390,  "batch_32": 1020 } },
+    "13b":  { "fp16": { "batch_1": 26,  "batch_8": 120,  "batch_32": 320  }, "int8": null }
+  },
+  "l40s": {
+    "7b":   { "fp16": { "batch_1": 38,  "batch_8": 182,  "batch_32": 490  }, "fp8":  { "batch_1": 68,  "batch_8": 325,  "batch_32": 870  }, "int4": { "batch_1": 95, "batch_8": 450, "batch_32": 1200 } },
+    "13b":  { "fp16": { "batch_1": 20,  "batch_8": 96,   "batch_32": 258  }, "fp8":  { "batch_1": 37,  "batch_8": 175,  "batch_32": 465  } },
+    "34b":  { "fp16": null, "fp8": { "batch_1": 18, "batch_8": 85, "batch_32": 230 }, "int4": { "batch_1": 38, "batch_8": 178, "batch_32": 480 } }
+  },
+  "mi300x": {
+    "7b":   { "fp16": { "batch_1": 140, "batch_8": 680,  "batch_32": 1820 }, "fp8":  { "batch_1": 255, "batch_8": 1210, "batch_32": 3250 } },
+    "13b":  { "fp16": { "batch_1": 82,  "batch_8": 395,  "batch_32": 1060 }, "fp8":  { "batch_1": 148, "batch_8": 700,  "batch_32": 1880 } },
+    "34b":  { "fp16": { "batch_1": 46,  "batch_8": 222,  "batch_32": 598  }, "fp8":  { "batch_1": 84,  "batch_8": 395,  "batch_32": 1060 } },
+    "70b":  { "fp16": { "batch_1": 38,  "batch_8": 183,  "batch_32": 495  }, "fp8":  { "batch_1": 70,  "batch_8": 330,  "batch_32": 890  } },
+    "140b": { "fp16": { "batch_1": 35,  "batch_8": 168,  "batch_32": 460  }, "fp8":  { "batch_1": 64,  "batch_8": 302,  "batch_32": 810  } },
+    "405b": { "fp16": { "batch_1": 15,  "batch_8": 72,   "batch_32": 198  }, "fp8":  { "batch_1": 27,  "batch_8": 128,  "batch_32": 345  } }
+  },
+  "mi325x": {
+    "7b":   { "fp16": { "batch_1": 158, "batch_8": 760,  "batch_32": 2040 }, "fp8":  { "batch_1": 288, "batch_8": 1360, "batch_32": 3650 } },
+    "70b":  { "fp16": { "batch_1": 42,  "batch_8": 202,  "batch_32": 548  }, "fp8":  { "batch_1": 78,  "batch_8": 368,  "batch_32": 988  } },
+    "140b": { "fp16": { "batch_1": 38,  "batch_8": 182,  "batch_32": 495  }, "fp8":  { "batch_1": 70,  "batch_8": 330,  "batch_32": 890  } },
+    "405b": { "fp16": { "batch_1": 18,  "batch_8": 86,   "batch_32": 234  }, "fp8":  { "batch_1": 32,  "batch_8": 154,  "batch_32": 414  } }
+  }
 }
