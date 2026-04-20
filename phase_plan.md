@@ -261,7 +261,7 @@
 - **Verify:** Place `<ExplainBox fieldId="test" />` on a page; see placeholder
 - **Refs:** PRD §6.5, docs/adding-explain-content.md
 
-### P1.3 — Discovery layout & tab navigation
+### ☑ P1.3 — Discovery layout & tab navigation
 - **Action:** `app/project/[id]/discovery/page.tsx` with five tabs: Workload, Hardware, Infra, Model Platform, Application.
 - **Deliverable:** page + tab component
 - **Verify:** All five tabs reachable; empty state shown per tab
