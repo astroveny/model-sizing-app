@@ -22,11 +22,14 @@ export class AnthropicProvider implements LlmProvider {
     const userMessages = messages.filter((m) => m.role !== "system");
     const systemPrompt = system ?? messages.find((m) => m.role === "system")?.content;
 
+    // Claude 4+ models have deprecated the temperature parameter
+    const isClaude4 = /claude-(opus|sonnet|haiku)-4/.test(this.model);
+
     try {
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: maxTokens,
-        temperature,
+        ...(isClaude4 ? {} : { temperature }),
         ...(systemPrompt ? { system: systemPrompt } : {}),
         messages: userMessages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
       });
