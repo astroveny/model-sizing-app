@@ -210,25 +210,25 @@
 - **Verify:** `docker build -t ml-sizer .` succeeds; image is < 500 MB
 - **Refs:** PRD §11.1
 
-### P0.10 — docker-compose.yml
+### ☑ P0.10 — docker-compose.yml
 - **Action:** Create `docker-compose.yml` with single `ml-sizer` service, volume mounts for `./data` and `./uploads`, env_file `.env`, restart policy.
 - **Deliverable:** `docker-compose.yml`, `.env.example`
 - **Verify:** `docker compose up` starts the app reachable at localhost:3000
 - **Refs:** PRD §11.2
 
-### P0.11 — Environment template
+### ☑ P0.11 — Environment template
 - **Action:** Create `.env.example` with all vars from PRD §8.3 (LLM_PROVIDER, ANTHROPIC_API_KEY, ANTHROPIC_MODEL, OpenAI-compatible alternatives). Add `NEXT_PUBLIC_APP_NAME`. Comment explanations.
 - **Deliverable:** `.env.example`
 - **Verify:** `cp .env.example .env`; fill in; app starts
 - **Refs:** PRD §8.3
 
-### P0.12 — Git hygiene
+### ☑ P0.12 — Git hygiene
 - **Action:** `.gitignore` (node_modules, .next, data/*.db, data/*.db-journal, uploads/*, .env). Initial commit.
 - **Deliverable:** `.gitignore`, initial commit with scaffold
 - **Verify:** `git status` clean after build; no secrets committed
 - **Refs:** —
 
-### P0.13 — Smoke test
+### ☑ P0.13 — Smoke test
 - **Action:** Manual walkthrough: fresh `docker compose up -d`, open browser, create project named "Smoke Test", add description, stop/start container, confirm project still visible.
 - **Deliverable:** passed smoke test (noted in CHANGELOG)
 - **Verify:** as described
