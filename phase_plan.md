@@ -291,7 +291,7 @@
 - **Verify:** as P1.4
 - **Refs:** PRD §5.1
 
-### P1.8 — Application tab form
+### ☑ P1.8 — Application tab form
 - **Action:** `components/discovery/ApplicationForm.tsx`: API gateway, auth, rate limiting, UI required, audit logging, metering.
 - **Deliverable:** component
 - **Verify:** as P1.4

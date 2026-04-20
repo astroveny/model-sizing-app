@@ -5,6 +5,7 @@ import { WorkloadForm } from "@/components/discovery/WorkloadForm";
 import { HardwareForm } from "@/components/discovery/HardwareForm";
 import { InfraForm } from "@/components/discovery/InfraForm";
 import { ModelPlatformForm } from "@/components/discovery/ModelPlatformForm";
+import { ApplicationForm } from "@/components/discovery/ApplicationForm";
 
 const TABS = [
   { id: "workload", label: "Workload" },
@@ -46,7 +47,7 @@ export default function DiscoveryPage() {
             <ModelPlatformForm />
           </TabsContent>
           <TabsContent value="application" className="m-0 h-full">
-            <TabShell label="Application" />
+            <ApplicationForm />
           </TabsContent>
         </div>
       </Tabs>
