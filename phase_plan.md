@@ -279,7 +279,7 @@
 - **Verify:** as P1.4
 - **Refs:** PRD §5.1
 
-### P1.6 — Infra tab form
+### ☑ P1.6 — Infra tab form
 - **Action:** `components/discovery/InfraForm.tsx`: orchestrator, existing cluster, air-gapped, GitOps, observability.
 - **Deliverable:** component
 - **Verify:** as P1.4
