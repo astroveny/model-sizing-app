@@ -851,7 +851,7 @@
 - **Verify:** Page reachable at `/onboarding`; linked from sidebar
 - **Refs:** PRD §6.0.8
 
-### ☐ P7.18 — First-run onboarding banner
+### ☑ P7.18 — First-run onboarding banner
 - **Action:** On landing page, when project list is empty AND `localStorage['ml-sizer:onboarded']` is unset, show a dismissible banner linking to `/onboarding`. Dismiss persists.
 - **Deliverable:** banner component; integration in landing page
 - **Verify:** Banner shows on empty state; dismiss hides it; persists across reload

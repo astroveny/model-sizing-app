@@ -6,6 +6,7 @@ import type { Project } from "@/lib/store";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectsSearchFilter } from "./ProjectsSearchFilter";
 import { EmptyState } from "@/components/common/EmptyState";
+import { OnboardingBanner } from "@/components/common/OnboardingBanner";
 
 const MODIFIED_DAYS: Record<string, number> = {
   "7d":  7,
@@ -69,11 +70,14 @@ export function ProjectsList({ projects }: ProjectsListProps) {
             description="Clear filters to see all projects."
           />
         ) : (
-          <EmptyState
-            icon={FolderOpen}
-            title="No projects yet"
-            description="Create a project to start sizing a ML/GenAI inference deployment."
-          />
+          <>
+            <OnboardingBanner />
+            <EmptyState
+              icon={FolderOpen}
+              title="No projects yet"
+              description="Create a project to start sizing a ML/GenAI inference deployment."
+            />
+          </>
         )
       ) : (
         <ul className="flex flex-col gap-3">
