@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { Sidebar } from "@/components/Sidebar/Sidebar";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -31,12 +31,14 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="h-full bg-[var(--bg-canvas)] text-[var(--text-primary)]">
         <ThemeProvider>
-          <div className="fixed top-3 right-4 z-50">
-            <ThemeToggle />
+          <div className="flex h-full">
+            <Sidebar />
+            <main className="flex-1 overflow-auto">
+              {children}
+            </main>
           </div>
-          {children}
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
       </body>

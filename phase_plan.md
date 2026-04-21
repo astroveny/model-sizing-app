@@ -791,7 +791,7 @@
 - **Verify:** Icon flips correctly; theme persists; no SSR hydration mismatch (use `mounted` state guard)
 - **Refs:** PRD §6.0.5
 
-### ☐ P7.8 — Root layout rewrite
+### ☑ P7.8 — Root layout rewrite
 - **Action:** Replace `app/layout.tsx` to render `<div class="flex h-screen"><Sidebar /><main class="flex-1 overflow-auto">{children}</main></div>`. Include breadcrumbs slot.
 - **Deliverable:** updated root layout
 - **Verify:** All pages render inside the layout; no orphan content
