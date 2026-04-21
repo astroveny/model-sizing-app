@@ -16,11 +16,11 @@ function CompareCol({ label, nvidia, amd, unit = "", lowerIsBetter = true }:
   const nvidiaWins = lowerIsBetter ? nvidia <= amd : nvidia >= amd;
   return (
     <div className="grid grid-cols-3 items-center py-2 border-b last:border-0 gap-2 text-sm">
-      <span className="text-muted-foreground text-xs">{label}</span>
-      <span className={`text-center font-medium tabular-nums ${nvidiaWins ? "text-emerald-600 dark:text-emerald-400" : ""}`}>
+      <span className="text-[var(--text-muted)] text-xs">{label}</span>
+      <span className={`text-center font-medium tabular-nums ${nvidiaWins ? "text-[var(--success)]" : ""}`}>
         {nvidia.toFixed(nvidia < 10 ? 1 : 0)}{unit}
       </span>
-      <span className={`text-center font-medium tabular-nums ${!nvidiaWins ? "text-emerald-600 dark:text-emerald-400" : ""}`}>
+      <span className={`text-center font-medium tabular-nums ${!nvidiaWins ? "text-[var(--success)]" : ""}`}>
         {amd.toFixed(amd < 10 ? 1 : 0)}{unit}
       </span>
     </div>
@@ -41,14 +41,14 @@ export function VendorComparison({ baseInput }: Props) {
   if (!nvidia || !amd || !nvidiaGpu || !amdGpu) return null;
 
   return (
-    <div className="rounded-lg border">
-      <div className="px-4 py-3 border-b bg-muted/30">
+    <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)]">
+      <div className="px-4 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)]">
         <h3 className="text-sm font-semibold">Vendor Comparison</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">NVIDIA H100 SXM vs AMD MI300X</p>
+        <p className="text-xs text-[var(--text-muted)] mt-0.5">NVIDIA H100 SXM vs AMD MI300X</p>
       </div>
       <div className="px-4 py-1">
         {/* Header */}
-        <div className="grid grid-cols-3 py-2 border-b text-xs font-semibold text-muted-foreground gap-2">
+        <div className="grid grid-cols-3 py-2 border-b text-xs font-semibold text-[var(--text-muted)] gap-2">
           <span></span>
           <span className="text-center">NVIDIA H100</span>
           <span className="text-center">AMD MI300X</span>
@@ -61,8 +61,8 @@ export function VendorComparison({ baseInput }: Props) {
         {nvidia.capacity.capexUsd > 0 && amd.capacity.capexUsd > 0 && (
           <CompareCol label="Est. CapEx"     nvidia={nvidia.capacity.capexUsd / 1e6}  amd={amd.capacity.capexUsd / 1e6}  lowerIsBetter unit="M USD" />
         )}
-        <div className="py-2 text-xs text-muted-foreground">
-          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 mr-1" />
+        <div className="py-2 text-xs text-[var(--text-muted)]">
+          <span className="inline-block h-2 w-2 rounded-full bg-[var(--success)] mr-1" />
           Green = better value for this metric
         </div>
       </div>

@@ -38,10 +38,10 @@ export function RackLayout({ result }: Props) {
   const rackH = RACK_UNITS * UNIT_PX;
 
   return (
-    <div className="rounded-lg border">
-      <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between flex-wrap gap-2">
+    <div className="rounded-lg border border-[var(--border-default)]">
+      <div className="px-4 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)] flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-sm font-semibold">Rack Layout</h3>
-        <div className="flex gap-3 text-xs text-muted-foreground">
+        <div className="flex gap-3 text-xs text-[var(--text-muted)]">
           <span>{count} server{count !== 1 ? "s" : ""}</span>
           <span>{racksNeeded} rack{racksNeeded !== 1 ? "s" : ""}</span>
           <span>{serverU}U / server</span>
@@ -53,14 +53,14 @@ export function RackLayout({ result }: Props) {
         <div className="flex gap-8 items-start">
           {racks.map((rack, ri) => (
             <div key={ri} className="flex flex-col items-center gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">Rack {ri + 1}</span>
+              <span className="text-xs font-medium text-[var(--text-muted)]">Rack {ri + 1}</span>
               <div className="flex gap-0">
                 {/* Unit number column */}
                 <svg width={LABEL_W} height={rackH + 2} className="shrink-0">
                   {Array.from({ length: RACK_UNITS }, (_, u) => (
                     u % 5 === 0 ? (
                       <text key={u} x={LABEL_W - 4} y={u * UNIT_PX + UNIT_PX / 2 + 3}
-                        textAnchor="end" fontSize={7} fill="var(--muted-foreground)" fontFamily="monospace">
+                        textAnchor="end" fontSize={7} fill="var(--text-muted)" fontFamily="monospace">
                         {u + 1}U
                       </text>
                     ) : null
@@ -70,18 +70,18 @@ export function RackLayout({ result }: Props) {
                 {/* Rack body */}
                 <svg
                   width={RACK_WIDTH} height={rackH + 2}
-                  className="border border-border rounded"
+                  className="border border-[var(--border-default)] rounded"
                   aria-label={`Rack ${ri + 1}`}
                 >
                   {/* Background */}
-                  <rect x={0} y={0} width={RACK_WIDTH} height={rackH} fill="var(--muted)" opacity={0.4} />
+                  <rect x={0} y={0} width={RACK_WIDTH} height={rackH} fill="var(--bg-subtle)" opacity={1} />
 
                   {/* Rack unit grid lines */}
                   {Array.from({ length: RACK_UNITS + 1 }, (_, u) => (
                     <line key={u}
                       x1={0} y1={u * UNIT_PX}
                       x2={RACK_WIDTH} y2={u * UNIT_PX}
-                      stroke="var(--border)" strokeWidth={u % 5 === 0 ? 0.8 : 0.3} opacity={0.6}
+                      stroke="var(--border-default)" strokeWidth={u % 5 === 0 ? 0.8 : 0.3} opacity={0.6}
                     />
                   ))}
 
@@ -135,7 +135,7 @@ export function RackLayout({ result }: Props) {
                     <text
                       x={RACK_WIDTH / 2} y={rack.usedU * UNIT_PX + 20}
                       textAnchor="middle" fontSize={8}
-                      fill="var(--muted-foreground)" fontFamily="sans-serif"
+                      fill="var(--text-muted)" fontFamily="sans-serif"
                     >
                       {RACK_UNITS - rack.usedU}U free
                     </text>
@@ -145,10 +145,10 @@ export function RackLayout({ result }: Props) {
 
               {/* Per-rack stats */}
               <div className="text-center space-y-0.5">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--text-muted)]">
                   {rack.servers.length} server{rack.servers.length !== 1 ? "s" : ""}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--text-muted)]">
                   {(rack.servers.length * parseFloat(powerPerServer)).toFixed(1)} kW
                 </p>
               </div>
@@ -157,9 +157,9 @@ export function RackLayout({ result }: Props) {
         </div>
 
         {/* Legend */}
-        <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="mt-4 flex items-center gap-4 text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-blue-500 opacity-85" />
+            <div className="w-3 h-3 rounded-sm bg-[var(--accent-primary)] opacity-85" />
             <span>{server?.model ?? "GPU server"}</span>
           </div>
           <span>{serverU}U per server</span>

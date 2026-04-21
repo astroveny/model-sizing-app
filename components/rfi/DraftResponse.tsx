@@ -72,23 +72,23 @@ export function DraftResponse() {
         <button
           onClick={generate}
           disabled={loading || !result}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           {loading ? "Generating…" : draftResponse ? "Regenerate" : "Generate Draft Response"}
         </button>
-        {!result && <p className="text-xs text-muted-foreground">Complete Discovery first to generate a response.</p>}
+        {!result && <p className="text-xs text-[var(--text-muted)]">Complete Discovery first to generate a response.</p>}
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {draftResponse && (
-        <div className="relative rounded-lg border bg-muted/30">
+        <div className="relative rounded-lg border border-[var(--border-default)] bg-[var(--bg-subtle)]">
           <button
             onClick={copy}
-            className="absolute top-2 right-2 flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs hover:bg-muted"
+            className="absolute top-2 right-2 flex items-center gap-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] px-2 py-1 text-xs hover:bg-[var(--bg-subtle)]"
           >
-            {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+            {copied ? <Check className="h-3 w-3 text-[var(--success)]" /> : <Copy className="h-3 w-3" />}
             {copied ? "Copied" : "Copy"}
           </button>
           <pre className="whitespace-pre-wrap text-sm p-4 pr-16 font-sans leading-relaxed max-h-[600px] overflow-y-auto">

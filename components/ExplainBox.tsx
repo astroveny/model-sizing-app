@@ -74,12 +74,12 @@ export function ExplainBox({ fieldId, label }: Props) {
   }
 
   return (
-    <div className="rounded-lg border bg-muted/40 p-3 text-sm">
-      <div className="mb-2 flex items-center gap-1.5 font-medium text-muted-foreground">
+    <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-subtle)] p-3 text-sm">
+      <div className="mb-2 flex items-center gap-1.5 font-medium text-[var(--text-muted)]">
         <HelpCircle className="h-3.5 w-3.5 shrink-0" />
         <span className="truncate">{title}</span>
         {isOverridden && (
-          <span className="ml-auto text-[10px] font-normal text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded">
+          <span className="ml-auto text-[10px] font-normal text-[var(--accent-primary)] bg-[var(--accent-primary)]/10 px-1.5 py-0.5 rounded">
             AI
           </span>
         )}
@@ -97,25 +97,25 @@ export function ExplainBox({ fieldId, label }: Props) {
           </TabsList>
 
           <TabsContent value="explain" className="mt-0 space-y-2">
-            <p className="text-xs leading-relaxed text-foreground/80">
+            <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
               {entry.explain}
             </p>
 
             {entry.customerFriendlyHint && (
-              <p className="text-xs italic text-muted-foreground border-l-2 border-primary/30 pl-2">
+              <p className="text-xs italic text-[var(--text-muted)] border-l-2 border-[var(--accent-primary)]/30 pl-2">
                 {entry.customerFriendlyHint}
               </p>
             )}
 
             {entry.commonMistakes && entry.commonMistakes.length > 0 && (
               <div className="space-y-0.5">
-                <p className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+                <p className="flex items-center gap-1 text-xs font-medium text-[var(--warning)]">
                   <AlertTriangle className="h-3 w-3" />
                   Common mistakes
                 </p>
                 <ul className="list-disc list-inside space-y-0.5">
                   {entry.commonMistakes.map((m, i) => (
-                    <li key={i} className="text-xs text-muted-foreground">
+                    <li key={i} className="text-xs text-[var(--text-muted)]">
                       {m}
                     </li>
                   ))}
@@ -124,7 +124,7 @@ export function ExplainBox({ fieldId, label }: Props) {
             )}
 
             {entry.relatedFields && entry.relatedFields.length > 0 && (
-              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <p className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
                 <Link2 className="h-3 w-3 shrink-0" />
                 See also:{" "}
                 <span className="font-mono">
@@ -135,13 +135,13 @@ export function ExplainBox({ fieldId, label }: Props) {
           </TabsContent>
 
           <TabsContent value="example" className="mt-0">
-            <p className="text-xs leading-relaxed text-foreground/80">
+            <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
               {entry.example}
             </p>
           </TabsContent>
         </Tabs>
       ) : (
-        <p className="text-xs text-muted-foreground italic">
+        <p className="text-xs text-[var(--text-muted)] italic">
           No explanation yet —{" "}
           <span className="font-mono text-[10px]">{fieldId}</span>
         </p>
@@ -155,7 +155,7 @@ export function ExplainBox({ fieldId, label }: Props) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 gap-1.5 px-2 text-xs text-muted-foreground"
+          className="h-6 gap-1.5 px-2 text-xs text-[var(--text-muted)]"
           disabled={loading || !activeProject}
           onClick={handleAskClaude}
         >
@@ -171,7 +171,7 @@ export function ExplainBox({ fieldId, label }: Props) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 gap-1.5 px-2 text-xs text-muted-foreground"
+            className="h-6 gap-1.5 px-2 text-xs text-[var(--text-muted)]"
             onClick={handleReset}
           >
             <RotateCcw className="h-3 w-3" />

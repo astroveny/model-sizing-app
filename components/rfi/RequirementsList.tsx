@@ -6,11 +6,11 @@ import { CheckCircle2, Circle, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const LAYER_COLOR: Record<string, string> = {
-  hardware:        "bg-amber-100  text-amber-700  dark:bg-amber-900/30  dark:text-amber-300",
-  infra:           "bg-blue-100   text-blue-700   dark:bg-blue-900/30   dark:text-blue-300",
-  "model-platform":"bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
-  application:     "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
-  general:         "bg-muted       text-muted-foreground",
+  hardware:        "bg-[var(--warning)]/10  text-[var(--warning)]",
+  infra:           "bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]",
+  "model-platform":"bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  application:     "bg-[var(--success)]/10 text-[var(--success)]",
+  general:         "bg-[var(--bg-subtle)] text-[var(--text-muted)]",
 };
 
 function RequirementRow({ req }: { req: ExtractedRequirement }) {
@@ -28,8 +28,8 @@ function RequirementRow({ req }: { req: ExtractedRequirement }) {
     <li className="flex items-start gap-3 py-3 border-b last:border-0">
       <span className="mt-0.5 shrink-0">
         {req.mandatory
-          ? <CheckCircle2 className="h-4 w-4 text-amber-500" />
-          : <Circle className="h-4 w-4 text-muted-foreground" />}
+          ? <CheckCircle2 className="h-4 w-4 text-[var(--warning)]" />
+          : <Circle className="h-4 w-4 text-[var(--text-muted)]" />}
       </span>
       <div className="flex-1 min-w-0">
         <p className="text-sm">{req.text}</p>
@@ -38,12 +38,12 @@ function RequirementRow({ req }: { req: ExtractedRequirement }) {
             <Tag className="h-2.5 w-2.5" />{req.layer}
           </span>
           {req.mandatory && (
-            <span className="rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-0.5 text-xs font-medium">
+            <span className="rounded-full bg-[var(--warning)]/10 text-[var(--warning)] px-2 py-0.5 text-xs font-medium">
               mandatory
             </span>
           )}
           {req.extractedValue != null && (
-            <span className="rounded-full bg-muted text-muted-foreground px-2 py-0.5 text-xs font-mono">
+            <span className="rounded-full bg-[var(--bg-subtle)] text-[var(--text-muted)] px-2 py-0.5 text-xs font-mono">
               {String(req.extractedValue)}
             </span>
           )}
@@ -52,7 +52,7 @@ function RequirementRow({ req }: { req: ExtractedRequirement }) {
       {canApply && (
         <button
           onClick={applyToDiscovery}
-          className="shrink-0 text-xs font-medium text-primary hover:underline"
+          className="shrink-0 text-xs font-medium text-[var(--accent-primary)] hover:underline"
         >
           Apply
         </button>
@@ -79,15 +79,15 @@ export function RequirementsList() {
 
   return (
     <div className="rounded-lg border">
-      <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)] flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">Extracted Requirements</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">{requirements.length} found · {applyable} can auto-populate Discovery</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">{requirements.length} found · {applyable} can auto-populate Discovery</p>
         </div>
         {applyable > 0 && (
           <button
             onClick={applyAll}
-            className="text-xs font-medium text-primary hover:underline"
+            className="text-xs font-medium text-[var(--accent-primary)] hover:underline"
           >
             Apply all ({applyable})
           </button>

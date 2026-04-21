@@ -23,7 +23,7 @@ import type { Quantization } from "@/lib/store";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
         {title}
       </h3>
       {children}
@@ -56,8 +56,8 @@ function FieldRow({
           onClick={() => onInfo(active ? "" : fieldId)}
           className={`rounded p-0.5 transition-colors ${
             active
-              ? "text-primary"
-              : "text-muted-foreground hover:text-foreground"
+              ? "text-[var(--accent-primary)]"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           }`}
           aria-label={`Explain ${label}`}
         >
@@ -65,7 +65,7 @@ function FieldRow({
         </button>
       </div>
       {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
     </div>
   );
 }
@@ -426,7 +426,7 @@ export function WorkloadForm() {
         {activeField ? (
           <ExplainBox fieldId={activeField} />
         ) : (
-          <div className="rounded-lg border border-dashed p-4 text-xs text-muted-foreground text-center">
+          <div className="rounded-lg border border-dashed p-4 text-xs text-[var(--text-muted)] text-center">
             Click <Info className="inline h-3.5 w-3.5 mx-0.5" /> next to any
             field to see an explanation.
           </div>

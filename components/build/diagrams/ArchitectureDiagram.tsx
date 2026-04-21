@@ -75,8 +75,8 @@ export function ArchitectureDiagram({ result }: Props) {
   const totalH = layers.length * (BOX_H + ARROW_H) - ARROW_H + 30;
 
   return (
-    <div className="rounded-lg border">
-      <div className="px-4 py-3 border-b bg-muted/30">
+    <div className="rounded-lg border border-[var(--border-default)]">
+      <div className="px-4 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)]">
         <h3 className="text-sm font-semibold">Architecture Overview</h3>
       </div>
       <div className="p-4 flex justify-center overflow-x-auto">

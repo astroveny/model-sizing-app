@@ -7,9 +7,9 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const WIN_COLOR = {
-  high:   "text-emerald-600 dark:text-emerald-400",
-  medium: "text-amber-600   dark:text-amber-400",
-  low:    "text-red-600     dark:text-red-400",
+  high:   "text-[var(--success)]",
+  medium: "text-[var(--warning)]",
+  low:    "text-[var(--danger)]",
 };
 
 export function QualificationPanel() {
@@ -31,7 +31,7 @@ export function QualificationPanel() {
 
   return (
     <div className="rounded-lg border">
-      <div className="px-4 py-3 border-b bg-muted/30 flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)] flex items-center justify-between">
         <h3 className="text-sm font-semibold">Qualification</h3>
         <span className={cn("flex items-center gap-1 text-sm font-semibold", WIN_COLOR[qual.winProbability])}>
           <WinIcon className="h-4 w-4" />
@@ -43,13 +43,13 @@ export function QualificationPanel() {
         {/* Fit score */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-muted-foreground">Fit score</span>
+            <span className="text-xs text-[var(--text-muted)]">Fit score</span>
             <span className="text-sm font-semibold tabular-nums">{qual.fitScore}/100</span>
           </div>
-          <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="h-2 rounded-full bg-[var(--bg-subtle)] overflow-hidden">
             <div
               className={cn("h-full rounded-full transition-all",
-                qual.fitScore >= 75 ? "bg-emerald-500" : qual.fitScore >= 50 ? "bg-amber-500" : "bg-red-500"
+                qual.fitScore >= 75 ? "bg-[var(--success)]" : qual.fitScore >= 50 ? "bg-[var(--warning)]" : "bg-[var(--danger)]"
               )}
               style={{ width: `${qual.fitScore}%` }}
             />
@@ -59,11 +59,11 @@ export function QualificationPanel() {
         {/* Strengths */}
         {qual.strengths.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">Strengths</p>
+            <p className="text-xs font-medium text-[var(--success)] mb-1">Strengths</p>
             <ul className="space-y-1">
               {qual.strengths.map((s, i) => (
-                <li key={i} className="text-xs text-muted-foreground flex gap-1.5">
-                  <span className="text-emerald-500 shrink-0">✓</span>{s}
+                <li key={i} className="text-xs text-[var(--text-muted)] flex gap-1.5">
+                  <span className="text-[var(--success)] shrink-0">✓</span>{s}
                 </li>
               ))}
             </ul>
@@ -73,11 +73,11 @@ export function QualificationPanel() {
         {/* Risks */}
         {qual.risks.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-amber-600 dark:text-amber-400 mb-1">Risks</p>
+            <p className="text-xs font-medium text-[var(--warning)] mb-1">Risks</p>
             <ul className="space-y-1">
               {qual.risks.map((r, i) => (
-                <li key={i} className="text-xs text-muted-foreground flex gap-1.5">
-                  <span className="text-amber-500 shrink-0">⚠</span>{r}
+                <li key={i} className="text-xs text-[var(--text-muted)] flex gap-1.5">
+                  <span className="text-[var(--warning)] shrink-0">⚠</span>{r}
                 </li>
               ))}
             </ul>
@@ -93,10 +93,10 @@ export function QualificationPanel() {
               className={cn(
                 "flex-1 rounded-md border py-1.5 text-xs font-medium transition-colors",
                 goNoGo === v
-                  ? v === "go"    ? "bg-emerald-600 text-white border-emerald-600"
-                  : v === "no-go" ? "bg-red-600 text-white border-red-600"
-                  : "bg-muted text-foreground"
-                  : "hover:bg-muted"
+                  ? v === "go"    ? "bg-[var(--success)] text-white border-[var(--success)]"
+                  : v === "no-go" ? "bg-[var(--danger)] text-white border-[var(--danger)]"
+                  : "bg-[var(--bg-subtle)] text-[var(--text-primary)]"
+                  : "hover:bg-[var(--bg-subtle)]"
               )}
             >
               {v === "go" ? "Go" : v === "no-go" ? "No-Go" : "Undecided"}

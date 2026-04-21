@@ -42,7 +42,7 @@ export function ExplainSizingButton({ context }: Props) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 gap-1.5 px-2 text-xs text-muted-foreground"
+        className="h-7 gap-1.5 px-2 text-xs text-[var(--text-muted)]"
         disabled={loading}
         onClick={handleExplain}
       >
@@ -61,12 +61,12 @@ export function ExplainSizingButton({ context }: Props) {
       )}
 
       {explanation && (
-        <div className="mt-2 rounded-md border bg-muted/50 p-3">
-          <p className="text-xs font-medium text-primary mb-1.5 flex items-center gap-1.5">
+        <div className="mt-2 rounded-md border border-[var(--border-default)] bg-[var(--bg-subtle)] p-3">
+          <p className="text-xs font-medium text-[var(--accent-primary)] mb-1.5 flex items-center gap-1.5">
             <Sparkles className="h-3 w-3" />
             Claude&apos;s explanation
           </p>
-          <div className="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">
+          <div className="text-xs text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
             {explanation}
           </div>
         </div>

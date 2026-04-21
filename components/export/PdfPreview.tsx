@@ -19,14 +19,14 @@ const PdfPreviewInner = dynamic(
 
     function Inner({ project, bom }: Props) {
       return (
-        <PDFViewer width="100%" height={700} className="rounded border border-border">
+        <PDFViewer width="100%" height={700} className="rounded border border-[var(--border-default)]">
           <SizingPdfDocument project={project} bom={bom} />
         </PDFViewer>
       );
     }
     return Inner;
   },
-  { ssr: false, loading: () => <div className="h-[700px] rounded border border-border flex items-center justify-center text-sm text-muted-foreground">Loading preview…</div> }
+  { ssr: false, loading: () => <div className="h-[700px] rounded border border-[var(--border-default)] flex items-center justify-center text-sm text-[var(--text-muted)]">Loading preview…</div> }
 );
 
 export function PdfPreview({ project, bom }: Props) {

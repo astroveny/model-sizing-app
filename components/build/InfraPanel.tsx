@@ -8,10 +8,10 @@ type Props = { result: BuildDerivedResult };
 function Row({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="flex items-start justify-between py-2 border-b last:border-0 gap-4">
-      <span className="text-sm text-muted-foreground shrink-0">{label}</span>
+      <span className="text-sm text-[var(--text-muted)] shrink-0">{label}</span>
       <span className="text-sm font-medium text-right">
         {value}
-        {sub && <span className="block text-xs text-muted-foreground font-normal">{sub}</span>}
+        {sub && <span className="block text-xs text-[var(--text-muted)] font-normal">{sub}</span>}
       </span>
     </div>
   );
@@ -33,8 +33,8 @@ export function InfraPanel({ result }: Props) {
     : "Not configured";
 
   return (
-    <div className="rounded-lg border">
-      <div className="px-4 py-3 border-b bg-muted/30">
+    <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)]">
+      <div className="px-4 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)]">
         <h3 className="text-sm font-semibold">Infrastructure</h3>
       </div>
       <div className="px-4 py-1">

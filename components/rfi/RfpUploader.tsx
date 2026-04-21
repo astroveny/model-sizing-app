@@ -61,7 +61,7 @@ export function RfpUploader() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 gap-3 cursor-pointer hover:border-primary/50 transition-colors"
+      className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] p-8 gap-3 cursor-pointer hover:border-[var(--accent-primary)]/50 transition-colors"
       onClick={() => !busy && inputRef.current?.click()}
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
@@ -75,27 +75,27 @@ export function RfpUploader() {
       />
 
       {busy ? (
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--text-muted)]" />
       ) : (
-        <Upload className="h-8 w-8 text-muted-foreground" />
+        <Upload className="h-8 w-8 text-[var(--text-muted)]" />
       )}
 
       <div className="text-center">
         <p className="text-sm font-medium">
           {status === "uploading" && "Uploading…"}
           {status === "extracting" && "Extracting requirements…"}
-          {status === "done" && <span className="text-emerald-600 dark:text-emerald-400">Done — requirements extracted</span>}
+          {status === "done" && <span className="text-[var(--success)]">Done — requirements extracted</span>}
           {status === "error" && <span className="text-destructive">Error</span>}
           {status === "idle" && "Drop PDF or DOCX here, or click to browse"}
         </p>
         {fileName && status !== "idle" && (
-          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 justify-center">
+          <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1 justify-center">
             <FileText className="h-3 w-3" /> {fileName}
           </p>
         )}
         {error && <p className="text-xs text-destructive mt-1">{error}</p>}
         {status === "idle" && (
-          <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, or plain text · max 10 MB</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">PDF, DOCX, or plain text · max 10 MB</p>
         )}
       </div>
     </div>

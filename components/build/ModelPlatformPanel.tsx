@@ -9,10 +9,10 @@ type Props = { result: BuildDerivedResult };
 function Row({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
   return (
     <div className="flex items-start justify-between py-2 border-b last:border-0 gap-4">
-      <span className="text-sm text-muted-foreground shrink-0">{label}</span>
-      <span className={`text-sm font-medium text-right ${highlight ? "text-primary" : ""}`}>
+      <span className="text-sm text-[var(--text-muted)] shrink-0">{label}</span>
+      <span className={`text-sm font-medium text-right ${highlight ? "text-[var(--warning)]" : ""}`}>
         {value}
-        {sub && <span className="block text-xs text-muted-foreground font-normal">{sub}</span>}
+        {sub && <span className="block text-xs text-[var(--text-muted)] font-normal">{sub}</span>}
       </span>
     </div>
   );
@@ -22,7 +22,7 @@ function LatencyBar({ valueMs, targetMs }: { valueMs: number; targetMs: number }
   const pct = Math.min(100, (valueMs / targetMs) * 100);
   const over = valueMs > targetMs;
   return (
-    <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
+    <div className="mt-1 h-1.5 rounded-full bg-[var(--bg-subtle)] overflow-hidden">
       <div
         className={`h-full rounded-full transition-all ${over ? "bg-amber-500" : "bg-emerald-500"}`}
         style={{ width: `${pct}%` }}
@@ -47,8 +47,8 @@ export function ModelPlatformPanel({ result }: Props) {
     .join(", ");
 
   return (
-    <div className="rounded-lg border">
-      <div className="px-4 py-3 border-b bg-muted/30">
+    <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)]">
+      <div className="px-4 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)]">
         <h3 className="text-sm font-semibold">Model Platform</h3>
       </div>
       <div className="px-4 py-1">
@@ -61,7 +61,7 @@ export function ModelPlatformPanel({ result }: Props) {
 
         <div className="py-2 border-b">
           <div className="flex items-start justify-between gap-4">
-            <span className="text-sm text-muted-foreground">TTFT</span>
+            <span className="text-sm text-[var(--text-muted)]">TTFT</span>
             <span className="text-sm font-medium">{optimizations.adjustedTtftMs.toFixed(1)} ms</span>
           </div>
           <LatencyBar valueMs={optimizations.adjustedTtftMs} targetMs={targetMs * 0.3} />
@@ -69,17 +69,17 @@ export function ModelPlatformPanel({ result }: Props) {
 
         <div className="py-2 border-b">
           <div className="flex items-start justify-between gap-4">
-            <span className="text-sm text-muted-foreground">ITL (per token)</span>
+            <span className="text-sm text-[var(--text-muted)]">ITL (per token)</span>
             <span className="text-sm font-medium">{optimizations.adjustedItlMs.toFixed(1)} ms</span>
           </div>
         </div>
 
         <div className="py-2 border-b">
           <div className="flex items-start justify-between gap-4">
-            <span className="text-sm text-muted-foreground shrink-0">End-to-end P95</span>
-            <span className={`text-sm font-medium text-right ${endToEndMs > targetMs ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+            <span className="text-sm text-[var(--text-muted)] shrink-0">End-to-end P95</span>
+            <span className={`text-sm font-medium text-right ${endToEndMs > targetMs ? "text-[var(--warning)]" : "text-[var(--success)]"}`}>
               {endToEndMs.toFixed(0)} ms
-              <span className="block text-xs text-muted-foreground font-normal">target: {targetMs.toFixed(0)} ms</span>
+              <span className="block text-xs text-[var(--text-muted)] font-normal">target: {targetMs.toFixed(0)} ms</span>
             </span>
           </div>
           <LatencyBar valueMs={endToEndMs} targetMs={targetMs} />
@@ -88,7 +88,7 @@ export function ModelPlatformPanel({ result }: Props) {
         <Row label="Decode throughput"  value={`${optimizations.adjustedDecodeTokensPerSecPerReplica.toFixed(0)} tok/s`}
           sub="per replica" />
         <Row label="Confidence"         value={result.confidence.toUpperCase()}
-          highlight={result.confidence === "low"} />
+          highlight={result.confidence === "low"} />  {/* highlight uses text-[var(--warning)] in Row */}
         <Row label="Optimizations"      value={opts || "None enabled"} />
       </div>
       <div className="px-4 pb-3">

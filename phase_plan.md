@@ -857,7 +857,7 @@
 - **Verify:** Banner shows on empty state; dismiss hides it; persists across reload
 - **Refs:** PRD §6.0.8
 
-### ☐ P7.19 — Apply Design System tokens to existing components
+### ☑ P7.19 — Apply Design System tokens to existing components
 - **Action:** Audit all components from Phases 1–6. Replace hardcoded colors (`bg-gray-100`, etc.) with Design System tokens (`bg-[var(--bg-surface)]` or Tailwind arbitrary values). ExplainBox, BuildPanel, Discovery forms, all. Ensure dark mode looks correct everywhere.
 - **Deliverable:** component style audit
 - **Verify:** Toggle dark mode on every page; nothing broken; borders instead of shadows in dark mode
