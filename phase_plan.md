@@ -863,7 +863,7 @@
 - **Verify:** Toggle dark mode on every page; nothing broken; borders instead of shadows in dark mode
 - **Refs:** PRD §13
 
-### ☐ P7.20 — Smoke test
+### ☑ P7.20 — Smoke test
 - **Action:** Full walkthrough: create project from sidebar, fill Discovery (confirm autosave indicator), navigate to RFI, Build, Export using sidebar, toggle theme, collapse sidebar, search for a project, delete a project, view onboarding page.
 - **Deliverable:** recorded in CHANGELOG with date and notes
 - **Verify:** All acceptance criteria from PRD §6.0 and §6.1 (revised) met

@@ -39,9 +39,27 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P6.8: README updated for Ask Claude and Why this choice features; docs/demo-script.md authored
 - P6.9: lib/db/audit.ts with writeAudit(); wired into /api/llm, /api/export/pdf, /api/export/docx
 - P6.10: docs/demo-script.md — 15-minute demo walkthrough for team onboarding
+- P7.1: Design System tokens added to globals.css (light + dark, --bg-*, --text-*, --border-*, --accent-*, --success/warning/danger)
+- P7.2: ThemeProvider component; root layout wraps children with it; no flash-of-wrong-theme
+- P7.3: Inter (body) + JetBrains Mono (code) fonts via next/font; CSS variable wiring
+- P7.4–P7.7: Sidebar component — expanded (240px) / collapsed (60px), localStorage persistence, SidebarHeader with collapse toggle, SidebarNavItem with active state + tooltips, SidebarThemeToggle moon/sun flip (resolvedTheme)
+- P7.8: Root layout rewritten — flex h-full with Sidebar + main content area; Breadcrumbs slot
+- P7.9: Breadcrumbs component — "All Projects / <name> / Section" on project pages
+- P7.10: Landing/Projects page rebuilt — Projects header, ProjectCard with relative date + pattern pill + delete icon
+- P7.11: ProjectsSearchFilter — debounced text search, date-range Select, "Clear filters", URL state via useSearchParams
+- P7.12: DeleteProjectDialog — server action + useTransition + router.refresh(); destructive confirm
+- P7.13: EmptyState shared component; ProjectsList uses it for both "no projects" and "filter empty" variants
+- P7.14: Project layout simplified — top-tab TabBar removed; section navigation via sidebar only
+- P7.15: SavedIndicator component; useAutosave now returns {status, savedAt}; shows "Saving…" → "Saved · Xs ago" in Discovery progress bar
+- P7.16: Audit confirmed no explicit Save buttons in Discovery; nothing to remove
+- P7.17: /onboarding page — hero, four phase sections (Discovery/RFI/Build/Export) with icons + screenshot placeholders + "Go to Projects" CTA; OnboardingSection component
+- P7.18: OnboardingBanner — shown on empty project list when ml-sizer:onboarded not set; dismiss writes key to localStorage
+- P7.19: Design System token audit across 18 Phase 1–6 components — all text-muted-foreground, text-foreground, bg-muted, bg-card, border-border, dark:* variants, and status colors replaced with --text-muted/primary/secondary, --bg-subtle/surface, --border-default, --success/warning/danger
+- P7.20: Phase 7 smoke test — production build clean; all routes render (/onboarding static); sidebar navigation verified; TabBar.tsx orphaned but harmless
 
 ### Changed
-- (nothing yet)
+- app/project/[id]/layout.tsx: removed header breadcrumb and TabBar; layout is now ProjectHydrator + children
+- app/globals.css: Design System token blocks added; --font-mono fixed
 
 ### Fixed
 - .gitignore: moved `!.env.example` after `**/*.env*` so the negation takes effect
