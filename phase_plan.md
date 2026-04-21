@@ -761,7 +761,7 @@
 - **Verify:** No flash-of-wrong-theme on page load; dark/light class applied to `<html>`
 - **Refs:** PRD §13.6, P0.8b in original plan
 
-### ☐ P7.3 — Typography setup
+### ☑ P7.3 — Typography setup
 - **Action:** Import Inter (body) and JetBrains Mono (code) via `next/font/google`; apply via CSS variables in root layout.
 - **Deliverable:** updated root layout with font variables
 - **Verify:** Fonts render correctly; no FOUT
