@@ -145,7 +145,7 @@ export type ShardingResult = {
   gpusPerReplica: number;
   interconnectRecommendation: {
     intraNode: "nvlink" | "infinity-fabric" | "pcie";
-    interNode: "infiniband-400g" | "infiniband-200g" | "roce-100g" | "ethernet-100g" | "none";
+    interNode: string; // "infiniband-400g" | "infiniband-200g" | "roce-100g" | "ethernet-100g" | "none" | user-specified
   };
   notes: string[];
 };

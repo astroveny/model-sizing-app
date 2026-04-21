@@ -896,7 +896,7 @@
 - **Verify:** Current code throws "Unterminated string in JSON"
 - **Refs:** PRD bug reference §2
 
-### ☐ P8.4 — RFP JSON truncation bug — fix
+### ☑ P8.4 — RFP JSON truncation bug — fix
 - **Action:** Two changes:
   1. Raise `maxTokens` in `lib/llm/prompts/extract-rfp.ts` call from default to 8000
   2. Add `lib/llm/json.ts` with `safeJsonParse(text, onMalformed)` that detects truncation, attempts auto-closing (append `]}` or similar), and on total failure retries the LLM call with a "continue where you left off" prompt

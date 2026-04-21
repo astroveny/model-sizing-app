@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useProjectStore } from "@/lib/store";
 import { llmComplete } from "@/lib/llm/client";
 import { EXTRACT_RFP_SYSTEM, buildExtractRfpPrompt } from "@/lib/llm/prompts/extract-rfp";
+import { safeJsonParse } from "@/lib/llm/json";
 import type { ExtractedRequirement } from "@/lib/store";
 import { Loader2 } from "lucide-react";
 
@@ -22,11 +23,13 @@ export function RfpPaster() {
       const result = await llmComplete({
         system: EXTRACT_RFP_SYSTEM,
         messages: [{ role: "user", content: buildExtractRfpPrompt(text) }],
-        maxTokens: 4096,
+        maxTokens: 8000,
         temperature: 0.1,
       });
 
-      const parsed = JSON.parse(result.text);
+      const { data: parsed, truncated } = safeJsonParse(result.text);
+      if (!parsed) throw new Error("Could not parse extraction response — try a shorter document.");
+      if (truncated) console.warn("[safeJsonParse] Response was truncated; partial data applied.");
       updateField("rfi.source", "pasted");
       updateField("rfi.rawText", text);
       updateField("rfi.extracted.requirements",     parsed.requirements     ?? []);
@@ -43,7 +46,7 @@ export function RfpPaster() {
   return (
     <div className="space-y-3">
       <textarea
-        className="w-full min-h-48 rounded-lg border bg-background px-3 py-2 text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+        className="w-full min-h-48 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 py-2 text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
         placeholder="Paste RFP or RFI text here…"
         value={text || rawText}
         onChange={(e) => setText(e.target.value)}
@@ -52,7 +55,7 @@ export function RfpPaster() {
       <button
         onClick={handleExtract}
         disabled={loading || !text.trim()}
-        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         {loading ? "Extracting…" : "Extract Requirements"}
