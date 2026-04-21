@@ -6,7 +6,7 @@ import { v4 as uuid } from "uuid";
 const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
-async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
+async function extractText(buffer: Buffer, mimeType: string, filename = ""): Promise<string> {
   if (mimeType === "application/pdf" || mimeType.includes("pdf")) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const pdfParse = require("pdf-parse") as (buf: Buffer) => Promise<{ text: string }>;
@@ -45,11 +45,14 @@ export async function POST(req: NextRequest) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
+  console.log(`[/api/upload] received: name=${file.name} size=${file.size} type="${file.type}"`);
+
   let extractedText: string;
   try {
-    extractedText = await extractText(buffer, file.type);
+    extractedText = await extractText(buffer, file.type, file.name);
+    console.log(`[/api/upload] extracted ${extractedText.length} chars from ${file.name}`);
   } catch (err) {
-    console.error("[/api/upload] extraction error:", err);
+    console.error(`[/api/upload] extraction failed for ${file.name} (type="${file.type}"):`, err);
     return NextResponse.json({ error: "Could not extract text from file" }, { status: 422 });
   }
 

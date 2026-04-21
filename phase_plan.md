@@ -904,7 +904,7 @@
 - **Verify:** P8.3 test passes; manually re-run with the real RFP that triggered the original bug
 - **Refs:** `docs/llm-provider-guide.md` §5
 
-### ☐ P8.5 — RFP file upload bug — diagnose
+### ☑ P8.5 — RFP file upload bug — diagnose
 - **Action:** Add detailed logging in `app/api/upload/route.ts`. Ask user for the specific file that failed (or a similar one). Determine if pdf-parse, mammoth, or file-type detection is throwing.
 - **Deliverable:** logs + diagnosis note in PHASE_PLAN troubleshooting section
 - **Verify:** Failure root cause identified
@@ -1045,8 +1045,18 @@ P8.3 — RFP JSON extraction truncation
 
 P8.5 — RFP file upload extraction failure
   Symptom: "could not extract from file"
-  Root cause: TBD during investigation.
-  Fix: see P8.6.
+  Root cause (P8.5 diagnosis, 2026-04-22): Two issues found:
+    1. MIME type detection relies solely on file.type which browsers often report
+       as "" for .pdf/.docx files dropped from some OS pickers or email clients.
+       Empty MIME falls through to the plain-text path → garbled binary returned
+       to the LLM, causing extraction to fail or produce nonsense.
+    2. Error message returned to client is generic ("Could not extract text from
+       file") with no detail about WHY it failed (encrypted PDF, scanned/image-only
+       PDF, corrupted file, empty file, wrong extension). User has no actionable
+       guidance.
+    Non-issues: pdf-parse loads fine in Node.js runtime (not Edge); mammoth
+    import works; 10MB size cap is correctly enforced.
+  Fix: see P8.6 (extension-based MIME fallback + actionable error messages).
 ```
 
 ---
