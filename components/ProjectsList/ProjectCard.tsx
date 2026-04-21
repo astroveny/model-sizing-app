@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import type { Project } from "@/lib/store";
+import { DeleteProjectDialog } from "./DeleteProjectDialog";
 
 const PATTERN_LABELS: Record<string, string> = {
   "internal-inference":  "Internal inference",
@@ -32,12 +34,11 @@ function formatRelativeDate(iso: string): string {
 
 interface ProjectCardProps {
   project: Project;
-  /** Injected by P7.12 — delete confirmation dialog trigger */
-  onDeleteClick?: (e: React.MouseEvent) => void;
 }
 
-export function ProjectCard({ project, onDeleteClick }: ProjectCardProps) {
+export function ProjectCard({ project }: ProjectCardProps) {
   const router = useRouter();
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
     <div
@@ -64,14 +65,18 @@ export function ProjectCard({ project, onDeleteClick }: ProjectCardProps) {
 
       <button
         aria-label={`Delete ${project.name}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onDeleteClick?.(e);
-        }}
+        onClick={(e) => { e.stopPropagation(); setDeleteOpen(true); }}
         className="ml-4 shrink-0 p-1.5 rounded-md text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--danger)] hover:bg-[var(--bg-subtle)] transition-all duration-150"
       >
         <Trash2 className="h-4 w-4" />
       </button>
+
+      <DeleteProjectDialog
+        projectId={project.id}
+        projectName={project.name}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+      />
     </div>
   );
 }

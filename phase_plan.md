@@ -815,7 +815,7 @@
 - **Verify:** Typing filters list live; URL updates with filters; shareable URLs work; "Clear filters" resets state
 - **Refs:** PRD §6.0.7
 
-### ☐ P7.12 — Delete project confirmation dialog
+### ☑ P7.12 — Delete project confirmation dialog
 - **Action:** Create `DeleteProjectDialog.tsx` using shadcn AlertDialog. Triggered from trash icon on `ProjectCard`. Dialog text: "Delete project '<n>'? This cannot be undone." Two buttons: Cancel, Delete (destructive variant).
 - **Deliverable:** component + wiring in ProjectCard
 - **Verify:** Delete button opens dialog; cancel does nothing; confirm deletes + updates list
