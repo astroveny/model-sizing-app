@@ -88,7 +88,7 @@ export function RfpUploader() {
           {status === "uploading" && "Uploading…"}
           {status === "extracting" && "Extracting requirements…"}
           {status === "done" && <span className="text-[var(--success)]">Done — requirements extracted</span>}
-          {status === "error" && <span className="text-destructive">Error</span>}
+          {status === "error" && <span className="text-[var(--danger)]">Upload failed</span>}
           {status === "idle" && "Drop PDF or DOCX here, or click to browse"}
         </p>
         {fileName && status !== "idle" && (
@@ -96,7 +96,7 @@ export function RfpUploader() {
             <FileText className="h-3 w-3" /> {fileName}
           </p>
         )}
-        {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+        {error && <p className="text-xs text-[var(--danger)] mt-1 max-w-xs">{error}</p>}
         {status === "idle" && (
           <p className="text-xs text-[var(--text-muted)] mt-1">PDF, DOCX, or plain text · max 10 MB</p>
         )}

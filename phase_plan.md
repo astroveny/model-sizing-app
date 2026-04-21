@@ -910,7 +910,7 @@
 - **Verify:** Failure root cause identified
 - **Refs:** PRD bug reference §3
 
-### ☐ P8.6 — RFP file upload bug — fix
+### ☑ P8.6 — RFP file upload bug — fix
 - **Action:** Depending on diagnosis: either swap the parsing library, add fallback (e.g., pdf-parse fails → try `pdfjs-dist`), or improve error messaging to include what went wrong ("Encrypted PDF not supported", "Scanned PDF — OCR not enabled in v1", etc.).
 - **Deliverable:** code fix + user-facing error surface
 - **Verify:** Upload the original failing file again; works or gives actionable error
