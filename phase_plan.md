@@ -890,7 +890,7 @@
 - **Verify:** P8.1 test now passes; additional assertion: engine note present when user choice undersized
 - **Refs:** `docs/sizing-math.md` §5
 
-### ☐ P8.3 — RFP JSON truncation bug — reproduce
+### ☑ P8.3 — RFP JSON truncation bug — reproduce
 - **Action:** Create failing test in `tests/llm/json.test.ts`: mock an LLM response truncated mid-JSON at 10,000 chars; run extraction; assert it handles gracefully (either retries or returns partial + error).
 - **Deliverable:** failing test
 - **Verify:** Current code throws "Unterminated string in JSON"
