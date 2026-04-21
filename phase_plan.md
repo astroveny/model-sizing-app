@@ -878,7 +878,7 @@
 
 **Exit criteria:** All three bugs fixed with regression tests; BoM shows "Indicative pricing — confirm with vendor" disclaimer; pricing sources documented per line item.
 
-### ☐ P8.1 — Interconnect preference bug — reproduce
+### ☑ P8.1 — Interconnect preference bug — reproduce
 - **Action:** Create failing test in `tests/sizing/sharding.test.ts`: set Discovery `hardware.networking = '100g' RoCE`; run `computeBuild`; assert `buildDerived.modelPlatform.interconnectRecommendation.interNode !== 'infiniband-400g'` when Discovery specifies RoCE.
 - **Deliverable:** failing test case
 - **Verify:** Test fails with current code (confirms bug)
