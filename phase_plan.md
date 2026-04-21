@@ -821,7 +821,7 @@
 - **Verify:** Delete button opens dialog; cancel does nothing; confirm deletes + updates list
 - **Refs:** PRD §6.0.7
 
-### ☐ P7.13 — Empty states
+### ☑ P7.13 — Empty states
 - **Action:** Create `components/common/EmptyState.tsx` — shared empty-state template. Use on landing page (no projects, filtered-to-zero). Each variant has appropriate CTA.
 - **Deliverable:** component
 - **Verify:** Empty states render correctly in all scenarios

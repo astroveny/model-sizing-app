@@ -1,9 +1,11 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { FolderOpen, SearchX } from "lucide-react";
 import type { Project } from "@/lib/store";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectsSearchFilter } from "./ProjectsSearchFilter";
+import { EmptyState } from "@/components/common/EmptyState";
 
 const MODIFIED_DAYS: Record<string, number> = {
   "7d":  7,
@@ -60,21 +62,19 @@ export function ProjectsList({ projects }: ProjectsListProps) {
 
       {/* List */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center gap-3">
-          {hasActiveFilters ? (
-            <>
-              <p className="text-[var(--text-primary)] font-medium">No projects match these filters</p>
-              <p className="text-sm text-[var(--text-muted)]">Clear filters to see all projects.</p>
-            </>
-          ) : (
-            <>
-              <p className="text-[var(--text-primary)] font-medium">No projects yet</p>
-              <p className="text-sm text-[var(--text-muted)] max-w-xs">
-                Create a project to start sizing a ML/GenAI inference deployment.
-              </p>
-            </>
-          )}
-        </div>
+        hasActiveFilters ? (
+          <EmptyState
+            icon={SearchX}
+            title="No projects match these filters"
+            description="Clear filters to see all projects."
+          />
+        ) : (
+          <EmptyState
+            icon={FolderOpen}
+            title="No projects yet"
+            description="Create a project to start sizing a ML/GenAI inference deployment."
+          />
+        )
       ) : (
         <ul className="flex flex-col gap-3">
           {filtered.map((project) => (
