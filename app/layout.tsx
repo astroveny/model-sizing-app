@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -36,7 +37,10 @@ export default function RootLayout({
           <div className="flex h-full">
             <Sidebar />
             <main className="flex-1 overflow-auto">
-              {children}
+              <div className="px-8 py-8">
+                <Breadcrumbs />
+                {children}
+              </div>
             </main>
           </div>
           <Toaster richColors position="bottom-right" />

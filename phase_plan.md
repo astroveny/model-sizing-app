@@ -797,7 +797,7 @@
 - **Verify:** All pages render inside the layout; no orphan content
 - **Refs:** PRD §6.0.3
 
-### ☐ P7.9 — Breadcrumbs component
+### ☑ P7.9 — Breadcrumbs component
 - **Action:** Create `components/common/Breadcrumbs.tsx` — reads current route, renders crumbs using Next.js `usePathname`. On project pages: "All Projects / <project name> / <section>".
 - **Deliverable:** component; rendered at top of main content area
 - **Verify:** Breadcrumbs render correctly on all routes
