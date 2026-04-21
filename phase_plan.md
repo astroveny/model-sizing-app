@@ -779,7 +779,7 @@
 - **Verify:** Click-through navigates; active state renders; tooltips on hover when collapsed
 - **Refs:** PRD §6.0.1
 
-### ☐ P7.6 — Current project section in sidebar
+### ☑ P7.6 — Current project section in sidebar
 - **Action:** Create `SidebarCurrentProject.tsx` — reads current project from URL params; renders section links (Discovery / RFI / Build / Export) when on a project page. Hidden otherwise.
 - **Deliverable:** component
 - **Verify:** Shows on `/project/[id]/*`; hidden on `/`, `/onboarding`

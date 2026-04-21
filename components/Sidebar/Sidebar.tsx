@@ -6,17 +6,16 @@ import { cn } from "@/lib/utils";
 import { SidebarHeader } from "./SidebarHeader";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { SidebarNewProjectButton } from "./SidebarNewProjectButton";
+import { SidebarCurrentProject } from "./SidebarCurrentProject";
 
 const STORAGE_KEY = "ml-sizer:sidebar-collapsed";
 
 interface SidebarProps {
-  /** Slot for the current-project section (P7.6) */
-  projectSection?: React.ReactNode;
   /** Slot for footer items (P7.7 theme toggle) */
   footer?: React.ReactNode;
 }
 
-export function Sidebar({ projectSection, footer }: SidebarProps) {
+export function Sidebar({ footer }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -67,13 +66,9 @@ export function Sidebar({ projectSection, footer }: SidebarProps) {
           exact
         />
 
-        {/* Current project section — injected by P7.6 */}
-        {projectSection && (
-          <>
-            <div className="my-2 border-t border-[var(--border-muted)]" />
-            {projectSection}
-          </>
-        )}
+        {/* Current project section — visible only on /project/[id]/* */}
+        <div className="my-2 border-t border-[var(--border-muted)]" />
+        <SidebarCurrentProject collapsed={isCollapsed} />
       </div>
 
       <div className="shrink-0 border-t border-[var(--border-default)] p-2">
