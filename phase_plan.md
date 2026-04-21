@@ -755,7 +755,7 @@
 - **Verify:** Inspect CSS vars in devtools; confirm both light and dark tokens present
 - **Refs:** PRD §13
 
-### ☐ P7.2 — Theme provider + layout integration
+### ☑ P7.2 — Theme provider + layout integration
 - **Action:** Create `components/common/ThemeProvider.tsx` wrapping `next-themes`'s `ThemeProvider` (attribute="class", defaultTheme="system", enableSystem, disableTransitionOnChange). Wrap root layout `app/layout.tsx`.
 - **Deliverable:** ThemeProvider; updated root layout
 - **Verify:** No flash-of-wrong-theme on page load; dark/light class applied to `<html>`
