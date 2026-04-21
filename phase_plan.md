@@ -839,7 +839,7 @@
 - **Verify:** Change a field, see "Saving…" → "Saved · 0s ago" → ticking up; disconnect DB, see "Unsaved changes"
 - **Refs:** PRD §6.1 (revised)
 
-### ☐ P7.16 — Remove any explicit Save buttons
+### ☑ P7.16 — Remove any explicit Save buttons
 - **Action:** Audit Discovery pages for any remaining Save buttons. Delete. Verify autosave handles all cases.
 - **Deliverable:** code removal
 - **Verify:** No save buttons visible in any Discovery sub-tab
