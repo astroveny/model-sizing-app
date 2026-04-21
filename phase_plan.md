@@ -833,7 +833,7 @@
 - **Verify:** Navigation between sections uses sidebar; no duplicate nav
 - **Refs:** PRD §6.0.4
 
-### ☐ P7.15 — Discovery autosave indicator
+### ☑ P7.15 — Discovery autosave indicator
 - **Action:** Create `components/discovery/SavedIndicator.tsx` — shows "Saving…" during debounce, "Saved · Xs ago" after persist success (ticks every second, caps at "1m+ ago"), "Unsaved changes" on error with retry button. Top-right of Discovery content area.
 - **Deliverable:** component + wired to the existing autosave hook from P0.7
 - **Verify:** Change a field, see "Saving…" → "Saved · 0s ago" → ticking up; disconnect DB, see "Unsaved changes"

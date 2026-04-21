@@ -7,6 +7,7 @@ import { InfraForm } from "@/components/discovery/InfraForm";
 import { ModelPlatformForm } from "@/components/discovery/ModelPlatformForm";
 import { ApplicationForm } from "@/components/discovery/ApplicationForm";
 import { useDiscoveryValidation } from "@/lib/hooks/useDiscoveryValidation";
+import { SavedIndicator } from "@/components/discovery/SavedIndicator";
 import { CheckCircle2 } from "lucide-react";
 
 const TABS = [
@@ -24,22 +25,23 @@ export default function DiscoveryPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Progress bar */}
-      <div className="px-6 py-3 border-b bg-muted/30 flex items-center gap-3">
-        <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
+      <div className="px-6 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)]/40 flex items-center gap-3">
+        <div className="flex-1 h-1.5 rounded-full bg-[var(--border-default)] overflow-hidden">
           <div
-            className="h-full rounded-full bg-primary transition-all duration-300"
+            className="h-full rounded-full bg-[var(--accent-primary)] transition-all duration-300"
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
+        <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">
           {filledCount} / {totalCount} fields
         </span>
         {isReadyForBuild && (
-          <span className="flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
+          <span className="flex items-center gap-1 text-xs font-medium text-[var(--success)] whitespace-nowrap">
             <CheckCircle2 className="h-3.5 w-3.5" />
             Ready for Build
           </span>
         )}
+        <SavedIndicator />
       </div>
 
       <Tabs defaultValue="workload" className="flex flex-col flex-1 min-h-0">
