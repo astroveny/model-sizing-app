@@ -767,7 +767,7 @@
 - **Verify:** Fonts render correctly; no FOUT
 - **Refs:** PRD §13.2
 
-### ☐ P7.4 — Sidebar component — layout shell
+### ☑ P7.4 — Sidebar component — layout shell
 - **Action:** Create `components/Sidebar/Sidebar.tsx` — expanded (240px) + collapsed (60px) states using conditional classes. Flex layout: header / nav items / spacer / footer. Read/write collapsed state to `localStorage` (`ml-sizer:sidebar-collapsed`).
 - **Deliverable:** `Sidebar.tsx`, `SidebarHeader.tsx` (with collapse toggle button)
 - **Verify:** Sidebar renders; toggle button switches widths; state persists across reload
