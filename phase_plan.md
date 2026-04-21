@@ -809,7 +809,7 @@
 - **Verify:** Projects list renders; clicking a card navigates into project
 - **Refs:** PRD §6.0.7
 
-### ☐ P7.11 — Search + filter bar
+### ☑ P7.11 — Search + filter bar
 - **Action:** Create `ProjectsSearchFilter.tsx` with: text search input (debounced 200ms), filter dropdowns for workload type and modified date range, "Clear filters" button. State encoded in URL query params via `useSearchParams`.
 - **Deliverable:** component
 - **Verify:** Typing filters list live; URL updates with filters; shareable URLs work; "Clear filters" resets state
