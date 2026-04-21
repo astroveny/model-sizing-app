@@ -785,7 +785,7 @@
 - **Verify:** Shows on `/project/[id]/*`; hidden on `/`, `/onboarding`
 - **Refs:** PRD §6.0.1, §6.0.4
 
-### ☐ P7.7 — Theme toggle with moon/sun flip
+### ☑ P7.7 — Theme toggle with moon/sun flip
 - **Action:** Create `SidebarThemeToggle.tsx` — uses `useTheme()` from next-themes. Shows `<Moon />` in light, `<Sun />` in dark (destination icon). Pinned to bottom of sidebar.
 - **Deliverable:** component
 - **Verify:** Icon flips correctly; theme persists; no SSR hydration mismatch (use `mounted` state guard)

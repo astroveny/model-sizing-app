@@ -7,15 +7,11 @@ import { SidebarHeader } from "./SidebarHeader";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { SidebarNewProjectButton } from "./SidebarNewProjectButton";
 import { SidebarCurrentProject } from "./SidebarCurrentProject";
+import { SidebarThemeToggle } from "./SidebarThemeToggle";
 
 const STORAGE_KEY = "ml-sizer:sidebar-collapsed";
 
-interface SidebarProps {
-  /** Slot for footer items (P7.7 theme toggle) */
-  footer?: React.ReactNode;
-}
-
-export function Sidebar({ footer }: SidebarProps) {
+export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -72,7 +68,7 @@ export function Sidebar({ footer }: SidebarProps) {
       </div>
 
       <div className="shrink-0 border-t border-[var(--border-default)] p-2">
-        {footer}
+        <SidebarThemeToggle collapsed={isCollapsed} />
       </div>
     </aside>
   );
