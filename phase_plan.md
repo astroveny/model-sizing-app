@@ -827,7 +827,7 @@
 - **Verify:** Empty states render correctly in all scenarios
 - **Refs:** PRD §6.0.7
 
-### ☐ P7.14 — Project page layout rework
+### ☑ P7.14 — Project page layout rework
 - **Action:** Remove the top-tab navigation from `app/project/[id]/layout.tsx` (Discovery/RFI/Build/Export). Section navigation now comes from the sidebar. Content area is a direct render of the section page.
 - **Deliverable:** updated layout
 - **Verify:** Navigation between sections uses sidebar; no duplicate nav
