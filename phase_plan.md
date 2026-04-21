@@ -773,7 +773,7 @@
 - **Verify:** Sidebar renders; toggle button switches widths; state persists across reload
 - **Refs:** PRD §6.0.1, §6.0.2
 
-### ☐ P7.5 — Sidebar nav items
+### ☑ P7.5 — Sidebar nav items
 - **Action:** Create `SidebarNavItem.tsx` — active state via pathname match. Build the global nav list: "+ New Project" (primary button style), "🏠 All Projects", "📖 How it works". Use `lucide-react` icons.
 - **Deliverable:** `SidebarNavItem.tsx`, integrated into Sidebar
 - **Verify:** Click-through navigates; active state renders; tooltips on hover when collapsed
