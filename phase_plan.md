@@ -845,7 +845,7 @@
 - **Verify:** No save buttons visible in any Discovery sub-tab
 - **Refs:** PRD §6.1 (revised)
 
-### ☐ P7.17 — Onboarding page
+### ☑ P7.17 — Onboarding page
 - **Action:** Create `app/onboarding/page.tsx` per PRD §6.0.8. Four phase sections. Use `components/onboarding/OnboardingSection.tsx` as reusable block.
 - **Deliverable:** page + component
 - **Verify:** Page reachable at `/onboarding`; linked from sidebar
