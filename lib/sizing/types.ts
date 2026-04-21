@@ -118,6 +118,12 @@ export type SizingInput = {
 
   // Deployment
   deploymentPattern: string;
+
+  // User networking preference (from Discovery hardware.networking).
+  // When set, sharding respects it for inter-node fabric instead of defaulting
+  // to infiniband-400g. An engine note is added when the preference may be
+  // undersized for the required bandwidth.
+  networkingPreference?: string;
 };
 
 // ---------------------------------------------------------------------------

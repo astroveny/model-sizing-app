@@ -884,7 +884,7 @@
 - **Verify:** Test fails with current code (confirms bug)
 - **Refs:** PRD bug reference §1; P2.9 original step
 
-### ☐ P8.2 — Interconnect preference bug — fix
+### ☑ P8.2 — Interconnect preference bug — fix
 - **Action:** Modify `lib/sizing/sharding.ts` (and/or `bom.ts`). Read `discovery.hardware.networking` as a constraint. Only recommend a different fabric if the user's choice can't meet bandwidth requirements — and if so, flag it in engine notes. Never silently overwrite.
 - **Deliverable:** code fix
 - **Verify:** P8.1 test now passes; additional assertion: engine note present when user choice undersized

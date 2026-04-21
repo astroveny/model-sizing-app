@@ -90,6 +90,7 @@ function toSizingInput(
     flashAttention:      modelPlatform.optimizations.flashAttention,
     chunkedPrefill:      modelPlatform.optimizations.chunkedPrefill,
     deploymentPattern: mapPattern(deploymentPattern),
+    networkingPreference: hardware.networking ?? undefined,
   };
 }
 

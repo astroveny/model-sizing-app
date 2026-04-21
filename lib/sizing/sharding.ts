@@ -77,10 +77,31 @@ export function computeSharding(
   }
 
   const intraNode = inferIntraNodeInterconnect(input.gpu.interconnect.intra_node);
-  const interNode =
-    pp > 1
-      ? "infiniband-400g"
-      : "none";
+
+  let interNode: string = "none";
+  if (pp > 1) {
+    const userNet = input.networkingPreference;
+    if (userNet && userNet !== "none") {
+      // Honour the user's choice; warn if it may be undersized for the scale
+      interNode = userNet;
+      const isHighBandwidth =
+        userNet.includes("infiniband") || userNet.includes("400g") || userNet.includes("800g");
+      if (!isHighBandwidth) {
+        notes.push(
+          `[WARNING] Inter-node fabric '${userNet}' may be undersized for PP=${pp} — InfiniBand 400G or equivalent is recommended for large-model inference. Verify bandwidth requirements before deploying.`
+        );
+      } else {
+        notes.push(
+          `Inter-node: using '${userNet}' as specified in hardware preferences.`
+        );
+      }
+    } else {
+      interNode = "infiniband-400g";
+      notes.push(
+        "Inter-node: defaulting to InfiniBand 400G for multi-node deployment. Set a networking preference in Discovery to override."
+      );
+    }
+  }
 
   // Warn if PCIe and TP > 2
   if (intraNode === "pcie" && tp > 2) {
