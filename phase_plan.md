@@ -803,7 +803,7 @@
 - **Verify:** Breadcrumbs render correctly on all routes
 - **Refs:** PRD §6.0.3
 
-### ☐ P7.10 — Landing/Projects page rebuild
+### ☑ P7.10 — Landing/Projects page rebuild
 - **Action:** Rewrite `app/page.tsx`. Replace existing project list with new layout: header ("Projects" + count) → search/filter bar → list of `ProjectCard`s.
 - **Deliverable:** new `app/page.tsx`; new components `components/ProjectsList/{ProjectsList.tsx, ProjectCard.tsx}`
 - **Verify:** Projects list renders; clicking a card navigates into project
