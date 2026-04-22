@@ -940,7 +940,7 @@
 - **Verify:** Override a price; total capex updates; reload; override persists
 - **Refs:** PRD §5.1 BomItem, §6.3 override handling
 
-### ☐ P8.11 — Phase 8 smoke test
+### ☑ P8.11 — Phase 8 smoke test
 - **Action:** End-to-end: load a project that exercised the bugs, confirm all three fixed; verify BoM has disclaimer + price overrides work.
 - **Deliverable:** recorded in CHANGELOG
 - **Refs:** PRD Phase 8 exit criteria

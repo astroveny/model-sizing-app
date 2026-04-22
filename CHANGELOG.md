@@ -56,6 +56,14 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P7.18: OnboardingBanner — shown on empty project list when ml-sizer:onboarded not set; dismiss writes key to localStorage
 - P7.19: Design System token audit across 18 Phase 1–6 components — all text-muted-foreground, text-foreground, bg-muted, bg-card, border-border, dark:* variants, and status colors replaced with --text-muted/primary/secondary, --bg-subtle/surface, --border-default, --success/warning/danger
 - P7.20: Phase 7 smoke test — production build clean; all routes render (/onboarding static); sidebar navigation verified; TabBar.tsx orphaned but harmless
+- P8.1–P8.2: Interconnect preference bug — failing test added; sharding.ts fixed to read networkingPreference from SizingInput; engine note emitted when user choice may be undersized; SizingInput and ShardingResult types updated; useBuildDerived threads preference through
+- P8.3–P8.4: RFP JSON truncation bug — failing test added; safeJsonParse utility (lib/llm/json.ts) with auto-repair strategy; maxTokens raised to 8000 in extract-rfp, RfpPaster, RfpUploader; safeJsonParse wired into both RFP components
+- P8.5–P8.6: RFP file upload bug — root causes diagnosed (empty MIME type + generic errors); app/api/upload/route.ts rewritten with extension-based MIME fallback, magic-byte PDF detection, and actionable error messages (encrypted PDF, scanned PDF, binary data, empty file)
+- P8.7: lib/upload/extract.ts extraction utility factored out; upload route deduped to import from it; tests/upload/extract.test.ts — 14 tests covering resolveType, looksLikePdf, and extractTextFromBuffer edge cases; all pass
+- P8.8: pricing_source field added to all 9 GPU entries (vendor-estimate) and all 7 server entries (vendor-estimate or indicative) in data/gpus.json and data/servers.json
+- P8.9: Amber pricing disclaimer banner added to BoM Summary tab on Export page; dismissible per session via sessionStorage
+- P8.10: Per-row unit price override inputs added to BoM table; overrides stored in build.overrides["bom:price:<name>"]; overridden rows highlighted in accent color with reset button; total CapEx recalculates live
+- P8.11: Phase 8 smoke test — typecheck clean; 42/42 tests passing (4 test files: sizing ×2, llm/json, upload/extract); all three bugs confirmed fixed via test coverage; BoM disclaimer and price overrides verified via code review. Date: 2026-04-22
 
 ### Changed
 - app/project/[id]/layout.tsx: removed header breadcrumb and TabBar; layout is now ProjectHydrator + children
