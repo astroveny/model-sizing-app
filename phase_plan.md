@@ -966,7 +966,7 @@
 - **Verify:** Tests cover: no overrides (clean derived), with overrides (marked), MoE project, cloud deployment, on-prem deployment
 - **Refs:** PRD §5.1 BuildState
 
-### ☐ P9.3 — Build Report Markdown renderer
+### ☑ P9.3 — Build Report Markdown renderer
 - **Action:** `lib/export/build-report-md.ts` — takes `BuildReport`, returns Markdown string. Include: H1 title, YAML frontmatter (project name, date), TOC, H2 per section, tables for BoM and assumptions. GitHub-flavored markdown.
 - **Deliverable:** renderer + unit tests
 - **Verify:** Output validates against a markdown linter; renders correctly in GitHub preview
