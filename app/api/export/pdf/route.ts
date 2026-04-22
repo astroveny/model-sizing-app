@@ -5,6 +5,7 @@ import { buildBomExport } from "@/lib/export/build-bom-export";
 const ReactPDF = require("@react-pdf/renderer") as typeof import("@react-pdf/renderer");
 import { SizingPdfDocument } from "@/lib/export/pdf";
 import { writeAudit } from "@/lib/db/audit";
+import { buildExportFilename } from "@/lib/export/filename";
 import React from "react";
 
 export async function GET(req: NextRequest) {
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${project.name.replace(/[^a-z0-9]/gi, "_")}_sizing.pdf"`,
+        "Content-Disposition": `attachment; filename="${buildExportFilename(project.name, "proposal", "pdf")}"`,
       },
     });
   } catch (err) {

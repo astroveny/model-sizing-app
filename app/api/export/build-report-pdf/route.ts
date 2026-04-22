@@ -3,6 +3,7 @@ import { getProject } from "@/lib/db/projects";
 import { extractBuildReport } from "@/lib/export/build-report-extract";
 import { BuildReportPdfDocument } from "@/lib/export/build-report-pdf";
 import { writeAudit } from "@/lib/db/audit";
+import { buildExportFilename } from "@/lib/export/filename";
 import React from "react";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const ReactPDF = require("@react-pdf/renderer") as typeof import("@react-pdf/renderer");
@@ -29,12 +30,10 @@ export async function GET(req: NextRequest) {
 
     writeAudit("export.build-report-pdf", { projectId: id }, id);
 
-    const slug = project.name.replace(/[^a-z0-9]/gi, "_");
-    const date = new Date().toISOString().slice(0, 10);
     return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${slug}-build-report-${date}.pdf"`,
+        "Content-Disposition": `attachment; filename="${buildExportFilename(project.name, "build-report", "pdf")}"`,
       },
     });
   } catch (err) {

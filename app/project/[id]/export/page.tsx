@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, FileCode2, FileJson, FileText, FileType, RotateCcw, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { buildExportFilename } from "@/lib/export/filename";
 
 const BOM_PRICE_PREFIX = "bom:price:";
 
@@ -94,7 +95,7 @@ export default function ExportPage() {
     );
   }
 
-  const slug = project.name.replace(/[^a-z0-9]/gi, "_");
+  const slug = project.name; // buildExportFilename handles slugification
 
   return (
     <div className="p-6 space-y-6 max-w-5xl">
@@ -127,7 +128,7 @@ export default function ExportPage() {
             <CardContent>
               <Button
                 className="w-full"
-                onClick={() => downloadUrl(`/api/export/pdf?projectId=${id}`, `${slug}_sizing.pdf`)}
+                onClick={() => downloadUrl(`/api/export/pdf?projectId=${id}`, buildExportFilename(slug, "proposal", "pdf"))}
               >
                 Download PDF
               </Button>
@@ -147,7 +148,7 @@ export default function ExportPage() {
             <CardContent>
               <Button
                 className="w-full"
-                onClick={() => downloadUrl(`/api/export/docx?projectId=${id}`, `${slug}_sizing.docx`)}
+                onClick={() => downloadUrl(`/api/export/docx?projectId=${id}`, buildExportFilename(slug, "proposal", "docx"))}
               >
                 Download DOCX
               </Button>
@@ -167,7 +168,7 @@ export default function ExportPage() {
             <CardContent>
               <Button
                 className="w-full"
-                onClick={() => downloadUrl(`/api/export/bom?projectId=${id}`, `${slug}_bom.json`)}
+                onClick={() => downloadUrl(`/api/export/bom?projectId=${id}`, buildExportFilename(slug, "bom", "json"))}
               >
                 Download JSON
               </Button>
@@ -199,10 +200,7 @@ export default function ExportPage() {
               <Button
                 className="w-full"
                 variant="outline"
-                onClick={() => {
-                  const date = new Date().toISOString().slice(0, 10);
-                  downloadUrl(`/api/export/build-report-pdf?projectId=${id}`, `${slug}-build-report-${date}.pdf`);
-                }}
+                onClick={() => downloadUrl(`/api/export/build-report-pdf?projectId=${id}`, buildExportFilename(slug, "build-report", "pdf"))}
               >
                 Download PDF
               </Button>
@@ -223,10 +221,7 @@ export default function ExportPage() {
               <Button
                 className="w-full"
                 variant="outline"
-                onClick={() => {
-                  const date = new Date().toISOString().slice(0, 10);
-                  downloadUrl(`/api/export/build-report-md?projectId=${id}`, `${slug}-build-report-${date}.md`);
-                }}
+                onClick={() => downloadUrl(`/api/export/build-report-md?projectId=${id}`, buildExportFilename(slug, "build-report", "md"))}
               >
                 Download MD
               </Button>

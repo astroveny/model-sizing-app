@@ -990,7 +990,7 @@
 - **Verify:** Both groups render; all five exports work
 - **Refs:** PRD §6.4 (revised)
 
-### ☐ P9.7 — Export filename convention
+### ☑ P9.7 — Export filename convention
 - **Action:** Enforce filename pattern: `<project-name-slugified>-<export-type>-<YYYY-MM-DD>.<ext>`. Examples: `acme-llm-proposal-2026-04-21.pdf`, `acme-llm-build-report-2026-04-21.md`. Implement via `lib/export/filename.ts`.
 - **Deliverable:** filename utility + applied to all export routes
 - **Verify:** Download files; filename matches pattern

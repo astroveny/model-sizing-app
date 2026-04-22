@@ -3,6 +3,7 @@ import { getProject } from "@/lib/db/projects";
 import { extractBuildReport } from "@/lib/export/build-report-extract";
 import { buildReportToMarkdown } from "@/lib/export/build-report-md";
 import { writeAudit } from "@/lib/db/audit";
+import { buildExportFilename } from "@/lib/export/filename";
 
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("projectId");
@@ -22,12 +23,10 @@ export async function GET(req: NextRequest) {
   const markdown = buildReportToMarkdown(report);
   writeAudit("export.build-report-md", { projectId: id }, id);
 
-  const slug = project.name.replace(/[^a-z0-9]/gi, "_");
-  const date = new Date().toISOString().slice(0, 10);
   return new NextResponse(markdown, {
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${slug}-build-report-${date}.md"`,
+      "Content-Disposition": `attachment; filename="${buildExportFilename(project.name, "build-report", "md")}"`,
     },
   });
 }
