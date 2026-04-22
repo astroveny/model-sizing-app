@@ -954,7 +954,7 @@
 
 **Exit criteria:** User can export a Build Report (PDF or MD) from the Export page that contains all Build data in structured form, suitable for internal review or PR attachment.
 
-### ☐ P9.1 — Build Report content spec
+### ☑ P9.1 — Build Report content spec
 - **Action:** Formalize the structure. Write `lib/export/build-report-spec.ts` as a data-shape description (typed) of what a Build Report contains. Sections: cover, TOC, per-layer panels (Hardware/Infra/ModelPlatform/Application), summary totals, assumptions, BoM table, engine notes.
 - **Deliverable:** TypeScript type + fixture JSON example
 - **Verify:** Type compiles; fixture validates
