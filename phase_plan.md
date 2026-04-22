@@ -984,7 +984,7 @@
 - **Verify:** Curl both endpoints; files download correctly; content matches preview
 - **Refs:** PRD §6.4 (revised)
 
-### ☐ P9.6 — Export page — add Build Report buttons
+### ☑ P9.6 — Export page — add Build Report buttons
 - **Action:** Update `app/project/[id]/export/page.tsx`. Section the page into two groups: "Customer Deliverables" (Proposal PDF, Proposal Word, JSON BoM) and "Internal Reports" (Build Report PDF, Build Report MD). Add brief description per item.
 - **Deliverable:** updated Export page
 - **Verify:** Both groups render; all five exports work

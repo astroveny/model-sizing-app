@@ -7,7 +7,7 @@ import { PdfPreview } from "@/components/export/PdfPreview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, FileJson, FileText, FileType, RotateCcw, X } from "lucide-react";
+import { AlertTriangle, FileCode2, FileJson, FileText, FileType, RotateCcw, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const BOM_PRICE_PREFIX = "bom:price:";
@@ -105,67 +105,134 @@ export default function ExportPage() {
         </p>
       </div>
 
-      {/* Download cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <FileType className="h-5 w-5 text-red-500" />
-              PDF Report
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Formatted report with cover, sizing highlights, BoM, and disclaimers.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              className="w-full"
-              onClick={() => downloadUrl(`/api/export/pdf?projectId=${id}`, `${slug}_sizing.pdf`)}
-            >
-              Download PDF
-            </Button>
-          </CardContent>
-        </Card>
+      {/* Customer Deliverables */}
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-sm font-semibold">Customer Deliverables</h3>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            Polished outputs suitable for sharing with the customer.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileType className="h-5 w-5 text-red-500" />
+                Proposal PDF
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Formatted report with cover, sizing highlights, BoM, and disclaimers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                className="w-full"
+                onClick={() => downloadUrl(`/api/export/pdf?projectId=${id}`, `${slug}_sizing.pdf`)}
+              >
+                Download PDF
+              </Button>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <FileText className="h-5 w-5 text-blue-500" />
-              Word Document
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Editable DOCX with the same sections as the PDF, styled for editing.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              className="w-full"
-              onClick={() => downloadUrl(`/api/export/docx?projectId=${id}`, `${slug}_sizing.docx`)}
-            >
-              Download DOCX
-            </Button>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileText className="h-5 w-5 text-blue-500" />
+                Proposal Word
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Editable DOCX with the same sections as the PDF, ready for customisation.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                className="w-full"
+                onClick={() => downloadUrl(`/api/export/docx?projectId=${id}`, `${slug}_sizing.docx`)}
+              >
+                Download DOCX
+              </Button>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <FileJson className="h-5 w-5 text-green-500" />
-              JSON BoM
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Structured bill of materials in JSON format for tooling and integrations.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              className="w-full"
-              onClick={() => downloadUrl(`/api/export/bom?projectId=${id}`, `${slug}_bom.json`)}
-            >
-              Download JSON
-            </Button>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileJson className="h-5 w-5 text-green-500" />
+                JSON BoM
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Structured bill of materials in JSON format for tooling and integrations.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                className="w-full"
+                onClick={() => downloadUrl(`/api/export/bom?projectId=${id}`, `${slug}_bom.json`)}
+              >
+                Download JSON
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Internal Reports */}
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-sm font-semibold">Internal Reports</h3>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            Detailed technical build reports for internal review, PRs, and handoff.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileType className="h-5 w-5 text-purple-500" />
+                Build Report PDF
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Full technical report — cover, per-layer panels, assumptions, BoM, engine notes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => {
+                  const date = new Date().toISOString().slice(0, 10);
+                  downloadUrl(`/api/export/build-report-pdf?projectId=${id}`, `${slug}-build-report-${date}.pdf`);
+                }}
+              >
+                Download PDF
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileCode2 className="h-5 w-5 text-purple-500" />
+                Build Report Markdown
+              </CardTitle>
+              <CardDescription className="text-xs">
+                GitHub-flavored Markdown with YAML frontmatter — attach to PRs or wikis.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => {
+                  const date = new Date().toISOString().slice(0, 10);
+                  downloadUrl(`/api/export/build-report-md?projectId=${id}`, `${slug}-build-report-${date}.md`);
+                }}
+              >
+                Download MD
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Preview */}
