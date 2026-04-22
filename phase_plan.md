@@ -934,7 +934,7 @@
 - **Verify:** Disclaimer renders; dismiss persists within session
 - **Refs:** PRD bug report reference "BoM pricing audit"
 
-### ☐ P8.10 — BoM override price surface in UI
+### ☑ P8.10 — BoM override price surface in UI
 - **Action:** The `BomItem` schema already has `unitPriceUsd` as a field. Add an editable input on each BoM row in the Build UI — user can override the catalog price per project. Overrides stored in `buildState.overrides` alongside other overrides.
 - **Deliverable:** override input in BoM row
 - **Verify:** Override a price; total capex updates; reload; override persists

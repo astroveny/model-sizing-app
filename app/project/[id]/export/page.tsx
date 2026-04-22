@@ -7,8 +7,10 @@ import { PdfPreview } from "@/components/export/PdfPreview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, FileJson, FileText, FileType, X } from "lucide-react";
+import { AlertTriangle, FileJson, FileText, FileType, RotateCcw, X } from "lucide-react";
 import { useMemo, useState } from "react";
+
+const BOM_PRICE_PREFIX = "bom:price:";
 
 function downloadUrl(href: string, filename: string) {
   const a = document.createElement("a");
@@ -20,6 +22,8 @@ function downloadUrl(href: string, filename: string) {
 export default function ExportPage() {
   const { id } = useParams<{ id: string }>();
   const project = useProjectStore((s) => s.activeProject);
+  const setBuildOverride = useProjectStore((s) => s.setBuildOverride);
+  const clearBuildOverride = useProjectStore((s) => s.clearBuildOverride);
 
   const [pricingDismissed, setPricingDismissed] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -36,9 +40,55 @@ export default function ExportPage() {
     return buildBomExport(project);
   }, [project]);
 
+  // Read per-item price overrides from build.overrides (key = "bom:price:<name>")
+  const priceOverrides = useMemo<Record<string, number>>(() => {
+    if (!project) return {};
+    const raw = project.build.overrides as Record<string, unknown>;
+    const result: Record<string, number> = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (k.startsWith(BOM_PRICE_PREFIX) && typeof v === "number") {
+        result[k.slice(BOM_PRICE_PREFIX.length)] = v;
+      }
+    }
+    return result;
+  }, [project]);
+
+  // Apply overrides to compute effective items + totals
+  const effectiveItems = useMemo(() => {
+    if (!bom) return [];
+    return bom.items.map((item) => {
+      const overridePrice = priceOverrides[item.name];
+      if (overridePrice !== undefined) {
+        return {
+          ...item,
+          unitPriceUsd: overridePrice,
+          totalPriceUsd: overridePrice * item.quantity,
+          overridden: true,
+        };
+      }
+      return { ...item, overridden: false };
+    });
+  }, [bom, priceOverrides]);
+
+  const effectiveCapex = useMemo(
+    () => effectiveItems.reduce((sum, i) => sum + (i.totalPriceUsd ?? 0), 0),
+    [effectiveItems]
+  );
+
+  function handlePriceChange(itemName: string, raw: string) {
+    const val = parseFloat(raw.replace(/[^0-9.]/g, ""));
+    if (!isNaN(val) && val >= 0) {
+      setBuildOverride(`${BOM_PRICE_PREFIX}${itemName}`, val);
+    }
+  }
+
+  function handlePriceReset(itemName: string) {
+    clearBuildOverride(`${BOM_PRICE_PREFIX}${itemName}`);
+  }
+
   if (!project || !bom) {
     return (
-      <div className="p-8 text-muted-foreground">
+      <div className="p-8 text-[var(--text-muted)]">
         No project loaded.
       </div>
     );
@@ -50,7 +100,7 @@ export default function ExportPage() {
     <div className="p-6 space-y-6 max-w-5xl">
       <div>
         <h2 className="text-2xl font-semibold">Export</h2>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-[var(--text-muted)] mt-1">
           Download the sizing report in your preferred format.
         </p>
       </div>
@@ -134,10 +184,11 @@ export default function ExportPage() {
             <CardHeader>
               <CardTitle className="text-base">Bill of Materials</CardTitle>
               <CardDescription>
-                {bom.items.length} items · Est. CapEx{" "}
-                {bom.totals.capexUsd > 0
-                  ? `$${bom.totals.capexUsd.toLocaleString()}`
-                  : "—"}
+                {effectiveItems.length} items · Est. CapEx{" "}
+                {effectiveCapex > 0 ? `$${effectiveCapex.toLocaleString()}` : "—"}
+                {effectiveItems.some((i) => i.overridden) && (
+                  <span className="ml-2 text-[var(--accent-primary)] text-xs">(includes overrides)</span>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -146,6 +197,7 @@ export default function ExportPage() {
                   <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                   <span className="flex-1">
                     Indicative pricing only — confirm all figures with your vendor before committing to a budget.
+                    You can override unit prices per row below.
                   </span>
                   <button
                     onClick={dismissPricing}
@@ -156,15 +208,15 @@ export default function ExportPage() {
                   </button>
                 </div>
               )}
-              {bom.items.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
+              {effectiveItems.length === 0 ? (
+                <p className="text-sm text-[var(--text-muted)]">
                   Complete Discovery to generate the bill of materials.
                 </p>
               ) : (
                 <div className="overflow-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b text-left text-muted-foreground">
+                      <tr className="border-b border-[var(--border-default)] text-left text-[var(--text-muted)]">
                         <th className="pb-2 pr-4 font-medium">Item</th>
                         <th className="pb-2 pr-4 font-medium">Category</th>
                         <th className="pb-2 pr-4 font-medium text-right">Qty</th>
@@ -173,13 +225,39 @@ export default function ExportPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {bom.items.map((item, i) => (
-                        <tr key={i} className="border-b last:border-0">
+                      {effectiveItems.map((item, i) => (
+                        <tr key={i} className="border-b border-[var(--border-muted)] last:border-0">
                           <td className="py-2 pr-4">{item.name}</td>
-                          <td className="py-2 pr-4 text-muted-foreground capitalize">{item.category}</td>
+                          <td className="py-2 pr-4 text-[var(--text-muted)] capitalize">{item.category}</td>
                           <td className="py-2 pr-4 text-right">{item.quantity}</td>
                           <td className="py-2 pr-4 text-right">
-                            {item.unitPriceUsd ? `$${item.unitPriceUsd.toLocaleString()}` : "—"}
+                            <div className="flex items-center justify-end gap-1">
+                              {item.overridden && (
+                                <button
+                                  onClick={() => handlePriceReset(item.name)}
+                                  title="Reset to catalog price"
+                                  className="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors"
+                                >
+                                  <RotateCcw className="h-3 w-3" />
+                                </button>
+                              )}
+                              <input
+                                type="text"
+                                defaultValue={item.unitPriceUsd?.toLocaleString() ?? ""}
+                                placeholder="—"
+                                onBlur={(e) => handlePriceChange(item.name, e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                                }}
+                                className={[
+                                  "w-24 text-right bg-transparent border rounded px-1.5 py-0.5 text-sm",
+                                  "focus:outline-none focus:border-[var(--accent-primary)]",
+                                  item.overridden
+                                    ? "border-[var(--accent-primary)] text-[var(--accent-primary)]"
+                                    : "border-[var(--border-muted)] hover:border-[var(--border-default)]",
+                                ].join(" ")}
+                              />
+                            </div>
                           </td>
                           <td className="py-2 text-right font-medium">
                             {item.totalPriceUsd ? `$${item.totalPriceUsd.toLocaleString()}` : "—"}
@@ -193,9 +271,7 @@ export default function ExportPage() {
                           Total CapEx (Est.)
                         </td>
                         <td className="pt-3 font-semibold text-right">
-                          {bom.totals.capexUsd > 0
-                            ? `$${bom.totals.capexUsd.toLocaleString()}`
-                            : "—"}
+                          {effectiveCapex > 0 ? `$${effectiveCapex.toLocaleString()}` : "—"}
                         </td>
                       </tr>
                     </tfoot>
