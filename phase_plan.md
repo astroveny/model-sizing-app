@@ -960,7 +960,7 @@
 - **Verify:** Type compiles; fixture validates
 - **Refs:** PRD §6.4 (revised)
 
-### ☐ P9.2 — Build Report data extractor
+### ☑ P9.2 — Build Report data extractor
 - **Action:** `lib/export/build-report-extract.ts` — pure function: `(project: Project) => BuildReport`. Pulls from Discovery + BuildDerived + BuildOverrides + engine notes + BoM. Includes computed assumptions (MFU/MBU/overhead used for this sizing).
 - **Deliverable:** extractor + unit tests
 - **Verify:** Tests cover: no overrides (clean derived), with overrides (marked), MoE project, cloud deployment, on-prem deployment
