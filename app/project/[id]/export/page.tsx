@@ -7,8 +7,8 @@ import { PdfPreview } from "@/components/export/PdfPreview";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileJson, FileText, FileType } from "lucide-react";
-import { useMemo } from "react";
+import { AlertTriangle, FileJson, FileText, FileType, X } from "lucide-react";
+import { useMemo, useState } from "react";
 
 function downloadUrl(href: string, filename: string) {
   const a = document.createElement("a");
@@ -20,6 +20,16 @@ function downloadUrl(href: string, filename: string) {
 export default function ExportPage() {
   const { id } = useParams<{ id: string }>();
   const project = useProjectStore((s) => s.activeProject);
+
+  const [pricingDismissed, setPricingDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return sessionStorage.getItem("ml-sizer:bom-pricing-dismissed") === "1";
+  });
+
+  function dismissPricing() {
+    sessionStorage.setItem("ml-sizer:bom-pricing-dismissed", "1");
+    setPricingDismissed(true);
+  }
 
   const bom = useMemo(() => {
     if (!project) return null;
@@ -131,6 +141,21 @@ export default function ExportPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {!pricingDismissed && (
+                <div className="flex items-start gap-2 rounded-md border border-[var(--warning)] bg-[var(--bg-subtle)] px-3 py-2 mb-4 text-sm text-[var(--warning)]">
+                  <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span className="flex-1">
+                    Indicative pricing only — confirm all figures with your vendor before committing to a budget.
+                  </span>
+                  <button
+                    onClick={dismissPricing}
+                    aria-label="Dismiss pricing notice"
+                    className="shrink-0 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               {bom.items.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   Complete Discovery to generate the bill of materials.

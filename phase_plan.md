@@ -928,7 +928,7 @@
 - **Verify:** Every entry has a `pricing_source`; values cross-referenced against a public source or flagged as indicative
 - **Refs:** `docs/adding-a-gpu.md` §1 field reference
 
-### ☐ P8.9 — BoM pricing disclaimer in UI
+### ☑ P8.9 — BoM pricing disclaimer in UI
 - **Action:** Add a visible disclaimer on the Build page BoM section: "⚠ Indicative pricing — verify with vendor." Dismissible but re-shown per session.
 - **Deliverable:** component update
 - **Verify:** Disclaimer renders; dismiss persists within session
