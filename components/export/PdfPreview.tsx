@@ -26,7 +26,7 @@ const PdfPreviewInner = dynamic(
     }
     return Inner;
   },
-  { ssr: false, loading: () => <div className="h-[700px] rounded border border-[var(--border-default)] flex items-center justify-center text-sm text-[var(--text-muted)]">Loading preview…</div> }
+  { ssr: false, loading: () => <div className="h-[700px] rounded border border-[var(--border-default)] flex items-center justify-center text-sm text-[var(--text-secondary)]">Loading preview…</div> }
 );
 
 export function PdfPreview({ project, bom }: Props) {

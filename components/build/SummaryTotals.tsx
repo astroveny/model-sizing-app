@@ -8,9 +8,9 @@ type Props = { result: BuildDerivedResult };
 function Stat({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] px-4 py-3">
-      <Icon className="h-4 w-4 text-[var(--text-muted)] shrink-0" />
+      <Icon className="h-4 w-4 text-[var(--text-secondary)] shrink-0" />
       <div className="min-w-0">
-        <p className="text-xs text-[var(--text-muted)] truncate">{label}</p>
+        <p className="text-xs text-[var(--text-secondary)] truncate">{label}</p>
         <p className="text-sm font-semibold tabular-nums">{value}</p>
       </div>
     </div>

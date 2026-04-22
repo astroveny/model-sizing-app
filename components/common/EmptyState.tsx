@@ -25,12 +25,12 @@ export function EmptyState({
     >
       {Icon && (
         <div className="rounded-full bg-[var(--bg-subtle)] p-4 mb-1">
-          <Icon className="h-8 w-8 text-[var(--text-muted)]" />
+          <Icon className="h-8 w-8 text-[var(--text-secondary)]" />
         </div>
       )}
       <p className="font-medium text-[var(--text-primary)]">{title}</p>
       {description && (
-        <p className="text-sm text-[var(--text-muted)] max-w-xs">{description}</p>
+        <p className="text-sm text-[var(--text-secondary)] max-w-xs">{description}</p>
       )}
       {action && <div className="mt-1">{action}</div>}
     </div>

@@ -9,10 +9,10 @@ type Props = { result: BuildDerivedResult };
 function Row({ label, value, sub, highlight }: { label: string; value: string; sub?: string; highlight?: boolean }) {
   return (
     <div className="flex items-start justify-between py-2 border-b last:border-0 gap-4">
-      <span className="text-sm text-[var(--text-muted)] shrink-0">{label}</span>
+      <span className="text-sm text-[var(--text-secondary)] shrink-0">{label}</span>
       <span className={`text-sm font-medium text-right ${highlight ? "text-[var(--warning)]" : ""}`}>
         {value}
-        {sub && <span className="block text-xs text-[var(--text-muted)] font-normal">{sub}</span>}
+        {sub && <span className="block text-xs text-[var(--text-secondary)] font-normal">{sub}</span>}
       </span>
     </div>
   );
@@ -61,7 +61,7 @@ export function ModelPlatformPanel({ result }: Props) {
 
         <div className="py-2 border-b">
           <div className="flex items-start justify-between gap-4">
-            <span className="text-sm text-[var(--text-muted)]">TTFT</span>
+            <span className="text-sm text-[var(--text-secondary)]">TTFT</span>
             <span className="text-sm font-medium">{optimizations.adjustedTtftMs.toFixed(1)} ms</span>
           </div>
           <LatencyBar valueMs={optimizations.adjustedTtftMs} targetMs={targetMs * 0.3} />
@@ -69,17 +69,17 @@ export function ModelPlatformPanel({ result }: Props) {
 
         <div className="py-2 border-b">
           <div className="flex items-start justify-between gap-4">
-            <span className="text-sm text-[var(--text-muted)]">ITL (per token)</span>
+            <span className="text-sm text-[var(--text-secondary)]">ITL (per token)</span>
             <span className="text-sm font-medium">{optimizations.adjustedItlMs.toFixed(1)} ms</span>
           </div>
         </div>
 
         <div className="py-2 border-b">
           <div className="flex items-start justify-between gap-4">
-            <span className="text-sm text-[var(--text-muted)] shrink-0">End-to-end P95</span>
+            <span className="text-sm text-[var(--text-secondary)] shrink-0">End-to-end P95</span>
             <span className={`text-sm font-medium text-right ${endToEndMs > targetMs ? "text-[var(--warning)]" : "text-[var(--success)]"}`}>
               {endToEndMs.toFixed(0)} ms
-              <span className="block text-xs text-[var(--text-muted)] font-normal">target: {targetMs.toFixed(0)} ms</span>
+              <span className="block text-xs text-[var(--text-secondary)] font-normal">target: {targetMs.toFixed(0)} ms</span>
             </span>
           </div>
           <LatencyBar valueMs={endToEndMs} targetMs={targetMs} />

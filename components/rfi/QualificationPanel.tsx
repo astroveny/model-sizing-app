@@ -43,7 +43,7 @@ export function QualificationPanel() {
         {/* Fit score */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[var(--text-muted)]">Fit score</span>
+            <span className="text-xs text-[var(--text-secondary)]">Fit score</span>
             <span className="text-sm font-semibold tabular-nums">{qual.fitScore}/100</span>
           </div>
           <div className="h-2 rounded-full bg-[var(--bg-subtle)] overflow-hidden">
@@ -62,7 +62,7 @@ export function QualificationPanel() {
             <p className="text-xs font-medium text-[var(--success)] mb-1">Strengths</p>
             <ul className="space-y-1">
               {qual.strengths.map((s, i) => (
-                <li key={i} className="text-xs text-[var(--text-muted)] flex gap-1.5">
+                <li key={i} className="text-xs text-[var(--text-secondary)] flex gap-1.5">
                   <span className="text-[var(--success)] shrink-0">✓</span>{s}
                 </li>
               ))}
@@ -76,7 +76,7 @@ export function QualificationPanel() {
             <p className="text-xs font-medium text-[var(--warning)] mb-1">Risks</p>
             <ul className="space-y-1">
               {qual.risks.map((r, i) => (
-                <li key={i} className="text-xs text-[var(--text-muted)] flex gap-1.5">
+                <li key={i} className="text-xs text-[var(--text-secondary)] flex gap-1.5">
                   <span className="text-[var(--warning)] shrink-0">⚠</span>{r}
                 </li>
               ))}

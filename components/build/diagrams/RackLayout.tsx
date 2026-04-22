@@ -41,7 +41,7 @@ export function RackLayout({ result }: Props) {
     <div className="rounded-lg border border-[var(--border-default)]">
       <div className="px-4 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)] flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-sm font-semibold">Rack Layout</h3>
-        <div className="flex gap-3 text-xs text-[var(--text-muted)]">
+        <div className="flex gap-3 text-xs text-[var(--text-secondary)]">
           <span>{count} server{count !== 1 ? "s" : ""}</span>
           <span>{racksNeeded} rack{racksNeeded !== 1 ? "s" : ""}</span>
           <span>{serverU}U / server</span>
@@ -53,7 +53,7 @@ export function RackLayout({ result }: Props) {
         <div className="flex gap-8 items-start">
           {racks.map((rack, ri) => (
             <div key={ri} className="flex flex-col items-center gap-1.5">
-              <span className="text-xs font-medium text-[var(--text-muted)]">Rack {ri + 1}</span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Rack {ri + 1}</span>
               <div className="flex gap-0">
                 {/* Unit number column */}
                 <svg width={LABEL_W} height={rackH + 2} className="shrink-0">
@@ -145,10 +145,10 @@ export function RackLayout({ result }: Props) {
 
               {/* Per-rack stats */}
               <div className="text-center space-y-0.5">
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-[var(--text-secondary)]">
                   {rack.servers.length} server{rack.servers.length !== 1 ? "s" : ""}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-[var(--text-secondary)]">
                   {(rack.servers.length * parseFloat(powerPerServer)).toFixed(1)} kW
                 </p>
               </div>
@@ -157,7 +157,7 @@ export function RackLayout({ result }: Props) {
         </div>
 
         {/* Legend */}
-        <div className="mt-4 flex items-center gap-4 text-xs text-[var(--text-muted)]">
+        <div className="mt-4 flex items-center gap-4 text-xs text-[var(--text-secondary)]">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-sm bg-[var(--accent-primary)] opacity-85" />
             <span>{server?.model ?? "GPU server"}</span>

@@ -1,14 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorkloadForm } from "@/components/discovery/WorkloadForm";
 import { HardwareForm } from "@/components/discovery/HardwareForm";
 import { InfraForm } from "@/components/discovery/InfraForm";
 import { ModelPlatformForm } from "@/components/discovery/ModelPlatformForm";
 import { ApplicationForm } from "@/components/discovery/ApplicationForm";
-import { useDiscoveryValidation } from "@/lib/hooks/useDiscoveryValidation";
-import { SavedIndicator } from "@/components/discovery/SavedIndicator";
-import { CheckCircle2 } from "lucide-react";
+import { DiscoveryProgressBanner } from "@/components/discovery/DiscoveryProgressBanner";
+import { ReviewDefaultsModal } from "@/components/discovery/ReviewDefaultsModal";
+import { QuickSizingBanner } from "@/components/discovery/QuickSizingBanner";
 
 const TABS = [
   { id: "workload", label: "Workload" },
@@ -19,30 +20,13 @@ const TABS = [
 ] as const;
 
 export default function DiscoveryPage() {
-  const { progressPct, filledCount, totalCount, isReadyForBuild } =
-    useDiscoveryValidation();
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   return (
     <div className="flex flex-col h-full">
-      {/* Progress bar */}
-      <div className="px-6 py-3 border-b border-[var(--border-default)] bg-[var(--bg-subtle)]/40 flex items-center gap-3">
-        <div className="flex-1 h-1.5 rounded-full bg-[var(--border-default)] overflow-hidden">
-          <div
-            className="h-full rounded-full bg-[var(--accent-primary)] transition-all duration-300"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-        <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">
-          {filledCount} / {totalCount} fields
-        </span>
-        {isReadyForBuild && (
-          <span className="flex items-center gap-1 text-xs font-medium text-[var(--success)] whitespace-nowrap">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Ready for Build
-          </span>
-        )}
-        <SavedIndicator />
-      </div>
+      <QuickSizingBanner onReviewDefaults={() => setReviewOpen(true)} />
+      <DiscoveryProgressBanner onReviewDefaults={() => setReviewOpen(true)} />
+      <ReviewDefaultsModal open={reviewOpen} onClose={() => setReviewOpen(false)} />
 
       <Tabs defaultValue="workload" className="flex flex-col flex-1 min-h-0">
         <div className="border-b px-6">

@@ -65,7 +65,7 @@ export function ProjectsSearchFilter({ hasActiveFilters }: ProjectsSearchFilterP
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <div className="relative flex-1 min-w-48">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)] pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)] pointer-events-none" />
         <Input
           defaultValue={q}
           onChange={(e) => handleSearch(e.target.value)}
@@ -90,7 +90,7 @@ export function ProjectsSearchFilter({ hasActiveFilters }: ProjectsSearchFilterP
       {hasActiveFilters && (
         <button
           onClick={clearAll}
-          className="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors duration-150"
+          className="flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-150"
         >
           <X className="h-3.5 w-3.5" />
           Clear filters

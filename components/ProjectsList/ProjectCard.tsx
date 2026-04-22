@@ -54,10 +54,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <p className="text-sm text-[var(--text-secondary)] truncate mt-0.5">{project.customer}</p>
         )}
         <div className="flex items-center gap-2 mt-2">
-          <span className="inline-flex items-center rounded-md border border-[var(--border-default)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
+          <span className="inline-flex items-center rounded-md border border-[var(--border-default)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
             {PATTERN_LABELS[project.deploymentPattern] ?? project.deploymentPattern}
           </span>
-          <span className="text-xs text-[var(--text-muted)]">
+          <span className="text-xs text-[var(--text-secondary)]">
             {formatRelativeDate(project.updatedAt)}
           </span>
         </div>
@@ -66,7 +66,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <button
         aria-label={`Delete ${project.name}`}
         onClick={(e) => { e.stopPropagation(); setDeleteOpen(true); }}
-        className="ml-4 shrink-0 p-1.5 rounded-md text-[var(--text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--danger)] hover:bg-[var(--bg-subtle)] transition-all duration-150"
+        className="ml-4 shrink-0 p-1.5 rounded-md text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 hover:text-[var(--danger)] hover:bg-[var(--bg-subtle)] transition-all duration-150"
       >
         <Trash2 className="h-4 w-4" />
       </button>

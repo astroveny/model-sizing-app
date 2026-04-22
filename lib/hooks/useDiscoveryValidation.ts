@@ -51,13 +51,14 @@ export function useDiscoveryValidation() {
     };
   }
 
-  // Required gate (minimum set for Build)
-  const { valid, errors } = validateDiscoveryRequired(discovery);
+  // Required gate (minimum set for Build); skipped fields use their defaults
+  const { valid, errors } = validateDiscoveryRequired(discovery, discovery._skipped ?? []);
 
-  // Overall progress across broader field set
+  // Overall progress: filled OR skipped counts toward progress
+  const skipped = discovery._skipped ?? [];
   const discoveryObj = discovery as unknown as Record<string, unknown>;
-  const filledCount = PROGRESS_FIELDS.filter(({ path }) =>
-    isFilled(getNestedValue(discoveryObj, path))
+  const filledCount = PROGRESS_FIELDS.filter(
+    ({ path }) => skipped.includes(path) || isFilled(getNestedValue(discoveryObj, path))
   ).length;
 
   const progressPct = Math.round((filledCount / PROGRESS_FIELDS.length) * 100);

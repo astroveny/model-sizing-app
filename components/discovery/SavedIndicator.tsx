@@ -27,8 +27,8 @@ export function SavedIndicator() {
     <span
       className={cn(
         "text-xs tabular-nums transition-colors duration-150",
-        status === "pending" && "text-[var(--text-muted)]",
-        status === "saving"  && "text-[var(--text-muted)]",
+        status === "pending" && "text-[var(--text-secondary)]",
+        status === "saving"  && "text-[var(--text-secondary)]",
         status === "saved"   && "text-[var(--text-secondary)]",
         status === "error"   && "text-[var(--danger)]"
       )}

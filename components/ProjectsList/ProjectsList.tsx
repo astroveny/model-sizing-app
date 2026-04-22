@@ -1,7 +1,8 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { FolderOpen, SearchX } from "lucide-react";
+import { FolderOpen, SearchX, Zap } from "lucide-react";
+import Link from "next/link";
 import type { Project } from "@/lib/store";
 import { ProjectCard } from "./ProjectCard";
 import { ProjectsSearchFilter } from "./ProjectsSearchFilter";
@@ -52,7 +53,7 @@ export function ProjectsList({ projects }: ProjectsListProps) {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
           Projects
-          <span className="ml-2 text-base font-normal text-[var(--text-muted)]">
+          <span className="ml-2 text-base font-normal text-[var(--text-secondary)]">
             {filtered.length}
           </span>
         </h1>
@@ -76,6 +77,15 @@ export function ProjectsList({ projects }: ProjectsListProps) {
               icon={FolderOpen}
               title="No projects yet"
               description="Create a project to start sizing a ML/GenAI inference deployment."
+              action={
+                <Link
+                  href="/quick-sizing"
+                  className="inline-flex items-center gap-2 rounded-md bg-[var(--accent-primary)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--accent-hover)] transition-colors"
+                >
+                  <Zap className="h-4 w-4" />
+                  Quick Sizing
+                </Link>
+              }
             />
           </>
         )

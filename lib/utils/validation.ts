@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DISCOVERY_DEFAULTS } from "@/lib/discovery/defaults";
 
 // ---------------------------------------------------------------------------
 // Primitives
@@ -131,11 +132,33 @@ export const DiscoveryRequiredSchema = z.object({
 
 export type DiscoveryRequiredInput = z.infer<typeof DiscoveryRequiredSchema>;
 
-export function validateDiscoveryRequired(discovery: unknown): {
+function applyDefault(
+  obj: Record<string, unknown>,
+  dotPath: string,
+  value: unknown
+): Record<string, unknown> {
+  const [head, ...rest] = dotPath.split(".");
+  if (rest.length === 0) return { ...obj, [head]: value };
+  const nested = (obj[head] ?? {}) as Record<string, unknown>;
+  return { ...obj, [head]: applyDefault(nested, rest.join("."), value) };
+}
+
+export function validateDiscoveryRequired(
+  discovery: unknown,
+  skipped: string[] = []
+): {
   valid: boolean;
   errors: string[];
 } {
-  const result = DiscoveryRequiredSchema.safeParse(discovery);
+  // Substitute defaults for skipped fields so they pass schema validation
+  let effective = discovery as Record<string, unknown>;
+  for (const fieldId of skipped) {
+    const defaultVal = DISCOVERY_DEFAULTS[fieldId as keyof typeof DISCOVERY_DEFAULTS];
+    if (defaultVal !== undefined) {
+      effective = applyDefault(effective, fieldId, defaultVal);
+    }
+  }
+  const result = DiscoveryRequiredSchema.safeParse(effective);
   if (result.success) return { valid: true, errors: [] };
   return {
     valid: false,

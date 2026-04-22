@@ -41,7 +41,7 @@ export function EngineNotes({ notes, defaultOpen = false }: Props) {
             </span>
           )}
         </span>
-        {open ? <ChevronUp className="h-4 w-4 text-[var(--text-muted)]" /> : <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" />}
+        {open ? <ChevronUp className="h-4 w-4 text-[var(--text-secondary)]" /> : <ChevronDown className="h-4 w-4 text-[var(--text-secondary)]" />}
       </button>
 
       {open && (
@@ -54,7 +54,7 @@ export function EngineNotes({ notes, defaultOpen = false }: Props) {
                 category === "recommendation" && "bg-[var(--success)]/5",
               )}>
                 {ICON[category]}
-                <span className="text-[var(--text-muted)] leading-relaxed">{message}</span>
+                <span className="text-[var(--text-secondary)] leading-relaxed">{message}</span>
               </li>
             );
           })}

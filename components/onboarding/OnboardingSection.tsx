@@ -26,7 +26,7 @@ export function OnboardingSection({
       {/* Content */}
       <div className="pb-10 min-w-0">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+          <span className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
             Phase {step}
           </span>
           <span className="text-xs text-[var(--border-default)]">—</span>
@@ -35,7 +35,7 @@ export function OnboardingSection({
 
         {/* Screenshot placeholder */}
         <div className="mb-4 h-36 rounded-lg border border-[var(--border-default)] bg-[var(--bg-subtle)] flex items-center justify-center">
-          <span className="text-xs text-[var(--text-muted)]">Screenshot coming soon</span>
+          <span className="text-xs text-[var(--text-secondary)]">Screenshot coming soon</span>
         </div>
 
         <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-2">

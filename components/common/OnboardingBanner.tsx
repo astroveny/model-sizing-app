@@ -38,7 +38,7 @@ export function OnboardingBanner() {
       <button
         onClick={dismiss}
         aria-label="Dismiss"
-        className="mt-0.5 shrink-0 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+        className="mt-0.5 shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
       >
         <X className="h-4 w-4" />
       </button>

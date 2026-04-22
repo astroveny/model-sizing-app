@@ -1084,13 +1084,13 @@
 
 **Exit criteria:** All user-requested polish items shipped; no regressions from Phase 7.
 
-### ☐ P11.1 — Text color contrast audit
+### ☑ P11.1 — Text color contrast audit
 - **Action:** Global audit via grep for `text-[var(--text-muted)]` and equivalent arbitrary-value usages across components. Replace with `--text-secondary` unless the element is a placeholder or disabled control. Run `axe-core` DevTools scan as regression check.
 - **Deliverable:** global replacement + axe report before/after
 - **Verify:** Toggle both themes; all labels and helper text clearly readable; axe scan passes AA on text elements
 - **Refs:** PRD §13.9 (v0.4a)
 
-### ☐ P11.2 — Sidebar reorder
+### ☑ P11.2 — Sidebar reorder
 - **Action:** Update `components/Sidebar/Sidebar.tsx` to the new order per PRD §6.0.1 (v0.4a). Key changes:
   - Theme toggle moves from pinned-bottom to position 2 (right under logo)
   - New "+ Quick Sizing" button in position 4 (after "+ New Project")
@@ -1099,13 +1099,13 @@
 - **Verify:** Visual check; both collapsed and expanded states correct; clicking Settings shows stub
 - **Refs:** PRD §6.0.1 (v0.4a)
 
-### ☐ P11.3 — "ML Sizer" home link
+### ☑ P11.3 — "ML Sizer" home link
 - **Action:** In `components/Sidebar/SidebarHeader.tsx`, wrap the logo + title in `<Link href="/">`. Ensure keyboard focusable. When sidebar collapsed, logo-only still clickable with `aria-label="Home"`.
 - **Deliverable:** logo clickable
 - **Verify:** Click from any route → lands on `/`; keyboard tab + enter also works
 - **Refs:** PRD §6.0.x (v0.4a)
 
-### ☐ P11.4 — Field meta + defaults
+### ☑ P11.4 — Field meta + defaults
 - **Action:**
   1. Create `lib/discovery/defaults.ts` — default values per PRD §6.1 table (v0.4a). Single source of truth.
   2. Create `lib/discovery/field-meta.ts` — classifies every field as `required` / `skippable` / `optional`.
@@ -1113,13 +1113,13 @@
 - **Verify:** Types match `DiscoveryState`; defaults table complete
 - **Refs:** PRD §6.1.x
 
-### ☐ P11.5 — Required markers on form fields
+### ☑ P11.5 — Required markers on form fields
 - **Action:** Update every form in `components/discovery/*Form.tsx`. Add red asterisk next to labels of fields with class `required`. Render a muted helper text for `optional` fields ("Optional").
 - **Deliverable:** label rendering update across all 5 Discovery form components
 - **Verify:** Asterisks appear only on truly-required fields; visual consistency across tabs
 - **Refs:** PRD §6.1.x
 
-### ☐ P11.6 — Skippable "Use default" toggle
+### ☑ P11.6 — Skippable "Use default" toggle
 - **Action:** For fields classified `skippable`, render a small Switch next to the input with label "Use default: <value>". When on:
   - Input becomes disabled
   - `_skipped` array in Discovery state includes the fieldId
@@ -1128,48 +1128,48 @@
 - **Verify:** Toggle skip on a field; persists; reload; still skipped
 - **Refs:** PRD §6.1.x
 
-### ☐ P11.7 — Validation respects _skipped
+### ☑ P11.7 — Validation respects _skipped
 - **Action:** Update `lib/utils/validation.ts` Zod schemas. A field being in `_skipped` counts as valid for required-gating. (Schema still validates type if value is present.)
 - **Deliverable:** updated validation + tests
 - **Verify:** Skipping a required field allows Build gate to open; unskipping requires re-entering
 - **Refs:** PRD §6.1.y
 
-### ☐ P11.8 — Progress banner
+### ☑ P11.8 — Progress banner
 - **Action:** Add `<DiscoveryProgressBanner>` at top of Discovery page. Three states: red (missing required), amber (ready with N defaults), green (all filled manually). Per PRD §6.1.y.
 - **Deliverable:** banner component + integration
 - **Verify:** State changes correctly as fields are filled/skipped
 - **Refs:** PRD §6.1.y
 
-### ☐ P11.9 — Review Defaults modal
+### ☑ P11.9 — Review Defaults modal
 - **Action:** Clicking "Review defaults" in the P11.8 banner opens a modal listing each skipped field with its default value and an "Override" link. Override link toggles skip off and focuses the field.
 - **Deliverable:** modal component
 - **Verify:** Modal shows correct list; Override link works
 - **Refs:** PRD §6.1.y
 
-### ☐ P11.10 — Build gate uses new validation
+### ☑ P11.10 — Build gate uses new validation
 - **Action:** Update the gate in `app/project/[id]/build/page.tsx` (or wherever gating lives) to use the updated validation from P11.7.
 - **Deliverable:** gate update
 - **Verify:** Discovery with all required filled-or-skipped → Build accessible; missing required → Build blocked with banner
 - **Refs:** PRD §6.1.y
 
-### ☐ P11.11 — Quick Sizing sidebar entry
+### ☑ P11.11 — Quick Sizing sidebar entry
 - **Action:** Add "+ Quick Sizing" button to sidebar (already placed in P11.2 as position 4; this step wires its route). Also add on empty-state landing page alongside "+ New Project".
 - **Deliverable:** nav wiring + landing empty-state update
 - **Refs:** PRD §6.0.1 (v0.4a)
 
-### ☐ P11.12 — Quick Sizing form
+### ☑ P11.12 — Quick Sizing form
 - **Action:** Build `app/quick-sizing/page.tsx`. Five-step form per PRD §6.6.2. Use shadcn Stepper pattern or plain sequential form with "Next"/"Back" buttons. Minimal styling; this is a functional path, not a marketing page.
 - **Deliverable:** page + form
 - **Verify:** Form captures all 5 answers; Back/Next navigation works
 - **Refs:** PRD §6.6
 
-### ☐ P11.13 — Rule-based recommender
+### ☑ P11.13 — Rule-based recommender
 - **Action:** Build `lib/quick-sizing/recommender.ts` per PRD §6.6.4. Pure function: `(scale, latency, deployment) => Candidate[]`. Returns up to 3 candidates from `data/models.json` with rationale.
 - **Deliverable:** recommender + unit tests covering the 4 scale bands
 - **Verify:** Tests pass; recommendations are sensible
 - **Refs:** PRD §6.6.4
 
-### ☐ P11.14 — Quick Sizing apply flow
+### ☑ P11.14 — Quick Sizing apply flow
 - **Action:** On submit + candidate picked:
   1. `createProject({ _source: 'quick-sizing' })`
   2. Apply model metadata from catalog → `discovery.model`
@@ -1179,12 +1179,12 @@
 - **Verify:** Resulting project is a regular project; no LLM dependency
 - **Refs:** PRD §6.6.3
 
-### ☐ P11.15 — LLM-assist stub
+### ☑ P11.15 — LLM-assist stub
 - **Action:** Wire the "Let the app recommend" radio to the rule-based recommender for now. Add a TODO hook point in `lib/quick-sizing/recommender.ts` for the LLM path (to be activated by Phase 10 / v0.4b).
 - **Deliverable:** hook point + clear TODO comment
 - **Refs:** PRD §6.6.4 (v0.4a note)
 
-### ☐ P11.16 — Quick Sizing banner on Discovery
+### ☑ P11.16 — Quick Sizing banner on Discovery
 - **Action:** If `_source === 'quick-sizing'`, show dismissible banner at top of Discovery: "Quick Sizing applied with N defaults. Review defaults." Dismiss state per-project.
 - **Deliverable:** banner
 - **Refs:** PRD §6.6.3 step 6

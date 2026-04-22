@@ -89,7 +89,7 @@ export default function ExportPage() {
 
   if (!project || !bom) {
     return (
-      <div className="p-8 text-[var(--text-muted)]">
+      <div className="p-8 text-[var(--text-secondary)]">
         No project loaded.
       </div>
     );
@@ -101,7 +101,7 @@ export default function ExportPage() {
     <div className="p-6 space-y-6 max-w-5xl">
       <div>
         <h2 className="text-2xl font-semibold">Export</h2>
-        <p className="text-[var(--text-muted)] mt-1">
+        <p className="text-[var(--text-secondary)] mt-1">
           Download the sizing report in your preferred format.
         </p>
       </div>
@@ -110,7 +110,7 @@ export default function ExportPage() {
       <div className="space-y-3">
         <div>
           <h3 className="text-sm font-semibold">Customer Deliverables</h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             Polished outputs suitable for sharing with the customer.
           </p>
         </div>
@@ -181,7 +181,7 @@ export default function ExportPage() {
       <div className="space-y-3">
         <div>
           <h3 className="text-sm font-semibold">Internal Reports</h3>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             Detailed technical build reports for internal review, PRs, and handoff.
           </p>
         </div>
@@ -264,21 +264,21 @@ export default function ExportPage() {
                   <button
                     onClick={dismissPricing}
                     aria-label="Dismiss pricing notice"
-                    className="shrink-0 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                    className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               )}
               {effectiveItems.length === 0 ? (
-                <p className="text-sm text-[var(--text-muted)]">
+                <p className="text-sm text-[var(--text-secondary)]">
                   Complete Discovery to generate the bill of materials.
                 </p>
               ) : (
                 <div className="overflow-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-[var(--border-default)] text-left text-[var(--text-muted)]">
+                      <tr className="border-b border-[var(--border-default)] text-left text-[var(--text-secondary)]">
                         <th className="pb-2 pr-4 font-medium">Item</th>
                         <th className="pb-2 pr-4 font-medium">Category</th>
                         <th className="pb-2 pr-4 font-medium text-right">Qty</th>
@@ -290,7 +290,7 @@ export default function ExportPage() {
                       {effectiveItems.map((item, i) => (
                         <tr key={i} className="border-b border-[var(--border-muted)] last:border-0">
                           <td className="py-2 pr-4">{item.name}</td>
-                          <td className="py-2 pr-4 text-[var(--text-muted)] capitalize">{item.category}</td>
+                          <td className="py-2 pr-4 text-[var(--text-secondary)] capitalize">{item.category}</td>
                           <td className="py-2 pr-4 text-right">{item.quantity}</td>
                           <td className="py-2 pr-4 text-right">
                             <div className="flex items-center justify-end gap-1">
@@ -298,7 +298,7 @@ export default function ExportPage() {
                                 <button
                                   onClick={() => handlePriceReset(item.name)}
                                   title="Reset to catalog price"
-                                  className="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors"
+                                  className="text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors"
                                 >
                                   <RotateCcw className="h-3 w-3" />
                                 </button>

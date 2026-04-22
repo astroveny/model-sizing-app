@@ -12,12 +12,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ExplainBox } from "@/components/ExplainBox";
+import { SkippableField } from "@/components/discovery/SkippableField";
 import { useProjectStore } from "@/lib/store";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
         {title}
       </h3>
       {children}
@@ -32,6 +33,8 @@ function FieldRow({
   onInfo,
   children,
   hint,
+  required,
+  optional,
 }: {
   label: string;
   fieldId: string;
@@ -39,17 +42,23 @@ function FieldRow({
   onInfo: (id: string) => void;
   children: React.ReactNode;
   hint?: string;
+  required?: boolean;
+  optional?: boolean;
 }) {
   const active = activeField === fieldId;
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
-        <Label className="text-sm">{label}</Label>
+        <Label className="text-sm">
+          {label}
+          {required && <span className="text-red-500 ml-0.5" aria-hidden>*</span>}
+          {optional && <span className="text-[var(--text-secondary)] text-xs font-normal ml-1">Optional</span>}
+        </Label>
         <button
           type="button"
           onClick={() => onInfo(active ? "" : fieldId)}
           className={`rounded p-0.5 transition-colors ${
-            active ? "text-[var(--accent-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            active ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           }`}
           aria-label={`Explain ${label}`}
         >
@@ -57,7 +66,7 @@ function FieldRow({
         </button>
       </div>
       {children}
-      {hint && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
+      {hint && <p className="text-xs text-[var(--text-secondary)]">{hint}</p>}
     </div>
   );
 }
@@ -69,7 +78,7 @@ export function ApplicationForm() {
   const updateField = useProjectStore((s) => s.updateField);
 
   if (!app) {
-    return <p className="text-sm text-[var(--text-muted)] p-6">Loading…</p>;
+    return <p className="text-sm text-[var(--text-secondary)] p-6">Loading…</p>;
   }
 
   const upd = (path: string, value: unknown) =>
@@ -86,26 +95,28 @@ export function ApplicationForm() {
               activeField={activeField}
               onInfo={setActiveField}
             >
-              <Select
-                value={app.apiGateway}
-                onValueChange={(v) =>
-                  upd(
-                    "application.apiGateway",
-                    v as "kong" | "apisix" | "envoy" | "cloud-native" | "none"
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="kong">Kong</SelectItem>
-                  <SelectItem value="apisix">Apache APISIX</SelectItem>
-                  <SelectItem value="envoy">Envoy</SelectItem>
-                  <SelectItem value="cloud-native">Cloud-native (ALB / API GW)</SelectItem>
-                </SelectContent>
-              </Select>
+              <SkippableField fieldId="application.apiGateway">
+                <Select
+                  value={app.apiGateway}
+                  onValueChange={(v) =>
+                    upd(
+                      "application.apiGateway",
+                      v as "kong" | "apisix" | "envoy" | "cloud-native" | "none"
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="kong">Kong</SelectItem>
+                    <SelectItem value="apisix">Apache APISIX</SelectItem>
+                    <SelectItem value="envoy">Envoy</SelectItem>
+                    <SelectItem value="cloud-native">Cloud-native (ALB / API GW)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -114,26 +125,28 @@ export function ApplicationForm() {
               activeField={activeField}
               onInfo={setActiveField}
             >
-              <Select
-                value={app.auth}
-                onValueChange={(v) =>
-                  upd(
-                    "application.auth",
-                    v as "oidc" | "apikey" | "mtls" | "jwt" | "none"
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="apikey">API Key</SelectItem>
-                  <SelectItem value="jwt">JWT</SelectItem>
-                  <SelectItem value="oidc">OIDC / OAuth 2.0</SelectItem>
-                  <SelectItem value="mtls">mTLS</SelectItem>
-                </SelectContent>
-              </Select>
+              <SkippableField fieldId="application.auth">
+                <Select
+                  value={app.auth}
+                  onValueChange={(v) =>
+                    upd(
+                      "application.auth",
+                      v as "oidc" | "apikey" | "mtls" | "jwt" | "none"
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="apikey">API Key</SelectItem>
+                    <SelectItem value="jwt">JWT</SelectItem>
+                    <SelectItem value="oidc">OIDC / OAuth 2.0</SelectItem>
+                    <SelectItem value="mtls">mTLS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SkippableField>
             </FieldRow>
           </div>
         </Section>
@@ -147,15 +160,17 @@ export function ApplicationForm() {
               onInfo={setActiveField}
               hint="Per-key or per-user request throttling"
             >
-              <div className="flex items-center gap-2 h-9">
-                <Switch
-                  checked={app.rateLimiting}
-                  onCheckedChange={(v) => upd("application.rateLimiting", v)}
-                />
-                <span className="text-sm text-[var(--text-muted)]">
-                  {app.rateLimiting ? "Enabled" : "Disabled"}
-                </span>
-              </div>
+              <SkippableField fieldId="application.rateLimiting">
+                <div className="flex items-center gap-2 h-9">
+                  <Switch
+                    checked={app.rateLimiting}
+                    onCheckedChange={(v) => upd("application.rateLimiting", v)}
+                  />
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {app.rateLimiting ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -165,15 +180,17 @@ export function ApplicationForm() {
               onInfo={setActiveField}
               hint="Chat UI or admin console needed"
             >
-              <div className="flex items-center gap-2 h-9">
-                <Switch
-                  checked={app.uiRequired}
-                  onCheckedChange={(v) => upd("application.uiRequired", v)}
-                />
-                <span className="text-sm text-[var(--text-muted)]">
-                  {app.uiRequired ? "Yes" : "No — API only"}
-                </span>
-              </div>
+              <SkippableField fieldId="application.uiRequired">
+                <div className="flex items-center gap-2 h-9">
+                  <Switch
+                    checked={app.uiRequired}
+                    onCheckedChange={(v) => upd("application.uiRequired", v)}
+                  />
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {app.uiRequired ? "Yes" : "No — API only"}
+                  </span>
+                </div>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -183,15 +200,17 @@ export function ApplicationForm() {
               onInfo={setActiveField}
               hint="Log all prompts and completions for compliance"
             >
-              <div className="flex items-center gap-2 h-9">
-                <Switch
-                  checked={app.auditLogging}
-                  onCheckedChange={(v) => upd("application.auditLogging", v)}
-                />
-                <span className="text-sm text-[var(--text-muted)]">
-                  {app.auditLogging ? "Required" : "Not required"}
-                </span>
-              </div>
+              <SkippableField fieldId="application.auditLogging">
+                <div className="flex items-center gap-2 h-9">
+                  <Switch
+                    checked={app.auditLogging}
+                    onCheckedChange={(v) => upd("application.auditLogging", v)}
+                  />
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {app.auditLogging ? "Required" : "Not required"}
+                  </span>
+                </div>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -201,15 +220,17 @@ export function ApplicationForm() {
               onInfo={setActiveField}
               hint="Token-level usage tracking — required for GPUaaS / SaaS patterns"
             >
-              <div className="flex items-center gap-2 h-9">
-                <Switch
-                  checked={app.metering}
-                  onCheckedChange={(v) => upd("application.metering", v)}
-                />
-                <span className="text-sm text-[var(--text-muted)]">
-                  {app.metering ? "Required" : "Not required"}
-                </span>
-              </div>
+              <SkippableField fieldId="application.metering">
+                <div className="flex items-center gap-2 h-9">
+                  <Switch
+                    checked={app.metering}
+                    onCheckedChange={(v) => upd("application.metering", v)}
+                  />
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {app.metering ? "Required" : "Not required"}
+                  </span>
+                </div>
+              </SkippableField>
             </FieldRow>
           </div>
         </Section>
@@ -220,7 +241,7 @@ export function ApplicationForm() {
         {activeField ? (
           <ExplainBox fieldId={activeField} />
         ) : (
-          <div className="rounded-lg border border-dashed p-4 text-xs text-[var(--text-muted)] text-center">
+          <div className="rounded-lg border border-dashed p-4 text-xs text-[var(--text-secondary)] text-center">
             Click <Info className="inline h-3.5 w-3.5 mx-0.5" /> next to any
             field to see an explanation.
           </div>

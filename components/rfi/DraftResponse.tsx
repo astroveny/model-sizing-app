@@ -77,7 +77,7 @@ export function DraftResponse() {
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           {loading ? "Generating…" : draftResponse ? "Regenerate" : "Generate Draft Response"}
         </button>
-        {!result && <p className="text-xs text-[var(--text-muted)]">Complete Discovery first to generate a response.</p>}
+        {!result && <p className="text-xs text-[var(--text-secondary)]">Complete Discovery first to generate a response.</p>}
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

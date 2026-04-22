@@ -12,12 +12,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ExplainBox } from "@/components/ExplainBox";
+import { SkippableField } from "@/components/discovery/SkippableField";
 import { useProjectStore } from "@/lib/store";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
         {title}
       </h3>
       {children}
@@ -32,6 +33,8 @@ function FieldRow({
   onInfo,
   children,
   hint,
+  required,
+  optional,
 }: {
   label: string;
   fieldId: string;
@@ -39,17 +42,23 @@ function FieldRow({
   onInfo: (id: string) => void;
   children: React.ReactNode;
   hint?: string;
+  required?: boolean;
+  optional?: boolean;
 }) {
   const active = activeField === fieldId;
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
-        <Label className="text-sm">{label}</Label>
+        <Label className="text-sm">
+          {label}
+          {required && <span className="text-red-500 ml-0.5" aria-hidden>*</span>}
+          {optional && <span className="text-[var(--text-secondary)] text-xs font-normal ml-1">Optional</span>}
+        </Label>
         <button
           type="button"
           onClick={() => onInfo(active ? "" : fieldId)}
           className={`rounded p-0.5 transition-colors ${
-            active ? "text-[var(--accent-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            active ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           }`}
           aria-label={`Explain ${label}`}
         >
@@ -57,7 +66,7 @@ function FieldRow({
         </button>
       </div>
       {children}
-      {hint && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
+      {hint && <p className="text-xs text-[var(--text-secondary)]">{hint}</p>}
     </div>
   );
 }
@@ -70,7 +79,7 @@ export function HardwareForm() {
   const updateField = useProjectStore((s) => s.updateField);
 
   if (!hardware || !constraints) {
-    return <p className="text-sm text-[var(--text-muted)] p-6">Loading…</p>;
+    return <p className="text-sm text-[var(--text-secondary)] p-6">Loading…</p>;
   }
 
   const upd = (path: string, value: unknown) =>
@@ -90,21 +99,23 @@ export function HardwareForm() {
               activeField={activeField}
               onInfo={setActiveField}
             >
-              <Select
-                value={hardware.preferredVendor}
-                onValueChange={(v) =>
-                  upd("hardware.preferredVendor", v as "nvidia" | "amd" | "either")
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nvidia">NVIDIA</SelectItem>
-                  <SelectItem value="amd">AMD</SelectItem>
-                  <SelectItem value="either">No preference (compare both)</SelectItem>
-                </SelectContent>
-              </Select>
+              <SkippableField fieldId="hardware.preferredVendor">
+                <Select
+                  value={hardware.preferredVendor}
+                  onValueChange={(v) =>
+                    upd("hardware.preferredVendor", v as "nvidia" | "amd" | "either")
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nvidia">NVIDIA</SelectItem>
+                    <SelectItem value="amd">AMD</SelectItem>
+                    <SelectItem value="either">No preference (compare both)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -112,6 +123,7 @@ export function HardwareForm() {
               fieldId="discovery.hardware.preferredGpu"
               activeField={activeField}
               onInfo={setActiveField}
+              optional
               hint="e.g. H100-80GB, MI300X — leave blank to let the engine decide"
             >
               <Input
@@ -129,21 +141,23 @@ export function HardwareForm() {
               activeField={activeField}
               onInfo={setActiveField}
             >
-              <Select
-                value={hardware.cooling}
-                onValueChange={(v) =>
-                  upd("hardware.cooling", v as "air" | "liquid" | "either")
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="air">Air cooling</SelectItem>
-                  <SelectItem value="liquid">Liquid cooling</SelectItem>
-                  <SelectItem value="either">No preference</SelectItem>
-                </SelectContent>
-              </Select>
+              <SkippableField fieldId="hardware.cooling">
+                <Select
+                  value={hardware.cooling}
+                  onValueChange={(v) =>
+                    upd("hardware.cooling", v as "air" | "liquid" | "either")
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="air">Air cooling</SelectItem>
+                    <SelectItem value="liquid">Liquid cooling</SelectItem>
+                    <SelectItem value="either">No preference</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -152,25 +166,27 @@ export function HardwareForm() {
               activeField={activeField}
               onInfo={setActiveField}
             >
-              <Select
-                value={hardware.networking}
-                onValueChange={(v) =>
-                  upd(
-                    "hardware.networking",
-                    v as "25G" | "100G" | "400G" | "infiniband"
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="25G">25G Ethernet</SelectItem>
-                  <SelectItem value="100G">100G Ethernet / RoCE</SelectItem>
-                  <SelectItem value="400G">400G Ethernet / RoCE</SelectItem>
-                  <SelectItem value="infiniband">InfiniBand NDR/HDR</SelectItem>
-                </SelectContent>
-              </Select>
+              <SkippableField fieldId="hardware.networking">
+                <Select
+                  value={hardware.networking}
+                  onValueChange={(v) =>
+                    upd(
+                      "hardware.networking",
+                      v as "25G" | "100G" | "400G" | "infiniband"
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="25G">25G Ethernet</SelectItem>
+                    <SelectItem value="100G">100G Ethernet / RoCE</SelectItem>
+                    <SelectItem value="400G">400G Ethernet / RoCE</SelectItem>
+                    <SelectItem value="infiniband">InfiniBand NDR/HDR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SkippableField>
             </FieldRow>
           </div>
         </Section>
@@ -258,7 +274,7 @@ export function HardwareForm() {
         {activeField ? (
           <ExplainBox fieldId={activeField} />
         ) : (
-          <div className="rounded-lg border border-dashed p-4 text-xs text-[var(--text-muted)] text-center">
+          <div className="rounded-lg border border-dashed p-4 text-xs text-[var(--text-secondary)] text-center">
             Click <Info className="inline h-3.5 w-3.5 mx-0.5" /> next to any
             field to see an explanation.
           </div>

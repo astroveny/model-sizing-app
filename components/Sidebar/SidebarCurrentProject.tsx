@@ -76,7 +76,7 @@ export function SidebarCurrentProject({ collapsed }: SidebarCurrentProjectProps)
           <Tooltip>
             <TooltipTrigger render={<div className="flex justify-center py-1" />}>
               <div className="relative">
-                <FolderOpen className="h-5 w-5 text-[var(--text-muted)]" />
+                <FolderOpen className="h-5 w-5 text-[var(--text-secondary)]" />
                 <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-[var(--accent-primary)]" />
               </div>
             </TooltipTrigger>
@@ -86,7 +86,7 @@ export function SidebarCurrentProject({ collapsed }: SidebarCurrentProjectProps)
           </Tooltip>
         </TooltipProvider>
       ) : (
-        <p className="px-3 py-1 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide truncate">
+        <p className="px-3 py-1 text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide truncate">
           {projectName ?? "Current project"}
         </p>
       )}

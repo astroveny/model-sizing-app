@@ -79,6 +79,8 @@ export type DiscoveryState = {
     auditLogging: boolean;
     metering: boolean;
   };
+  /** fieldIds that the user has opted to use the default value for */
+  _skipped: string[];
 };
 
 export type ExtractedRequirement = {
@@ -204,6 +206,7 @@ export type Project = {
   rfi: RfiState;
   build: BuildState;
   explainOverrides: Record<string, ExplainContent>;
+  _source?: "quick-sizing" | "manual";
 };
 
 // ---------------------------------------------------------------------------
@@ -266,6 +269,7 @@ export function defaultDiscovery(): DiscoveryState {
       auditLogging: false,
       metering: false,
     },
+    _skipped: [],
   };
 }
 

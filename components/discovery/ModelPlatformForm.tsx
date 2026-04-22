@@ -12,12 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ExplainBox } from "@/components/ExplainBox";
+import { SkippableField } from "@/components/discovery/SkippableField";
 import { useProjectStore } from "@/lib/store";
+import type { DiscoveryDefaultKey } from "@/lib/discovery/defaults";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
         {title}
       </h3>
       {children}
@@ -32,6 +34,8 @@ function FieldRow({
   onInfo,
   children,
   hint,
+  required,
+  optional,
 }: {
   label: string;
   fieldId: string;
@@ -39,17 +43,23 @@ function FieldRow({
   onInfo: (id: string) => void;
   children: React.ReactNode;
   hint?: string;
+  required?: boolean;
+  optional?: boolean;
 }) {
   const active = activeField === fieldId;
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
-        <Label className="text-sm">{label}</Label>
+        <Label className="text-sm">
+          {label}
+          {required && <span className="text-red-500 ml-0.5" aria-hidden>*</span>}
+          {optional && <span className="text-[var(--text-secondary)] text-xs font-normal ml-1">Optional</span>}
+        </Label>
         <button
           type="button"
           onClick={() => onInfo(active ? "" : fieldId)}
           className={`rounded p-0.5 transition-colors ${
-            active ? "text-[var(--accent-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            active ? "text-[var(--accent-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           }`}
           aria-label={`Explain ${label}`}
         >
@@ -57,7 +67,7 @@ function FieldRow({
         </button>
       </div>
       {children}
-      {hint && <p className="text-xs text-[var(--text-muted)]">{hint}</p>}
+      {hint && <p className="text-xs text-[var(--text-secondary)]">{hint}</p>}
     </div>
   );
 }
@@ -108,7 +118,7 @@ export function ModelPlatformForm() {
   const updateField = useProjectStore((s) => s.updateField);
 
   if (!mp) {
-    return <p className="text-sm text-[var(--text-muted)] p-6">Loading…</p>;
+    return <p className="text-sm text-[var(--text-secondary)] p-6">Loading…</p>;
   }
 
   const upd = (path: string, value: unknown) =>
@@ -126,26 +136,28 @@ export function ModelPlatformForm() {
               activeField={activeField}
               onInfo={setActiveField}
             >
-              <Select
-                value={mp.inferenceServer}
-                onValueChange={(v) =>
-                  upd(
-                    "modelPlatform.inferenceServer",
-                    v as "vllm" | "tgi" | "triton" | "tensorrt-llm" | "sglang"
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="vllm">vLLM</SelectItem>
-                  <SelectItem value="tgi">TGI (Text Generation Inference)</SelectItem>
-                  <SelectItem value="triton">Triton Inference Server</SelectItem>
-                  <SelectItem value="tensorrt-llm">TensorRT-LLM</SelectItem>
-                  <SelectItem value="sglang">SGLang</SelectItem>
-                </SelectContent>
-              </Select>
+              <SkippableField fieldId="modelPlatform.inferenceServer">
+                <Select
+                  value={mp.inferenceServer}
+                  onValueChange={(v) =>
+                    upd(
+                      "modelPlatform.inferenceServer",
+                      v as "vllm" | "tgi" | "triton" | "tensorrt-llm" | "sglang"
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="vllm">vLLM</SelectItem>
+                    <SelectItem value="tgi">TGI (Text Generation Inference)</SelectItem>
+                    <SelectItem value="triton">Triton Inference Server</SelectItem>
+                    <SelectItem value="tensorrt-llm">TensorRT-LLM</SelectItem>
+                    <SelectItem value="sglang">SGLang</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -154,28 +166,30 @@ export function ModelPlatformForm() {
               activeField={activeField}
               onInfo={setActiveField}
             >
-              <Select
-                value={mp.modelRegistry ?? "none"}
-                onValueChange={(v) =>
-                  upd(
-                    "modelPlatform.modelRegistry",
-                    v === "none"
-                      ? undefined
-                      : (v as "mlflow" | "huggingface" | "s3" | "custom")
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="huggingface">Hugging Face Hub</SelectItem>
-                  <SelectItem value="mlflow">MLflow</SelectItem>
-                  <SelectItem value="s3">S3 / object store</SelectItem>
-                  <SelectItem value="custom">Custom registry</SelectItem>
-                </SelectContent>
-              </Select>
+              <SkippableField fieldId="modelPlatform.modelRegistry">
+                <Select
+                  value={mp.modelRegistry ?? "none"}
+                  onValueChange={(v) =>
+                    upd(
+                      "modelPlatform.modelRegistry",
+                      v === "none"
+                        ? undefined
+                        : (v as "mlflow" | "huggingface" | "s3" | "custom")
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="None" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="huggingface">Hugging Face Hub</SelectItem>
+                    <SelectItem value="mlflow">MLflow</SelectItem>
+                    <SelectItem value="s3">S3 / object store</SelectItem>
+                    <SelectItem value="custom">Custom registry</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -184,24 +198,26 @@ export function ModelPlatformForm() {
               activeField={activeField}
               onInfo={setActiveField}
             >
-              <Select
-                value={mp.caching ?? "none"}
-                onValueChange={(v) =>
-                  upd(
-                    "modelPlatform.caching",
-                    v === "none" ? undefined : (v as "redis" | "semantic")
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="redis">Redis (exact match)</SelectItem>
-                  <SelectItem value="semantic">Semantic cache</SelectItem>
-                </SelectContent>
-              </Select>
+              <SkippableField fieldId="modelPlatform.caching">
+                <Select
+                  value={mp.caching ?? "none"}
+                  onValueChange={(v) =>
+                    upd(
+                      "modelPlatform.caching",
+                      v === "none" ? undefined : (v as "redis" | "semantic")
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="None" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="redis">Redis (exact match)</SelectItem>
+                    <SelectItem value="semantic">Semantic cache</SelectItem>
+                  </SelectContent>
+                </Select>
+              </SkippableField>
             </FieldRow>
           </div>
 
@@ -213,15 +229,17 @@ export function ModelPlatformForm() {
               onInfo={setActiveField}
               hint="Multiple models on shared GPU pool"
             >
-              <div className="flex items-center gap-2 h-9">
-                <Switch
-                  checked={mp.multiModelServing}
-                  onCheckedChange={(v) => upd("modelPlatform.multiModelServing", v)}
-                />
-                <span className="text-sm text-[var(--text-muted)]">
-                  {mp.multiModelServing ? "Enabled" : "Disabled"}
-                </span>
-              </div>
+              <SkippableField fieldId="modelPlatform.multiModelServing">
+                <div className="flex items-center gap-2 h-9">
+                  <Switch
+                    checked={mp.multiModelServing}
+                    onCheckedChange={(v) => upd("modelPlatform.multiModelServing", v)}
+                  />
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {mp.multiModelServing ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+              </SkippableField>
             </FieldRow>
 
             <FieldRow
@@ -231,15 +249,17 @@ export function ModelPlatformForm() {
               onInfo={setActiveField}
               hint="Traffic splitting between model versions"
             >
-              <div className="flex items-center gap-2 h-9">
-                <Switch
-                  checked={mp.abTesting}
-                  onCheckedChange={(v) => upd("modelPlatform.abTesting", v)}
-                />
-                <span className="text-sm text-[var(--text-muted)]">
-                  {mp.abTesting ? "Enabled" : "Disabled"}
-                </span>
-              </div>
+              <SkippableField fieldId="modelPlatform.abTesting">
+                <div className="flex items-center gap-2 h-9">
+                  <Switch
+                    checked={mp.abTesting}
+                    onCheckedChange={(v) => upd("modelPlatform.abTesting", v)}
+                  />
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {mp.abTesting ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+              </SkippableField>
             </FieldRow>
           </div>
         </Section>
@@ -256,17 +276,19 @@ export function ModelPlatformForm() {
                 onInfo={setActiveField}
                 hint={hint}
               >
-                <div className="flex items-center gap-2 h-9">
-                  <Switch
-                    checked={mp.optimizations[key]}
-                    onCheckedChange={(v) =>
-                      upd(`modelPlatform.optimizations.${key}`, v)
-                    }
-                  />
-                  <span className="text-sm text-[var(--text-muted)]">
-                    {mp.optimizations[key] ? "On" : "Off"}
-                  </span>
-                </div>
+                <SkippableField fieldId={`modelPlatform.optimizations.${key}` as DiscoveryDefaultKey}>
+                  <div className="flex items-center gap-2 h-9">
+                    <Switch
+                      checked={mp.optimizations[key]}
+                      onCheckedChange={(v) =>
+                        upd(`modelPlatform.optimizations.${key}`, v)
+                      }
+                    />
+                    <span className="text-sm text-[var(--text-secondary)]">
+                      {mp.optimizations[key] ? "On" : "Off"}
+                    </span>
+                  </div>
+                </SkippableField>
               </FieldRow>
             ))}
           </div>
@@ -278,7 +300,7 @@ export function ModelPlatformForm() {
         {activeField ? (
           <ExplainBox fieldId={activeField} />
         ) : (
-          <div className="rounded-lg border border-dashed p-4 text-xs text-[var(--text-muted)] text-center">
+          <div className="rounded-lg border border-dashed p-4 text-xs text-[var(--text-secondary)] text-center">
             Click <Info className="inline h-3.5 w-3.5 mx-0.5" /> next to any
             field to see an explanation.
           </div>

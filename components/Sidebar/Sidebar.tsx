@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Home, BookOpen } from "lucide-react";
+import { Home, BookOpen, Zap, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarHeader } from "./SidebarHeader";
 import { SidebarNavItem } from "./SidebarNavItem";
@@ -41,12 +41,26 @@ export function Sidebar() {
       <SidebarHeader collapsed={isCollapsed} onToggle={toggle} />
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-2 flex flex-col gap-1 px-2">
-        {/* Primary CTA */}
-        <div className="mb-1">
+        {/* Position 2: Theme toggle */}
+        <SidebarThemeToggle collapsed={isCollapsed} />
+
+        {/* Position 3: New Project */}
+        <div className="mt-1">
           <SidebarNewProjectButton collapsed={isCollapsed} />
         </div>
 
-        {/* Global nav */}
+        {/* Position 4: Quick Sizing */}
+        <SidebarNavItem
+          href="/quick-sizing"
+          icon={Zap}
+          label="Quick Sizing"
+          collapsed={isCollapsed}
+          exact
+        />
+
+        <div className="my-1 border-t border-[var(--border-muted)]" />
+
+        {/* Position 5: All Projects */}
         <SidebarNavItem
           href="/"
           icon={Home}
@@ -54,6 +68,8 @@ export function Sidebar() {
           collapsed={isCollapsed}
           exact
         />
+
+        {/* Position 6: How it works */}
         <SidebarNavItem
           href="/onboarding"
           icon={BookOpen}
@@ -62,13 +78,18 @@ export function Sidebar() {
           exact
         />
 
+        {/* Position 7: Settings (stub) */}
+        <SidebarNavItem
+          href="/settings"
+          icon={Settings}
+          label="Settings"
+          collapsed={isCollapsed}
+          exact
+        />
+
         {/* Current project section — visible only on /project/[id]/* */}
         <div className="my-2 border-t border-[var(--border-muted)]" />
         <SidebarCurrentProject collapsed={isCollapsed} />
-      </div>
-
-      <div className="shrink-0 border-t border-[var(--border-default)] p-2">
-        <SidebarThemeToggle collapsed={isCollapsed} />
       </div>
     </aside>
   );

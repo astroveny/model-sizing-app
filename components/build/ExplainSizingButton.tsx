@@ -42,7 +42,7 @@ export function ExplainSizingButton({ context }: Props) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-7 gap-1.5 px-2 text-xs text-[var(--text-muted)]"
+        className="h-7 gap-1.5 px-2 text-xs text-[var(--text-secondary)]"
         disabled={loading}
         onClick={handleExplain}
       >

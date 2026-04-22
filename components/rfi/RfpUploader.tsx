@@ -78,9 +78,9 @@ export function RfpUploader() {
       />
 
       {busy ? (
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--text-muted)]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--text-secondary)]" />
       ) : (
-        <Upload className="h-8 w-8 text-[var(--text-muted)]" />
+        <Upload className="h-8 w-8 text-[var(--text-secondary)]" />
       )}
 
       <div className="text-center">
@@ -92,13 +92,13 @@ export function RfpUploader() {
           {status === "idle" && "Drop PDF or DOCX here, or click to browse"}
         </p>
         {fileName && status !== "idle" && (
-          <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1 justify-center">
+          <p className="text-xs text-[var(--text-secondary)] mt-1 flex items-center gap-1 justify-center">
             <FileText className="h-3 w-3" /> {fileName}
           </p>
         )}
         {error && <p className="text-xs text-[var(--danger)] mt-1 max-w-xs">{error}</p>}
         {status === "idle" && (
-          <p className="text-xs text-[var(--text-muted)] mt-1">PDF, DOCX, or plain text · max 10 MB</p>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">PDF, DOCX, or plain text · max 10 MB</p>
         )}
       </div>
     </div>
