@@ -945,6 +945,80 @@
 - **Deliverable:** recorded in CHANGELOG
 - **Refs:** PRD Phase 8 exit criteria
 
+### ☑ P8.12 — Hydration mismatch warning on `<body>`
+- **Action:** Add `suppressHydrationWarning` to the `<body>` element in `app/layout.tsx`. Already applied to `<html>`; extend to `<body>`. Root cause: browser extensions (Grammarly, etc.) inject attributes at runtime.
+- **Deliverable:** 1-line change to root layout
+- **Verify:** Reload page with Grammarly or similar extension installed; no hydration warning in console
+- **Refs:** User reported ExplainBox hydration warning
+
+### ☑ P8.13 — RFP upload: DOMMatrix error
+- **Action:** Swap `pdfjs-dist` (browser-only) for `pdf-parse` (Node-safe) in server-side PDF parsing.
+  ```bash
+  npm uninstall pdfjs-dist
+  npm install pdf-parse @types/pdf-parse
+  ```
+  In `app/api/upload/route.ts`:
+  ```ts
+  import pdfParse from 'pdf-parse'
+  const { text } = await pdfParse(buffer)
+  ```
+- **Deliverable:** dependency swap + route update
+- **Verify:** Upload the failing RFP; extraction succeeds
+- **Refs:** User reported "DOMMatrix is not defined"
+
+### ☑ P8.14 — PDF download: "site not available" crash
+- **Action:** Investigate `app/api/export/pdf/route.ts` (and related export routes). Likely causes:
+  - Missing `export const runtime = 'nodejs'` (route defaulting to edge, which can't run `@react-pdf/renderer`)
+  - Unhandled exception inside PDF generation
+  - Transitive `pdfjs-dist` import re-introducing DOMMatrix issue
+- **Required fixes:**
+  1. Add `export const runtime = 'nodejs'` to every export route
+  2. Wrap generation in try/catch with structured error response (JSON `{ error, detail }`)
+  3. Server log full stack on error
+- **Deliverable:** routes updated across PDF, Word, Build Report PDF
+- **Verify:** Download succeeds; if it fails, user sees structured error in dev tools
+- **Refs:** User reported
+
+### ☑ P8.15 — Build Report MD data mismatch
+- **Action:** The extractor in `lib/export/build-report-extract.ts` pulls incorrect data. Diagnose and fix.
+- **Diagnosis steps:**
+  1. Take the reference Llama-70B sample project with complete Discovery + Build
+  2. Export Build Report MD
+  3. Diff actual vs expected against the Build page UI, section by section
+  4. Identify mapping errors (wrong store paths, missing override merge, wrong field labels)
+- **Fixes expected in:**
+  - `lib/export/build-report-extract.ts` (data pulls)
+  - `lib/export/build-report-md.ts` (rendering / labels)
+- **Deliverable:** fixed extractor + renderer + regression test with fixture project
+- **Verify:** MD output matches Build page 1:1 for hardware, infra, modelPlatform, application, summary tables
+- **Refs:** P9.2, P9.3, user report
+
+### ☑ P8.16 — Build Report: remove Node Pool table
+- **Action:** The "node pools" table is consistently empty. Remove from both MD and PDF templates. Add a `TODO: restore when node pool rendering is fixed` comment at the removal site.
+- **Deliverable:** table removed from `lib/export/build-report-md.ts` and `lib/export/build-report-pdf.tsx`
+- **Refs:** User observation
+
+### ☑ P8.17 — Build Report: Engine Notes missing
+- **Action:** Engine notes (from `lib/sizing/notes.ts`) are populated in `buildState.notes` but not pulled by the extractor. Fix: extractor reads `notes`, renderer outputs them under an "Engine Notes" section (grouped by layer where available).
+- **Deliverable:** extractor + renderer fix
+- **Verify:** Build page has notes → export MD → notes appear in Engine Notes section, grouped by layer
+- **Refs:** User observation
+
+### ☑ P8.18 — RFI "Apply to Discovery" broken
+- **Action:** The Apply button on RFI extracted items doesn't update Discovery. Investigate and fix. Likely causes:
+  - Store action not dispatched
+  - Wrong `fieldId` resolver (extracted item → Discovery field path)
+  - Update reverted by subsequent autosave race
+- **Deliverable:** fix + integration test: paste sample RFP → click Apply on one item → assert Discovery store updated
+- **Verify:** As described
+- **Refs:** User reported
+
+### ☑ P8.19 — RFI: confirm no auto-apply
+- **Action:** Audit current code for any auto-apply behavior after extraction (per PRD §6.2.x, extraction should not touch Discovery automatically). If found, remove.
+- **Deliverable:** audit + removal if needed; integration test
+- **Verify:** Paste RFP → extracted items appear; Discovery is NOT modified until user clicks Apply
+- **Refs:** PRD §6.2.x (v0.4a)
+
 ---
 
 ## Phase 9 — Build Report Export
@@ -1003,18 +1077,151 @@
 
 ---
 
+## Phase 11 — UX Polish Round 2
+[Back to ToC](#phase-plan--model-sizing-app)
+
+**Goal:** Ship visible UX wins: text contrast, sidebar reorder, ML Sizer home link, required field markers, skippable toggle, Quick Sizing flow, RFI Apply polish.
+
+**Exit criteria:** All user-requested polish items shipped; no regressions from Phase 7.
+
+### ☐ P11.1 — Text color contrast audit
+- **Action:** Global audit via grep for `text-[var(--text-muted)]` and equivalent arbitrary-value usages across components. Replace with `--text-secondary` unless the element is a placeholder or disabled control. Run `axe-core` DevTools scan as regression check.
+- **Deliverable:** global replacement + axe report before/after
+- **Verify:** Toggle both themes; all labels and helper text clearly readable; axe scan passes AA on text elements
+- **Refs:** PRD §13.9 (v0.4a)
+
+### ☐ P11.2 — Sidebar reorder
+- **Action:** Update `components/Sidebar/Sidebar.tsx` to the new order per PRD §6.0.1 (v0.4a). Key changes:
+  - Theme toggle moves from pinned-bottom to position 2 (right under logo)
+  - New "+ Quick Sizing" button in position 4 (after "+ New Project")
+  - New "⚙ Settings" link in position 7 (under "How it works") — **placeholder route only in v0.4a** (Settings page itself is v0.4b / Phase 10). Link to `/settings` which renders a stub page.
+- **Deliverable:** reordered sidebar + stub `/settings` page saying "Settings coming in next release"
+- **Verify:** Visual check; both collapsed and expanded states correct; clicking Settings shows stub
+- **Refs:** PRD §6.0.1 (v0.4a)
+
+### ☐ P11.3 — "ML Sizer" home link
+- **Action:** In `components/Sidebar/SidebarHeader.tsx`, wrap the logo + title in `<Link href="/">`. Ensure keyboard focusable. When sidebar collapsed, logo-only still clickable with `aria-label="Home"`.
+- **Deliverable:** logo clickable
+- **Verify:** Click from any route → lands on `/`; keyboard tab + enter also works
+- **Refs:** PRD §6.0.x (v0.4a)
+
+### ☐ P11.4 — Field meta + defaults
+- **Action:**
+  1. Create `lib/discovery/defaults.ts` — default values per PRD §6.1 table (v0.4a). Single source of truth.
+  2. Create `lib/discovery/field-meta.ts` — classifies every field as `required` / `skippable` / `optional`.
+- **Deliverable:** two files; typed constants
+- **Verify:** Types match `DiscoveryState`; defaults table complete
+- **Refs:** PRD §6.1.x
+
+### ☐ P11.5 — Required markers on form fields
+- **Action:** Update every form in `components/discovery/*Form.tsx`. Add red asterisk next to labels of fields with class `required`. Render a muted helper text for `optional` fields ("Optional").
+- **Deliverable:** label rendering update across all 5 Discovery form components
+- **Verify:** Asterisks appear only on truly-required fields; visual consistency across tabs
+- **Refs:** PRD §6.1.x
+
+### ☐ P11.6 — Skippable "Use default" toggle
+- **Action:** For fields classified `skippable`, render a small Switch next to the input with label "Use default: <value>". When on:
+  - Input becomes disabled
+  - `_skipped` array in Discovery state includes the fieldId
+  - Validation treats this field as complete
+- **Deliverable:** reusable `<SkippableField>` wrapper + applied to every skippable field
+- **Verify:** Toggle skip on a field; persists; reload; still skipped
+- **Refs:** PRD §6.1.x
+
+### ☐ P11.7 — Validation respects _skipped
+- **Action:** Update `lib/utils/validation.ts` Zod schemas. A field being in `_skipped` counts as valid for required-gating. (Schema still validates type if value is present.)
+- **Deliverable:** updated validation + tests
+- **Verify:** Skipping a required field allows Build gate to open; unskipping requires re-entering
+- **Refs:** PRD §6.1.y
+
+### ☐ P11.8 — Progress banner
+- **Action:** Add `<DiscoveryProgressBanner>` at top of Discovery page. Three states: red (missing required), amber (ready with N defaults), green (all filled manually). Per PRD §6.1.y.
+- **Deliverable:** banner component + integration
+- **Verify:** State changes correctly as fields are filled/skipped
+- **Refs:** PRD §6.1.y
+
+### ☐ P11.9 — Review Defaults modal
+- **Action:** Clicking "Review defaults" in the P11.8 banner opens a modal listing each skipped field with its default value and an "Override" link. Override link toggles skip off and focuses the field.
+- **Deliverable:** modal component
+- **Verify:** Modal shows correct list; Override link works
+- **Refs:** PRD §6.1.y
+
+### ☐ P11.10 — Build gate uses new validation
+- **Action:** Update the gate in `app/project/[id]/build/page.tsx` (or wherever gating lives) to use the updated validation from P11.7.
+- **Deliverable:** gate update
+- **Verify:** Discovery with all required filled-or-skipped → Build accessible; missing required → Build blocked with banner
+- **Refs:** PRD §6.1.y
+
+### ☐ P11.11 — Quick Sizing sidebar entry
+- **Action:** Add "+ Quick Sizing" button to sidebar (already placed in P11.2 as position 4; this step wires its route). Also add on empty-state landing page alongside "+ New Project".
+- **Deliverable:** nav wiring + landing empty-state update
+- **Refs:** PRD §6.0.1 (v0.4a)
+
+### ☐ P11.12 — Quick Sizing form
+- **Action:** Build `app/quick-sizing/page.tsx`. Five-step form per PRD §6.6.2. Use shadcn Stepper pattern or plain sequential form with "Next"/"Back" buttons. Minimal styling; this is a functional path, not a marketing page.
+- **Deliverable:** page + form
+- **Verify:** Form captures all 5 answers; Back/Next navigation works
+- **Refs:** PRD §6.6
+
+### ☐ P11.13 — Rule-based recommender
+- **Action:** Build `lib/quick-sizing/recommender.ts` per PRD §6.6.4. Pure function: `(scale, latency, deployment) => Candidate[]`. Returns up to 3 candidates from `data/models.json` with rationale.
+- **Deliverable:** recommender + unit tests covering the 4 scale bands
+- **Verify:** Tests pass; recommendations are sensible
+- **Refs:** PRD §6.6.4
+
+### ☐ P11.14 — Quick Sizing apply flow
+- **Action:** On submit + candidate picked:
+  1. `createProject({ _source: 'quick-sizing' })`
+  2. Apply model metadata from catalog → `discovery.model`
+  3. Apply defaults from `lib/discovery/defaults.ts` → other fields; mark them in `_skipped`
+  4. Navigate to `/project/<id>/discovery` with banner state flagged
+- **Deliverable:** apply logic + integration test (end-to-end: Quick Sizing form → Discovery with 12+ defaults)
+- **Verify:** Resulting project is a regular project; no LLM dependency
+- **Refs:** PRD §6.6.3
+
+### ☐ P11.15 — LLM-assist stub
+- **Action:** Wire the "Let the app recommend" radio to the rule-based recommender for now. Add a TODO hook point in `lib/quick-sizing/recommender.ts` for the LLM path (to be activated by Phase 10 / v0.4b).
+- **Deliverable:** hook point + clear TODO comment
+- **Refs:** PRD §6.6.4 (v0.4a note)
+
+### ☐ P11.16 — Quick Sizing banner on Discovery
+- **Action:** If `_source === 'quick-sizing'`, show dismissible banner at top of Discovery: "Quick Sizing applied with N defaults. Review defaults." Dismiss state per-project.
+- **Deliverable:** banner
+- **Refs:** PRD §6.6.3 step 6
+
+### ☐ P11.17 — RFI Apply polish
+- **Action:** Depends on P8.18 fix being in place. Improve UX:
+  - Apply button per extracted item with status pill (Unapplied / Applied / Conflict)
+  - Bulk "Apply All Unapplied" at top
+  - Conflict resolution dialog: "Discovery already has X; overwrite with Y?"
+- **Deliverable:** updated RFI UI
+- **Verify:** All three states reachable; conflict dialog works
+- **Refs:** PRD §6.2.x, P8.18
+
+### ☐ P11.18 — Smoke test
+- **Action:** Full walkthrough:
+  1. From `/`, Quick Sizing path → Discovery with banner, toggle some skips, review defaults modal, proceed to Build
+  2. "+ New Project" path → Discovery with required markers, skippable toggles, progress banner states
+  3. RFI path → paste sample RFP, extract, apply one, apply-all unapplied
+  4. Theme toggle in new position, ML Sizer home link, all routes
+- **Deliverable:** CHANGELOG entry
+- **Verify:** No regressions from Phase 7; all PRD v0.4a acceptance criteria met
+
+---
+
 ## Future phases (v2+)
 [Back to ToC](#phase-plan--model-sizing-app)
 
 Not assigned step IDs yet — will be enumerated when scoped.
 
-- **Phase 10** — Fine-tuning workload module (LoRA, QLoRA, full FT sizing)
-- **Phase 11** — Training workload module (multi-node training, gradient sizing)
-- **Phase 12** — MCP integrations (live catalog / pricing lookups)
-- **Phase 13** — Additional accelerators (Intel Gaudi, AWS Trainium/Inferentia, Google TPU)
-- **Phase 14** — IaC export (Terraform modules, Helm charts)
-- **Phase 15** — RAG / vector DB sizing sub-module
-- **Phase 16** — Multi-region & DR sizing
+- **Phase 10** — LLM Settings (model routing, provider config, v0.4b)
+- **Phase 12** — Server/BoM override (v0.4b)
+- **Phase 13** — Fine-tuning workload module (LoRA, QLoRA, full FT sizing)
+- **Phase 14** — MCP integrations (live catalog / pricing lookups)
+- **Phase 15** — Additional accelerators (Intel Gaudi, AWS Trainium/Inferentia, Google TPU)
+- **Phase 16** — IaC export (Terraform modules, Helm charts)
+- **Phase 17** — RAG / vector DB sizing sub-module
+- **Phase 18** — Multi-region & DR sizing
 
 ---
 
@@ -1057,6 +1264,43 @@ P8.5 — RFP file upload extraction failure
     Non-issues: pdf-parse loads fine in Node.js runtime (not Edge); mammoth
     import works; 10MB size cap is correctly enforced.
   Fix: see P8.6 (extension-based MIME fallback + actionable error messages).
+
+P8.12 — Hydration mismatch on <body>
+  Symptom: "A tree hydrated but some attributes of the server rendered HTML
+           didn't match the client properties"
+  Root cause: browser extensions (Grammarly, etc.) inject attributes onto <body>
+  Fix: add suppressHydrationWarning to <body> in app/layout.tsx
+  Regression test: none (dev-only warning)
+
+P8.13 — DOMMatrix not defined on PDF upload
+  Symptom: Server throws "DOMMatrix is not defined"
+  Root cause: pdfjs-dist assumes browser APIs not available in Node SSR
+  Fix: swap to pdf-parse
+  Regression test: tests/fixtures/rfp-samples/*.pdf
+
+P8.14 — PDF download "site not available"
+  Symptom: Client sees "site was not available" on PDF download
+  Root cause: TBD — likely edge runtime or unhandled exception
+  Fix: runtime='nodejs' + try/catch + structured error
+  Regression test: integration test per export route
+
+P8.15 — Build Report MD data mismatch
+  Symptom: Hardware/Infra/etc tables have wrong or missing values
+  Root cause: extractor reads wrong store paths
+  Fix: repair mappings + regression test with fixture
+  Regression test: tests/export/build-report.test.ts
+
+P8.17 — Engine Notes missing from Build Report
+  Symptom: Engine Notes section empty despite notes in Build page
+  Root cause: extractor doesn't pull buildState.notes
+  Fix: add to extractor + renderer
+  Regression test: as P8.15
+
+P8.18 — RFI Apply to Discovery broken
+  Symptom: Clicking Apply on extracted requirement doesn't update Discovery
+  Root cause: TBD
+  Fix: wire Apply to store dispatch + integration test
+  Regression test: tests/rfi/apply.test.ts
 ```
 
 ---
@@ -1067,3 +1311,4 @@ P8.5 — RFP file upload extraction failure
 |---|---|---|
 | v0.1 | 2026-04-19 | Initial phase plan with P0–P6 steps |
 | v0.3 | 2026-04-21 | Added Phase 7 (UX redesign: left-nav, themes, landing, autosave indicator), Phase 8 (bug fixes: interconnect, RFP JSON, RFP upload, BoM pricing audit), Phase 9 (Build Report export in PDF and Markdown). Renumbered old Phase 7–13 futures to Phase 10–16. Added prepopulated troubleshooting entries for P8.1, P8.3, P8.5. |
+| v0.4a | 2026-04-22 | **Phase 8 extension (P8.12–P8.19):** hydration warning, DOMMatrix, PDF download crash, Build Report MD data, Node Pool table removed, Engine Notes restored, RFI Apply fixed, RFI confirm-before-apply. **Phase 11 (P11.1–P11.18):** text contrast, sidebar reorder + theme-toggle-to-top, ML Sizer home link, required field markers, skippable toggle + defaults, progress banner, Review Defaults modal, Quick Sizing flow (rule-based; LLM-assist stub), RFI Apply polish. Added prepopulated troubleshooting entries for P8.12–P8.18. |

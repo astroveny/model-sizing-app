@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { extractBuildReport } from "@/lib/export/build-report-extract";
-import { defaultProject, defaultDiscovery, defaultBuildDerived } from "@/lib/store";
+import { defaultProject } from "@/lib/store";
 import type { Project } from "@/lib/store";
 
 // ---------------------------------------------------------------------------
@@ -22,20 +22,6 @@ function denseProject70B(): Project {
   p.discovery.load.avgInputTokens = 512;
   p.discovery.load.avgOutputTokens = 256;
   p.discovery.hardware.preferredGpu = "h100-sxm";
-  // Populate build.final so hardware/infra/mp/app fields are readable
-  p.build.final = defaultBuildDerived();
-  p.build.final.hardware.gpu = { model: "H100 SXM5", count: 8, vramPerGpuGb: 80 };
-  p.build.final.hardware.server = { model: "DGX H100", count: 1, gpusPerServer: 8 };
-  p.build.final.hardware.storage = { type: "nvme", capacityTb: 30 };
-  p.build.final.hardware.networking = { fabric: "infiniband-400g", linksPerNode: 2 };
-  p.build.final.infra = { orchestrator: "kubernetes", nodePools: [], loadBalancer: "nginx", monitoring: ["prometheus"] };
-  p.build.final.modelPlatform.server = "vllm";
-  p.build.final.modelPlatform.replicas = 2;
-  p.build.final.modelPlatform.tensorParallelism = 4;
-  p.build.final.modelPlatform.latencyEstimates = { ttftMs: 180, itlMs: 17, endToEndMs: 3580, prefillTokensPerSec: 10000, decodeTokensPerSec: 420 };
-  p.build.final.modelPlatform.interconnectRecommendation = { intraNode: "nvlink", interNode: "infiniband-400g" };
-  p.build.final.application = { gateway: "kong", authMethod: "oidc", rateLimits: { rps: 50, burst: 100 }, metering: false };
-  p.build.notes = ["[INFO] TP=4 chosen"];
   return p;
 }
 
@@ -67,24 +53,35 @@ describe("extractBuildReport — dense 70B project", () => {
     expect(report!.project.deploymentPattern).toBe("internal-inference");
   });
 
-  it("includes hardware fields from build.final", () => {
+  it("derives hardware fields from sizing engine", () => {
     const report = extractBuildReport(denseProject70B())!;
+    // GPU model comes from catalog (h100-sxm → "H100 SXM5")
     expect(report.hardware.gpuModel).toBe("H100 SXM5");
-    expect(report.hardware.serverModel).toBe("DGX H100");
-    expect(report.hardware.gpuCount).toBe(8);
+    expect(report.hardware.vramPerGpuGb).toBe(80);
+    expect(report.hardware.gpuCount).toBeGreaterThan(0);
+    expect(report.hardware.serverModel).toBeTruthy();
   });
 
-  it("includes model platform fields from build.final", () => {
+  it("derives model platform fields from sizing engine", () => {
     const report = extractBuildReport(denseProject70B())!;
     expect(report.modelPlatform.inferenceServer).toBe("vllm");
-    expect(report.modelPlatform.tensorParallelism).toBe(4);
-    expect(report.modelPlatform.ttftMs).toBe(180);
+    expect(report.modelPlatform.tensorParallelism).toBeGreaterThan(0);
+    expect(report.modelPlatform.ttftMs).toBeGreaterThan(0);
+    expect(report.modelPlatform.itlMs).toBeGreaterThan(0);
+    expect(report.modelPlatform.endToEndMs).toBeGreaterThan(0);
   });
 
   it("includes sizing-derived totals", () => {
     const report = extractBuildReport(denseProject70B())!;
     expect(report.totals.totalGpus).toBeGreaterThan(0);
     expect(report.totals.serverCount).toBeGreaterThan(0);
+  });
+
+  it("derives infra fields from discovery.infra", () => {
+    const report = extractBuildReport(denseProject70B())!;
+    expect(report.infra.orchestrator).toBe("kubernetes");
+    expect(report.infra.loadBalancer).toBe("K8s Service + Ingress");
+    expect(report.infra.airGapped).toBe(false);
   });
 
   it("populates bom with at least GPU and server rows", () => {
@@ -107,16 +104,16 @@ describe("extractBuildReport — dense 70B project", () => {
     expect(report.hasOverrides).toBe(false);
   });
 
-  it("includes engine notes from build.notes", () => {
+  it("populates engine notes from computeSizing", () => {
     const report = extractBuildReport(denseProject70B())!;
-    expect(report.engineNotes).toContain("[INFO] TP=4 chosen");
+    // Engine notes come from the sizing engine, always an array
+    expect(Array.isArray(report.engineNotes)).toBe(true);
   });
 });
 
 describe("extractBuildReport — with BoM price overrides", () => {
   it("applies price override and marks row as overridden", () => {
     const p = denseProject70B();
-    // Find what the GPU item name will be (H100 SXM5 from catalog)
     (p.build.overrides as Record<string, unknown>)["bom:price:H100 SXM5"] = 28000;
 
     const report = extractBuildReport(p)!;
@@ -156,8 +153,6 @@ describe("extractBuildReport — MoE project", () => {
     p.discovery.load.avgInputTokens = 256;
     p.discovery.load.avgOutputTokens = 128;
     p.discovery.hardware.preferredGpu = "mi300x";
-    p.build.final = defaultBuildDerived();
-    p.build.notes = [];
 
     const report = extractBuildReport(p);
     expect(report).not.toBeNull();

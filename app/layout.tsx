@@ -32,7 +32,7 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full bg-[var(--bg-canvas)] text-[var(--text-primary)]">
+      <body className="h-full bg-[var(--bg-canvas)] text-[var(--text-primary)]" suppressHydrationWarning>
         <ThemeProvider>
           <div className="flex h-full">
             <Sidebar />

@@ -36,8 +36,10 @@ export type BuildReportHardware = {
 
 export type BuildReportInfra = {
   orchestrator: string;
-  nodePools: { role: string; nodes: number }[];
+  // TODO: restore when node pool rendering is fixed
   loadBalancer: string;
+  airGapped: boolean;
+  gitops: string;
   monitoring: string[];
 };
 
@@ -149,11 +151,9 @@ export const BUILD_REPORT_FIXTURE: BuildReport = {
   },
   infra: {
     orchestrator: "kubernetes",
-    nodePools: [
-      { role: "gpu-worker", nodes: 1 },
-      { role: "cpu-system", nodes: 2 },
-    ],
-    loadBalancer: "nginx",
+    loadBalancer: "K8s Service + Ingress",
+    airGapped: false,
+    gitops: "argocd",
     monitoring: ["prometheus", "grafana"],
   },
   modelPlatform: {

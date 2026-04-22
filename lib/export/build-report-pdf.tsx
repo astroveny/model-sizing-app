@@ -184,27 +184,12 @@ function InfraAppPage({ report }: { report: BuildReport }) {
     <Page size="A4" style={styles.page}>
       <Footer title={report.project.name} />
       <SectionTitle>Infrastructure</SectionTitle>
+      {/* TODO: restore when node pool rendering is fixed */}
       <KvRow label="Orchestrator"  value={infra.orchestrator || "—"} />
       <KvRow label="Load Balancer" value={infra.loadBalancer || "—"} />
+      <KvRow label="Air-gapped"    value={infra.airGapped ? "Yes" : "No"} />
+      <KvRow label="GitOps"        value={infra.gitops || "—"} />
       <KvRow label="Monitoring"    value={infra.monitoring.length ? infra.monitoring.join(", ") : "—"} />
-
-      {infra.nodePools.length > 0 && (
-        <>
-          <SubTitle>Node Pools</SubTitle>
-          <View style={styles.table}>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableCellBold, { flex: 2 }]}>Role</Text>
-              <Text style={styles.tableCellBold}>Nodes</Text>
-            </View>
-            {infra.nodePools.map((pool, i) => (
-              <View key={i} style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
-                <Text style={[styles.tableCell, { flex: 2 }]}>{pool.role}</Text>
-                <Text style={styles.tableCell}>{pool.nodes}</Text>
-              </View>
-            ))}
-          </View>
-        </>
-      )}
 
       <SectionTitle>Application Layer</SectionTitle>
       <KvRow label="API Gateway"   value={app.gateway    || "—"} />

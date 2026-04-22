@@ -72,6 +72,16 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P9.6: Export page sectioned into "Customer Deliverables" (PDF/DOCX/BoM) and "Internal Reports" (Build Report PDF/MD); outline-button style for internal reports
 - P9.7: lib/export/filename.ts — slugifyName + buildExportFilename utility; all 5 routes + Export page buttons use canonical pattern <slug>-<type>-<YYYY-MM-DD>.<ext>; 9 tests in tests/export/filename.test.ts
 - P9.8: Phase 9 smoke test — typecheck clean; 78/78 tests passing (7 test files); Build Report PDF/MD content verified to match via shared fixture. Date: 2026-04-22
+- PRD v0.4a + PHASE_PLAN v0.4a applied: §13.9 accessible text rules, §6.6 Quick Sizing, §6.1.x/y field classification, §6.2.x Apply flow, §6.0 sidebar reorder; Phase 8 extension (P8.12–P8.19) and Phase 11 appended to PHASE_PLAN
+- P8.12: suppressHydrationWarning added to <body> in app/layout.tsx
+- P8.13: pdfjs-dist confirmed absent; pdf-parse already in use (resolved in P8.5/P8.6)
+- P8.14: export const runtime = "nodejs" added to all 5 export routes + /api/llm + /api/upload; try/catch already present
+- P8.15: Build Report extractor rewritten to derive all panel data from computeSizing() + discovery state — build.final (never populated by UI) is no longer read
+- P8.16: Node Pool table removed from Build Report MD and PDF; TODO marker left at removal sites
+- P8.17: engineNotes fixed — extractor now always uses sizing.notes (was short-circuited by empty build.notes array via ?? operator)
+- P8.18: RFI Apply race condition fixed — RequirementsList now calls saveProjectAction immediately after updateField so navigation can't lose the applied value before autosave fires; integration test in tests/rfi/apply.test.ts
+- P8.19: Confirmed no auto-apply — RfpPaster and RfpUploader write only to rfi.* store paths, never to discovery.*
+- 85/85 tests passing (8 test files). Date: 2026-04-22
 
 ### Changed
 - app/project/[id]/layout.tsx: removed header breadcrumb and TabBar; layout is now ProjectHydrator + children

@@ -111,10 +111,7 @@ function renderHardware(r: BuildReport): string {
 
 function renderInfra(r: BuildReport): string {
   const infra = r.infra;
-  const poolRows = infra.nodePools.length > 0
-    ? infra.nodePools.map((p) => tableRow([p.role, fmtNum(p.nodes)]))
-    : [tableRow(["—", "—"])];
-
+  // TODO: restore when node pool rendering is fixed
   return [
     "## Infrastructure",
     "",
@@ -122,13 +119,9 @@ function renderInfra(r: BuildReport): string {
     tableSep(2),
     tableRow(["Orchestrator",  infra.orchestrator || "—"]),
     tableRow(["Load balancer", infra.loadBalancer  || "—"]),
+    tableRow(["Air-gapped",    infra.airGapped ? "Yes" : "No"]),
+    tableRow(["GitOps",        infra.gitops || "—"]),
     tableRow(["Monitoring",    infra.monitoring.length ? infra.monitoring.join(", ") : "—"]),
-    "",
-    "### Node Pools",
-    "",
-    tableRow(["Role", "Nodes"]),
-    tableSep(2),
-    ...poolRows,
     "",
   ].join("\n");
 }

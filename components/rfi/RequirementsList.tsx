@@ -2,6 +2,7 @@
 
 import { useProjectStore } from "@/lib/store";
 import type { ExtractedRequirement } from "@/lib/store";
+import { saveProjectAction } from "@/lib/actions/projects";
 import { CheckCircle2, Circle, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,14 +16,16 @@ const LAYER_COLOR: Record<string, string> = {
 
 function RequirementRow({ req }: { req: ExtractedRequirement }) {
   const updateField = useProjectStore((s) => s.updateField);
-  const discovery = useProjectStore((s) => s.activeProject?.discovery);
 
-  function applyToDiscovery() {
-    if (!req.mapsToDiscoveryField || !req.extractedValue) return;
+  async function applyToDiscovery() {
+    if (!req.mapsToDiscoveryField || req.extractedValue == null) return;
     updateField(`discovery.${req.mapsToDiscoveryField}`, req.extractedValue);
+    // Persist immediately — avoids race if user navigates away before debounce fires.
+    const project = useProjectStore.getState().activeProject;
+    if (project) await saveProjectAction(project);
   }
 
-  const canApply = !!req.mapsToDiscoveryField && !!req.extractedValue;
+  const canApply = !!req.mapsToDiscoveryField && req.extractedValue != null;
 
   return (
     <li className="flex items-start gap-3 py-3 border-b last:border-0">
@@ -65,12 +68,15 @@ export function RequirementsList() {
   const requirements = useProjectStore((s) => s.activeProject?.rfi.extracted.requirements ?? []);
   const updateField = useProjectStore((s) => s.updateField);
 
-  function applyAll() {
+  async function applyAll() {
     for (const req of requirements) {
-      if (req.mapsToDiscoveryField && req.extractedValue) {
+      if (req.mapsToDiscoveryField && req.extractedValue != null) {
         updateField(`discovery.${req.mapsToDiscoveryField}`, req.extractedValue);
       }
     }
+    // Persist the full batch immediately.
+    const project = useProjectStore.getState().activeProject;
+    if (project) await saveProjectAction(project);
   }
 
   if (requirements.length === 0) return null;

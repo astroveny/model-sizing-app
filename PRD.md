@@ -236,6 +236,8 @@ type DiscoveryState = {
     auditLogging: boolean
     metering: boolean             // required for gpuaas/saas patterns
   }
+  _skipped: string[]              // NEW v0.4a: fieldIds where "Use default" is enabled
+  _source: 'manual' | 'quick-sizing' | 'rfp-import'  // NEW v0.4a: creation source
 }
 
 type RfiState = {
@@ -367,12 +369,15 @@ The application uses a persistent **two-level left navigation sidebar** modeled 
 
 ```
 ┌─────────────────────────┐
-│  [Logo / App Name]      │  ← header with collapse toggle
+│  [Logo / ML Sizer]      │  ← header; clicking routes to /
+│  🌙 / ☀️ Theme toggle   │  ← position 2 (moved from bottom)
 │                         │
 │  [+ New Project]        │  ← primary CTA
+│  [+ Quick Sizing]       │  ← NEW v0.4a
 │                         │
 │  🏠  All Projects        │  ← global nav
 │  📖  How it works        │  ← onboarding page
+│  ⚙   Settings           │  ← NEW v0.4a placeholder (Settings page in v0.4b)
 │                         │
 │  ─── Current project ── │  ← visible only when inside /project/[id]
 │  <project name>         │
@@ -383,10 +388,13 @@ The application uses a persistent **two-level left navigation sidebar** modeled 
 │                         │
 │  (flex spacer)          │
 │                         │
-│  🌙 / ☀️ Theme toggle   │  ← pinned bottom
-│  ⟨ Collapse ⟩           │  ← toggle expanded/collapsed
+│  ⟨ Collapse ⟩           │  ← pinned bottom (theme toggle moved to top)
 └─────────────────────────┘
 ```
+
+#### 6.0.x ML Sizer home link
+
+Clicking "ML Sizer" in the sidebar header routes to `/`. Applies to both expanded and collapsed states (collapsed logo still clickable; `aria-label="Home"`). Keyboard focusable.
 
 #### 6.0.2 Collapse behavior
 
@@ -512,6 +520,60 @@ When inside a project, the Discovery/RFI/Build/Export sections are selected via 
 - [ ] Required-field banner appears when minimum set incomplete
 - [ ] Values persist across browser refresh
 
+#### 6.1.x Required fields + Skip toggle
+
+Fields are classified into three categories:
+- **Required** — must have a value before Build is accessible
+- **Skippable required** — required by default, but has a sensible engine default; user can toggle "Use default" to skip entering
+- **Optional** — no constraint; blank means "not specified"
+
+Classification table:
+
+| Field | Class | Default if skipped |
+|---|---|---|
+| `model.name` | Required | — |
+| `model.params` | Required | — |
+| `model.quantization` | Required | — |
+| `model.contextLength` | Skippable | 8192 |
+| `load.concurrentUsers` | Required | — |
+| `load.avgInputTokens` | Skippable | 2000 |
+| `load.avgOutputTokens` | Skippable | 500 |
+| `load.targetLatencyP95Ms` | Skippable | 10000 |
+| `load.targetTTFTMs` | Skippable | 1000 |
+| `load.targetITLMs` | Skippable | 40 |
+| `load.peakBurstMultiplier` | Skippable | 2.0 |
+| `load.uptimeSla` | Optional | — |
+| `load.streaming` | Optional (default false) | — |
+| `constraints.*` | Optional | — |
+| `hardware.preferredVendor` | Skippable | 'either' |
+| `hardware.preferredGpu` | Optional (auto-select if blank) | — |
+| `hardware.networking` | Skippable | '100g' |
+| `hardware.cooling` | Skippable | 'either' |
+| `infra.orchestrator` | Skippable | 'kubernetes' |
+| `infra.airGapped` | Skippable | false |
+| `modelPlatform.inferenceServer` | Skippable | 'vllm' |
+| `modelPlatform.optimizations.*` | Optional | engine-sensible defaults |
+| `application.apiGateway` | Skippable | 'cloud-native' |
+| `application.auth` | Skippable | 'apikey' |
+
+Note: `hardware.preferredServer` deferred to v0.4b (Phase 12).
+
+UI rendering:
+- **Required** fields: red asterisk
+- **Skippable** fields: small "Use default: \<value\>" toggle; when on, input disabled and default used at sizing time
+- **Optional** fields: unmarked
+
+Defaults live in `lib/discovery/defaults.ts` — single source of truth.
+
+#### 6.1.y Progress gating
+
+Build section is usable when all **Required** fields have values AND all **Skippable required** fields either have values OR have "Use default" enabled. Optional fields never block.
+
+Top-of-Discovery banner:
+- 🔴 "Missing required fields: \<list\>" (incomplete)
+- 🟡 "Ready to size — N defaults in use" (with "Review defaults" link)
+- 🟢 "All fields filled" (no skips)
+
 ### 6.2 RFI section
 
 **Structure:**
@@ -526,6 +588,17 @@ When inside a project, the Discovery/RFI/Build/Export sections are selected via 
 - User can edit any extracted item before mapping.
 - "Apply to Discovery" button populates Discovery with mapped values.
 - Qualification is computed deterministically from extracted requirements + Discovery completeness + constraints.
+
+#### 6.2.x Apply flow (explicit user action required)
+
+The app does **not** automatically populate Discovery from RFP extraction. User must explicitly apply.
+
+Each extracted requirement has:
+- **Apply** button → maps this one requirement to its Discovery field; Discovery updates immediately
+- Status pill: **Unapplied** / **Applied** / **Conflict** (if Discovery already has a non-matching value)
+- Conflict resolution dialog on Apply: "Discovery already has X; overwrite with Y?"
+
+Bulk **"Apply All Unapplied"** button at top of requirements list.
 
 **Acceptance criteria:**
 - [ ] Can paste RFP text and get structured extraction
@@ -608,6 +681,47 @@ Plus a top-level summary: total GPUs, servers, power, rack units, capex, monthly
 - [ ] Content can be edited via a simple JSON file without code changes
 - [ ] "Ask Claude" produces context-aware explanations within 5s
 - [ ] Custom explanations persist per-project in SQLite
+
+### 6.6 Quick Sizing Mode
+
+Accessible from sidebar ("+ Quick Sizing") or empty landing page state.
+
+#### 6.6.1 Purpose
+Fast project creation for demos, discovery-call starters, or rough-order-of-magnitude sizing. User answers 5 questions, app fills the rest with defaults. LLM-based model recommendation is a stub in v0.4a (rule-based only); activated in v0.4b.
+
+#### 6.6.2 Flow
+
+Step 1 — **Objective** (free-text): "What are you trying to do?"
+Step 2 — **Model choice**: "I know the model" (fuzzy match against `data/models.json`) or "Let the app recommend" (rule-based v0.4a, LLM-assisted v0.4b)
+Step 3 — **Scale**: concurrent users (number input + slider)
+Step 4 — **Latency sensitivity**: Real-time chat (< 5s) / Responsive (< 15s) / Batch / no preference
+Step 5 — **Deployment**: pattern (internal/external-api/gpuaas/saas) + target (on-prem/cloud/either)
+
+#### 6.6.3 Output
+
+On submit:
+1. Create a new project
+2. Determine candidate models (picked by user or rule-based recommender)
+3. Apply model metadata to `discovery.model`
+4. Apply defaults from `lib/discovery/defaults.ts` to all other fields; mark them in `_skipped`
+5. Set `_source = 'quick-sizing'`
+6. Navigate to Discovery with banner: "Quick Sizing applied with N defaults. Review defaults."
+
+#### 6.6.4 Rule-based recommender (v0.4a)
+
+Lives in `lib/quick-sizing/recommender.ts`. Pure function. Returns up to 3 candidates from `data/models.json` with plain-English rationale.
+
+- < 50 concurrent + responsive/batch → 7B–13B class candidates
+- 50–500 concurrent → 7B–70B based on latency sensitivity
+- 500+ concurrent → smaller models favored, multi-replica
+- Real-time latency → favor smaller models + stronger quantization
+
+#### 6.6.5 Acceptance criteria
+- [ ] Completes in < 60s end-to-end
+- [ ] Works without any LLM configured (rule-based path)
+- [ ] Every applied default traceable ("review defaults" banner links to list)
+- [ ] Resulting project is a normal project (editable, deletable, exportable)
+- [ ] LLM-assist hook placeholder exists but stubbed to rule-based in v0.4a
 
 ---
 
@@ -1308,6 +1422,21 @@ Dark mode uses borders (`border-default`) instead of shadows for elevation.
 - Keyboard navigable throughout
 - ARIA labels on icon-only buttons
 
+### 13.9 Text color accessibility
+
+The v0.3 spec's `--text-secondary` (`#5a5a5a` light, `#8b949e` dark) and `--text-muted` (`#8a8a8a` light, `#6e7681` dark) sometimes fail 4.5:1 WCAG AA contrast on `--bg-subtle` backgrounds.
+
+**Rule:**
+- `--text-secondary` is the minimum for any text carrying meaning (labels, helper text, captions)
+- `--text-muted` is reserved for placeholder-only states (empty input placeholders, disabled controls)
+- Never use `--text-muted` for labels, captions, or form descriptors
+
+Minimum pairings:
+- `--text-secondary` on `--bg-canvas`, `--bg-surface`, `--bg-subtle` — ≥ 4.5:1 (AA)
+- `--text-muted` only on `--bg-surface` or `--bg-canvas` (never on `--bg-subtle`)
+
+**Phase 11 audit task:** replace any existing `--text-muted` usage on labels/captions with `--text-secondary` globally.
+
 ---
 
 ## 14. Revision Log
@@ -1317,6 +1446,7 @@ Dark mode uses borders (`border-default`) instead of shadows for elevation.
 | v0.1 | 2026-04-18 | Claude + owner | Initial draft covering v1 scope, inference-only, on-prem primary, Docker distribution |
 | v0.2 | 2026-04-19 | Claude + owner | §5.1: added TTFT/ITL targets, optimizations object, TP/PP/EP + latency estimates in BuildDerived. §5.2: added `description` column to projects table. §7.1: reorganized into memory footprint, prefill phase, decode phase, sharding strategy (TP/PP/EP), and capacity. §7.6: new "Inference Optimizations" section. §7.7: new worked example for Llama 3.1 70B. |
 | v0.3 | 2026-04-21 | Claude + owner | UX redesign: two-level left nav (§6.0), merged landing/projects page (§6.0.7), onboarding page (§6.0.8), autosave indicator instead of save button (§6.1 revised), Build Report export in PDF + Markdown (§6.4 revised). New §10 Phase 7+ file-structure additions. New §13 Design System (color tokens, typography, spacing, motion, accessibility). Known bugs + BoM pricing audit queued for Phase 8. |
+| v0.4a | 2026-04-22 | Claude + owner | §6.1 required/skippable/optional field classes with full classification table and defaults; §6.6 Quick Sizing mode with rule-based recommender (LLM-assist stub to be activated in v0.4b); §5.1 adds `_skipped`, `_source`; §6.0 sidebar reorder + ML Sizer home link; §6.2 explicit Apply flow for RFI; §13.9 accessible text rules |
 
 ---
 

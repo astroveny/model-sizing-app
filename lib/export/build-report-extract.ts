@@ -4,7 +4,7 @@ import type { Project } from "@/lib/store";
 import type { SizingInput } from "@/lib/sizing/types";
 import { computeSizing } from "@/lib/sizing/index";
 import { buildBom } from "@/lib/sizing/bom";
-import { getGpuById, modelCatalog } from "@/lib/sizing/catalog";
+import { getGpuById, getBestServer, modelCatalog } from "@/lib/sizing/catalog";
 import {
   BUILD_REPORT_VERSION,
   type BuildReport,
@@ -83,6 +83,8 @@ function buildAssumptions(input: SizingInput, project: Project): BuildReportAssu
 /**
  * Pure function: extracts a complete BuildReport from a Project.
  * Returns null when Discovery is incomplete (no model params / no concurrent users).
+ * All panel data is derived fresh from computeSizing() + discovery state —
+ * build.final is NOT used as it is never populated by the UI.
  */
 export function extractBuildReport(project: Project): BuildReport | null {
   const input = toSizingInput(project);
@@ -128,7 +130,13 @@ export function extractBuildReport(project: Project): BuildReport | null {
 
   const capexUsd = bom.reduce((s, r) => s + (r.totalPriceUsd ?? 0), 0);
 
-  const { hardware: hw, infra, modelPlatform: mp, application: app } = project.build.final;
+  const { discovery } = project;
+  const { infra, modelPlatform: mp, application: app } = discovery;
+
+  // Hardware: derived from sizing engine + GPU/server catalog
+  const server = getBestServer(input.gpu.id);
+  const gpusPerServer = server?.max_gpus ?? sizing.sharding.gpusPerReplica;
+  const endToEndMs = sizing.optimizations.adjustedTtftMs + sizing.optimizations.adjustedItlMs * input.avgOutputTokens;
 
   return {
     version: BUILD_REPORT_VERSION,
@@ -153,52 +161,56 @@ export function extractBuildReport(project: Project): BuildReport | null {
     },
 
     hardware: {
-      gpuModel:        hw.gpu.model,
-      gpuCount:        hw.gpu.count,
-      vramPerGpuGb:    hw.gpu.vramPerGpuGb,
-      serverModel:     hw.server.model,
-      serverCount:     hw.server.count,
-      gpusPerServer:   hw.server.gpusPerServer,
-      networkFabric:   hw.networking.fabric,
-      storageType:     hw.storage.type,
-      storageCapacityTb: hw.storage.capacityTb,
+      gpuModel:          input.gpu.model,
+      gpuCount:          sizing.capacity.totalGpus,
+      vramPerGpuGb:      input.gpu.vram_gb,
+      serverModel:       server?.model ?? "Best-match server",
+      serverCount:       sizing.capacity.serverCount,
+      gpusPerServer,
+      networkFabric:     sizing.sharding.interconnectRecommendation.interNode,
+      storageType:       "nvme",
+      storageCapacityTb: Math.ceil(sizing.capacity.serverCount * 15),
     },
 
     infra: {
       orchestrator: infra.orchestrator,
-      nodePools:    infra.nodePools,
-      loadBalancer: infra.loadBalancer,
-      monitoring:   infra.monitoring,
+      // TODO: restore when node pool rendering is fixed
+      loadBalancer: infra.orchestrator === "kubernetes" ? "K8s Service + Ingress" : "Native LB",
+      airGapped:    infra.airGapped,
+      gitops:       infra.gitops && infra.gitops !== "none" ? infra.gitops : "Not configured",
+      monitoring:   infra.observability,
     },
 
     modelPlatform: {
-      inferenceServer:    mp.server,
-      replicas:           mp.replicas,
-      tensorParallelism:  mp.tensorParallelism,
-      pipelineParallelism: mp.pipelineParallelism,
-      expertParallelism:  mp.expertParallelism,
-      kvCacheGb:          mp.kvCacheGb,
-      maxBatchSize:       mp.maxBatchSize,
-      ttftMs:             mp.latencyEstimates.ttftMs,
-      itlMs:              mp.latencyEstimates.itlMs,
-      endToEndMs:         mp.latencyEstimates.endToEndMs,
-      decodeTokensPerSec: mp.latencyEstimates.decodeTokensPerSec,
-      intraNodeFabric:    mp.interconnectRecommendation.intraNode,
-      interNodeFabric:    mp.interconnectRecommendation.interNode,
+      inferenceServer:     mp.inferenceServer,
+      replicas:            sizing.capacity.replicas,
+      tensorParallelism:   sizing.sharding.tensorParallelism,
+      pipelineParallelism: sizing.sharding.pipelineParallelism,
+      expertParallelism:   sizing.sharding.expertParallelism,
+      kvCacheGb:           sizing.optimizations.adjustedKvCacheTotalGb,
+      maxBatchSize:        input.concurrentUsers,
+      ttftMs:              sizing.optimizations.adjustedTtftMs,
+      itlMs:               sizing.optimizations.adjustedItlMs,
+      endToEndMs,
+      decodeTokensPerSec:  sizing.optimizations.adjustedDecodeTokensPerSecPerReplica,
+      intraNodeFabric:     sizing.sharding.interconnectRecommendation.intraNode,
+      interNodeFabric:     sizing.sharding.interconnectRecommendation.interNode,
     },
 
     application: {
-      gateway:       app.gateway,
-      authMethod:    app.authMethod,
-      rateLimitRps:  app.rateLimits.rps,
-      metering:      app.metering,
+      gateway:      app.apiGateway,
+      authMethod:   app.auth,
+      rateLimitRps: discovery.load.requestsPerSecond || 0,
+      metering:     app.metering,
     },
 
     assumptions: buildAssumptions(input, project),
 
     bom,
 
-    engineNotes: project.build.notes ?? sizing.notes,
+    // Use fresh sizing notes; project.build.notes is populated only by the UI
+    // and is not persisted server-side — always prefer the computed result.
+    engineNotes: sizing.notes,
 
     hasOverrides,
   };
