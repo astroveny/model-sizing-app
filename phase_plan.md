@@ -972,7 +972,7 @@
 - **Verify:** Output validates against a markdown linter; renders correctly in GitHub preview
 - **Refs:** PRD §6.4 (revised)
 
-### ☐ P9.4 — Build Report PDF components
+### ☑ P9.4 — Build Report PDF components
 - **Action:** `lib/export/build-report-pdf.tsx` — React-PDF components for: cover, TOC, layer sections, assumptions, BoM table. Use existing design tokens adapted to print (PDF doesn't have dark mode — always light).
 - **Deliverable:** PDF component tree + preview in dev route
 - **Verify:** PDF renders visually correctly in Preview/Acrobat
