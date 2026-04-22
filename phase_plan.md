@@ -978,7 +978,7 @@
 - **Verify:** PDF renders visually correctly in Preview/Acrobat
 - **Refs:** PRD §6.4 (revised)
 
-### ☐ P9.5 — Build Report API routes
+### ☑ P9.5 — Build Report API routes
 - **Action:** `app/api/export/build-report-pdf/route.ts` and `app/api/export/build-report-md/route.ts`. Both accept `projectId`, load project, run extractor, render, return file.
 - **Deliverable:** two routes
 - **Verify:** Curl both endpoints; files download correctly; content matches preview

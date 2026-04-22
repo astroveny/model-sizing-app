@@ -10,6 +10,8 @@ export type AuditEvent =
   | "export.pdf"
   | "export.docx"
   | "export.bom"
+  | "export.build-report-pdf"
+  | "export.build-report-md"
   | "rfi.extract"
   | "rfi.draft";
 
