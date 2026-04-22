@@ -996,7 +996,7 @@
 - **Verify:** Download files; filename matches pattern
 - **Refs:** PRD §6.4 (revised) acceptance criteria
 
-### ☐ P9.8 — Phase 9 smoke test
+### ☑ P9.8 — Phase 9 smoke test
 - **Action:** Full export cycle for the reference Llama-70B sample project. Verify Build Report PDF matches Build Report MD content-for-content. Open MD in GitHub preview for visual QA.
 - **Deliverable:** recorded in CHANGELOG
 - **Refs:** PRD §6.4 (revised) exit criteria

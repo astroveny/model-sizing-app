@@ -64,6 +64,14 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P8.9: Amber pricing disclaimer banner added to BoM Summary tab on Export page; dismissible per session via sessionStorage
 - P8.10: Per-row unit price override inputs added to BoM table; overrides stored in build.overrides["bom:price:<name>"]; overridden rows highlighted in accent color with reset button; total CapEx recalculates live
 - P8.11: Phase 8 smoke test — typecheck clean; 42/42 tests passing (4 test files: sizing ×2, llm/json, upload/extract); all three bugs confirmed fixed via test coverage; BoM disclaimer and price overrides verified via code review. Date: 2026-04-22
+- P9.1: lib/export/build-report-spec.ts — BuildReport type with sub-types for all 8 sections + BUILD_REPORT_FIXTURE (Llama-70B Acme example)
+- P9.2: lib/export/build-report-extract.ts — pure (Project) → BuildReport | null extractor; threads BoM price overrides, assumptions with source tags, engine notes; 14 tests in tests/export/build-report-extract.test.ts
+- P9.3: lib/export/build-report-md.ts — GitHub-flavored Markdown renderer; YAML frontmatter, TOC with anchors, GFM tables for all sections, pricing disclaimer, override asterisks; 13 tests in tests/export/build-report-md.test.ts
+- P9.4: lib/export/build-report-pdf.tsx — BuildReportPdfDocument (5 pages: cover, summary+hardware+MP, infra+app+notes, BoM, assumptions+disclaimers); alternating-row tables, pricing warning box, override markers
+- P9.5: app/api/export/build-report-pdf/route.ts + build-report-md/route.ts — server-side render routes; 422 on incomplete Discovery; audit log wired; AuditEvent union extended
+- P9.6: Export page sectioned into "Customer Deliverables" (PDF/DOCX/BoM) and "Internal Reports" (Build Report PDF/MD); outline-button style for internal reports
+- P9.7: lib/export/filename.ts — slugifyName + buildExportFilename utility; all 5 routes + Export page buttons use canonical pattern <slug>-<type>-<YYYY-MM-DD>.<ext>; 9 tests in tests/export/filename.test.ts
+- P9.8: Phase 9 smoke test — typecheck clean; 78/78 tests passing (7 test files); Build Report PDF/MD content verified to match via shared fixture. Date: 2026-04-22
 
 ### Changed
 - app/project/[id]/layout.tsx: removed header breadcrumb and TabBar; layout is now ProjectHydrator + children
