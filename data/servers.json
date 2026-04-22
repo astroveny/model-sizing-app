@@ -9,6 +9,7 @@
       "rack_units": 8,
       "tdp_watts": 10200,
       "list_price_usd": 300000,
+      "pricing_source": "indicative",
       "notes": "8x H100 SXM reference server. Most common H100 platform outside DGX."
     },
     {
@@ -20,6 +21,7 @@
       "rack_units": 8,
       "tdp_watts": 10000,
       "list_price_usd": 290000,
+      "pricing_source": "indicative",
       "notes": "HPE liquid-cooled 8x H100 SXM platform. Common in HPC/supercomputing environments."
     },
     {
@@ -31,6 +33,7 @@
       "rack_units": 8,
       "tdp_watts": 6000,
       "list_price_usd": 60000,
+      "pricing_source": "indicative",
       "notes": "Cost-effective 8x PCIe GPU server. Good for H100 PCIe or L40S deployments."
     },
     {
@@ -42,7 +45,9 @@
       "rack_units": 10,
       "tdp_watts": 10200,
       "list_price_usd": 350000,
-      "notes": "NVIDIA reference DGX H100. 8x H100 SXM with full NVLink 4 fabric and NVSwitch."
+      "pricing_source": "vendor-estimate",
+      "notes": "NVIDIA reference DGX H100. 8x H100 SXM with full NVLink 4 fabric and NVSwitch.",
+      "sources": ["https://www.nvidia.com/en-us/data-center/dgx-h100/"]
     },
     {
       "id": "nvidia-dgx-h200",
@@ -53,7 +58,9 @@
       "rack_units": 10,
       "tdp_watts": 10200,
       "list_price_usd": 380000,
-      "notes": "NVIDIA reference DGX H200. 8x H200 SXM. Drop-in upgrade from DGX H100."
+      "pricing_source": "vendor-estimate",
+      "notes": "NVIDIA reference DGX H200. 8x H200 SXM. Drop-in upgrade from DGX H100.",
+      "sources": ["https://www.nvidia.com/en-us/data-center/dgx-h200/"]
     },
     {
       "id": "nvidia-hgx-b200",
@@ -64,7 +71,9 @@
       "rack_units": 10,
       "tdp_watts": 14400,
       "list_price_usd": 500000,
-      "notes": "Blackwell HGX platform. 8x B200 SXM with NVLink 5. Requires liquid cooling."
+      "pricing_source": "vendor-estimate",
+      "notes": "Blackwell HGX platform. 8x B200 SXM with NVLink 5. Requires liquid cooling.",
+      "sources": ["https://www.nvidia.com/en-us/data-center/dgx-b200/"]
     },
     {
       "id": "amd-mi300x-server",
@@ -75,6 +84,7 @@
       "rack_units": 8,
       "tdp_watts": 8000,
       "list_price_usd": 200000,
+      "pricing_source": "indicative",
       "notes": "Generic reference 8x MI300X/MI325X OAM server (Dell, Gigabyte, Supermicro variants). Pricing varies significantly."
     }
   ]

@@ -916,13 +916,13 @@
 - **Verify:** Upload the original failing file again; works or gives actionable error
 - **Refs:** PRD bug reference §3
 
-### ☐ P8.7 — RFP file upload — edge-case test fixtures
+### ☑ P8.7 — RFP file upload — edge-case test fixtures
 - **Action:** Add fixtures to `tests/fixtures/rfp-samples/`: password-protected PDF, scanned PDF, DOCX with images, DOCX with tables, plain text, malformed PDF. Add test cases covering each.
 - **Deliverable:** fixtures + tests
 - **Verify:** All fixtures either parse successfully or fail with actionable error message
 - **Refs:** `docs/llm-provider-guide.md`
 
-### ☐ P8.8 — BoM pricing audit — data review
+### ☑ P8.8 — BoM pricing audit — data review
 - **Action:** Review every `list_price_usd` in `data/gpus.json` and `data/servers.json`. For each, add a `pricing_source` field with: URL if public, "vendor-estimate" if from vendor but not public, or "indicative" if unknown. Update the values where public pricing has changed.
 - **Deliverable:** updated JSON with sourced prices
 - **Verify:** Every entry has a `pricing_source`; values cross-referenced against a public source or flagged as indicative
