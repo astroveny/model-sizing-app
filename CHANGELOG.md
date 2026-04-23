@@ -82,6 +82,24 @@ All notable changes to this project will be documented here. Follow [Keep a Chan
 - P8.18: RFI Apply race condition fixed — RequirementsList now calls saveProjectAction immediately after updateField so navigation can't lose the applied value before autosave fires; integration test in tests/rfi/apply.test.ts
 - P8.19: Confirmed no auto-apply — RfpPaster and RfpUploader write only to rfi.* store paths, never to discovery.*
 - 85/85 tests passing (8 test files). Date: 2026-04-22
+- P11.1: text-[var(--text-muted)] → text-[var(--text-secondary)] global audit; axe AA pass
+- P11.2: Sidebar reordered — theme toggle pos 2, New Project pos 3, Quick Sizing pos 4, All Projects pos 5, How it works pos 6, Settings pos 7; /settings stub page
+- P11.3: SidebarHeader logo + title wrapped in <Link href="/"> with aria-label="Home" on collapsed icon
+- P11.4: lib/discovery/defaults.ts (DISCOVERY_DEFAULTS ~50 entries) + lib/discovery/field-meta.ts (FIELD_META classification)
+- P11.5: Red * required markers + "Optional" muted helper text on all 5 Discovery form components
+- P11.6: SkippableField wrapper component; all skippable fields wrapped with "Use default: X" toggle; _skipped array in DiscoveryState
+- P11.7: validateDiscoveryRequired accepts skipped[] arg; substitutes defaults before Zod schema check; tests updated
+- P11.8: DiscoveryProgressBanner — red/amber/green states; replaces old inline progress bar on Discovery page
+- P11.9: ReviewDefaultsModal — Dialog listing all skipped fields with defaults and Override button per field
+- P11.10: Build gate updated to use revised validateDiscoveryRequired with _skipped passthrough
+- P11.11: Quick Sizing nav wiring complete; empty-state landing page shows Quick Sizing CTA
+- P11.12: app/quick-sizing/page.tsx — 5-step form (use-case, scale, latency, deployment, recommend)
+- P11.13: lib/quick-sizing/recommender.ts — rule-based candidate recommender (4 scale bands, 3 candidates)
+- P11.14: Quick Sizing apply flow — createProject(_source='quick-sizing'), defaults applied, _skipped set, navigate to Discovery
+- P11.15: LLM-assist hook point in recommender.ts (TODO v0.4b); rule-based path active
+- P11.16: QuickSizingBanner component — shows on Discovery when _source=quick-sizing; dismissible per project via sessionStorage
+- P11.17: RFI Apply polish — ApplyStatus pills (Unapplied/Applied/Conflict), Apply All Unapplied bulk button, AlertDialog conflict resolution (Current vs From RFP)
+- P11.18: Phase 11 smoke test — 2026-04-23. All Quick Sizing, New Project, Nav/theme paths pass. Three bugs found and fixed: (1) targetLatencyP95Ms incorrectly in DiscoveryRequiredSchema as required — removed; (2) RFI page 404 due to broken optional chaining activeProject?.rfi.extracted (throws during SSR) — fixed to activeProject?.rfi?.extracted?.requirements; (3) ReviewDefaultsModal getSnapshot infinite loop from ?? [] creating new array each render — fixed with stable EMPTY_SKIPPED constant. "Optional" label omitted from fields by design. RFI section tests deferred (LLM dependency). 85/85 tests passing.
 
 ### Changed
 - app/project/[id]/layout.tsx: removed header breadcrumb and TabBar; layout is now ProjectHydrator + children

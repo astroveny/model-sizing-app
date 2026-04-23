@@ -9,7 +9,7 @@ import { DraftResponse }      from "@/components/rfi/DraftResponse";
 import { FileText, ClipboardList, CheckSquare, FileEdit } from "lucide-react";
 
 export default function RfiPage() {
-  const requirements = useProjectStore((s) => s.activeProject?.rfi.extracted.requirements ?? []);
+  const requirements = useProjectStore((s) => s.activeProject?.rfi?.extracted?.requirements ?? []);
   const hasRequirements = requirements.length > 0;
 
   return (

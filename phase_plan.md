@@ -1189,7 +1189,7 @@
 - **Deliverable:** banner
 - **Refs:** PRD §6.6.3 step 6
 
-### ☐ P11.17 — RFI Apply polish
+### ☑ P11.17 — RFI Apply polish
 - **Action:** Depends on P8.18 fix being in place. Improve UX:
   - Apply button per extracted item with status pill (Unapplied / Applied / Conflict)
   - Bulk "Apply All Unapplied" at top
@@ -1198,7 +1198,7 @@
 - **Verify:** All three states reachable; conflict dialog works
 - **Refs:** PRD §6.2.x, P8.18
 
-### ☐ P11.18 — Smoke test
+### ☑ P11.18 — Smoke test
 - **Action:** Full walkthrough:
   1. From `/`, Quick Sizing path → Discovery with banner, toggle some skips, review defaults modal, proceed to Build
   2. "+ New Project" path → Discovery with required markers, skippable toggles, progress banner states

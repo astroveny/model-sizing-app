@@ -19,10 +19,8 @@ export function ExplainBox({ fieldId, label }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { activeProject, updateField } = useProjectStore((s) => ({
-    activeProject: s.activeProject,
-    updateField: s.updateField,
-  }));
+  const activeProject = useProjectStore((s) => s.activeProject);
+  const updateField = useProjectStore((s) => s.updateField);
 
   const explainOverrides = activeProject?.explainOverrides;
   const entry = getExplainEntry(fieldId, explainOverrides);

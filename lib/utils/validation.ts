@@ -126,7 +126,6 @@ export const DiscoveryRequiredSchema = z.object({
     concurrentUsers: z.number().int().min(1),
     avgInputTokens: z.number().int().min(1),
     avgOutputTokens: z.number().int().min(1),
-    targetLatencyP95Ms: z.number().min(1),
   }),
 });
 

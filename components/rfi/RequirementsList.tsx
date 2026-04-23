@@ -113,7 +113,7 @@ function RequirementRow({
 }
 
 export function RequirementsList() {
-  const requirements = useProjectStore((s) => s.activeProject?.rfi.extracted.requirements ?? []);
+  const requirements = useProjectStore((s) => s.activeProject?.rfi?.extracted?.requirements ?? []);
   const discovery    = useProjectStore((s) => s.activeProject?.discovery);
   const updateField  = useProjectStore((s) => s.updateField);
 

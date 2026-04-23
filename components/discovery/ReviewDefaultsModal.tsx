@@ -16,9 +16,11 @@ interface ReviewDefaultsModalProps {
   onClose: () => void;
 }
 
+const EMPTY_SKIPPED: string[] = [];
+
 export function ReviewDefaultsModal({ open, onClose }: ReviewDefaultsModalProps) {
   const skipped = useProjectStore(
-    (s) => s.activeProject?.discovery._skipped ?? []
+    (s) => s.activeProject?.discovery._skipped ?? EMPTY_SKIPPED
   );
   const updateField = useProjectStore((s) => s.updateField);
 
