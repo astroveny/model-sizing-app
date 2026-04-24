@@ -46,3 +46,27 @@ export const auditLog = sqliteTable("audit_log", {
     .notNull()
     .default(sql`(datetime('now'))`),
 });
+
+export const configuredModels = sqliteTable("configured_models", {
+  id: text("id").primaryKey(),
+  label: text("label").notNull(),
+  provider: text("provider").notNull(), // 'anthropic' | 'openai-compatible'
+  providerConfigEncrypted: text("provider_config_encrypted").notNull(),
+  assignedFeaturesJson: text("assigned_features_json").notNull().default("[]"),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  lastValidatedAt: text("last_validated_at"),
+  isValid: integer("is_valid"), // 0 | 1 | null
+});
+
+export const settingsKv = sqliteTable("settings_kv", {
+  key: text("key").primaryKey(),
+  valueJson: text("value_json").notNull(),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});

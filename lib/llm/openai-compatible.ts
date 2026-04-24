@@ -15,15 +15,15 @@ export class OpenAiCompatibleProvider implements LlmProvider {
   private apiKey: string;
   private model: string;
 
-  constructor() {
-    const baseUrl = process.env.OPENAI_COMPATIBLE_BASE_URL;
-    const apiKey  = process.env.OPENAI_COMPATIBLE_API_KEY ?? "none";
-    const model   = process.env.OPENAI_COMPATIBLE_MODEL;
-    if (!baseUrl) throw new LlmFatalError("OPENAI_COMPATIBLE_BASE_URL is not set");
-    if (!model)   throw new LlmFatalError("OPENAI_COMPATIBLE_MODEL is not set");
-    this.baseUrl = baseUrl.replace(/\/$/, "");
-    this.apiKey  = apiKey;
-    this.model   = model;
+  constructor(baseUrl?: string, apiKey?: string, model?: string) {
+    const url   = baseUrl ?? process.env.OPENAI_COMPATIBLE_BASE_URL;
+    const key   = apiKey  ?? process.env.OPENAI_COMPATIBLE_API_KEY ?? "none";
+    const mdl   = model   ?? process.env.OPENAI_COMPATIBLE_MODEL;
+    if (!url) throw new LlmFatalError("OPENAI_COMPATIBLE_BASE_URL is not set");
+    if (!mdl) throw new LlmFatalError("OPENAI_COMPATIBLE_MODEL is not set");
+    this.baseUrl = url.replace(/\/$/, "");
+    this.apiKey  = key;
+    this.model   = mdl;
   }
 
   async complete(params: LlmCompleteParams): Promise<LlmCompleteResult> {

@@ -203,6 +203,7 @@ type DiscoveryState = {
   hardware: {
     preferredVendor: 'nvidia' | 'amd' | 'either'
     preferredGpu?: string         // e.g., 'H100-80GB'
+    preferredServer?: string      // NEW v0.4b: server SKU id from data/servers.json
     cooling: 'air' | 'liquid' | 'either'
     networking: '25G' | '100G' | '400G' | 'infiniband'
   }
@@ -273,6 +274,7 @@ type BuildState = {
   overrides: Partial<BuildDerived> // manual user overrides
   final: BuildDerived             // derived with overrides applied
   bom: BomItem[]
+  bomOverrides: Record<string, Partial<BomItem>>  // NEW v0.4b: keyed by bom item id
   totals: {
     gpuCount: number
     serverCount: number
@@ -342,6 +344,37 @@ type ExplainContent = {
   example: string                 // markdown
   customerFriendlyHint?: string   // plain-English for client-facing mode
 }
+
+// NEW v0.4b — LLM feature routing
+type LlmFeatureId =
+  | 'rfp-extract'           // RFI: extract requirements from RFP
+  | 'rfi-draft-response'    // RFI: draft response per layer
+  | 'explain-field'         // ExplainBox "Ask Claude"
+  | 'explain-sizing'        // Build panels "Why this choice?"
+  | 'build-report-summary'  // Export: narrative exec summary
+  | 'quick-sizing-assist'   // Quick Sizing LLM recommendation
+
+type ConfiguredModel = {
+  id: string
+  label: string
+  provider: 'anthropic' | 'openai-compatible'
+  providerConfig: {
+    apiKey?: string               // stored encrypted; never returned in plaintext
+    baseUrl?: string              // openai-compatible only
+    model: string                 // e.g. "claude-opus-4-7"
+  }
+  assignedFeatures: LlmFeatureId[]
+  createdAt: string
+  updatedAt: string
+  isValid?: boolean
+  lastValidatedAt?: string
+}
+
+// NEW v0.4b — top-level store slice (alongside Project[])
+// settings: {
+//   configuredModels: ConfiguredModel[]
+//   featureRouting: Record<LlmFeatureId, string | null>  // featureId → modelId | null
+// }
 ```
 
 ### 5.2 SQLite schema (Drizzle)
@@ -351,6 +384,23 @@ projects       (id, name, description, customer, created_at, updated_at, data_js
 rfp_uploads    (id, project_id, filename, path, uploaded_at)
 explain_custom (id, project_id, field_id, explain, example)
 audit_log      (id, project_id, event, payload_json, created_at)
+
+-- NEW v0.4b
+configured_models
+  (id TEXT PRIMARY KEY,
+   label TEXT NOT NULL,
+   provider TEXT NOT NULL,                    -- 'anthropic' | 'openai-compatible'
+   provider_config_encrypted TEXT NOT NULL,   -- AES-256-GCM encrypted JSON
+   assigned_features_json TEXT NOT NULL,      -- JSON array of LlmFeatureId
+   created_at TEXT NOT NULL,
+   updated_at TEXT NOT NULL,
+   last_validated_at TEXT,
+   is_valid INTEGER)                          -- 0/1/null
+
+settings_kv
+  (key TEXT PRIMARY KEY,
+   value_json TEXT NOT NULL,
+   updated_at TEXT NOT NULL)
 ```
 
 `description` is nullable text (free-form project description / notes).
@@ -607,6 +657,12 @@ Bulk **"Apply All Unapplied"** button at top of requirements list.
 - [ ] "Apply to Discovery" updates store without data loss for untouched fields
 - [ ] Qualification score updates reactively as Discovery/RFI changes
 
+#### 6.2.y Extraction uses assigned model (v0.4b)
+
+RFP extraction (paste and upload) calls `getLlmProviderForFeature('rfp-extract')`. If the feature has no model assigned, the Extract button is disabled with tooltip: "Configure a model for RFP extraction in Settings."
+
+Same pattern applies to draft response: `getLlmProviderForFeature('rfi-draft-response')`.
+
 ### 6.3 Build section
 
 **Structure:** Four panels, one per layer, each showing:
@@ -657,6 +713,20 @@ Plus a top-level summary: total GPUs, servers, power, rack units, capex, monthly
 - [ ] Exports reflect current store state (no stale data)
 - [ ] Export files named: `<project-name>-<export-type>-<YYYY-MM-DD>.<ext>`
 
+#### 6.4.x BoM override UI (v0.4b)
+
+In the Build page → BoM table, each line item has:
+- **Editable `unitPriceUsd` input** inline; changes saved to `build.bomOverrides[itemId].unitPriceUsd`
+- **"Swap item" dropdown** listing alternative catalog items in the same `category`; saves full replacement item fields to `build.bomOverrides[itemId]`
+- **Override indicator** ("✎" icon + distinct background) when any override is active on that line
+- **"Reset to catalog" link** per overridden line (reverts to catalog value)
+
+#### 6.4.y Exports reflect overrides (v0.4b)
+
+All five export outputs (Proposal PDF, Proposal Word, JSON BoM, Build Report PDF, Build Report MD) must:
+- Render overridden values, not catalog defaults
+- Include note in BoM table header when any override is active: "Prices/items overridden from catalog"
+
 ### 6.5 Explain & Example component
 
 **`<ExplainBox fieldId="..." mode="compact|expanded" />`**
@@ -701,7 +771,11 @@ Step 5 — **Deployment**: pattern (internal/external-api/gpuaas/saas) + target 
 
 On submit:
 1. Create a new project
-2. Determine candidate models (picked by user or rule-based recommender)
+2. Determine candidate models:
+   - If user picked a specific model → use it
+   - If user chose "Let the app recommend":
+     - If `quick-sizing-assist` feature has a configured model → call LLM with objective + scale + latency + deployment → get 1–3 candidates with rationale
+     - Otherwise → fall back to rule-based recommender (v0.4a)
 3. Apply model metadata to `discovery.model`
 4. Apply defaults from `lib/discovery/defaults.ts` to all other fields; mark them in `_skipped`
 5. Set `_source = 'quick-sizing'`
@@ -716,12 +790,18 @@ Lives in `lib/quick-sizing/recommender.ts`. Pure function. Returns up to 3 candi
 - 500+ concurrent → smaller models favored, multi-replica
 - Real-time latency → favor smaller models + stronger quantization
 
-#### 6.6.5 Acceptance criteria
+#### 6.6.5 LLM-assist recommender (v0.4b)
+
+Lives in `lib/llm/prompts/quick-sizing.ts` with `PROMPT_VERSION`. Takes structured input (objective free-text, scale, latency, deployment) and returns JSON of up to 3 candidates with rationale. Uses the `quick-sizing-assist` feature's assigned model.
+
+On LLM failure (rate limit, parse error, no response): silently fall back to rule-based. User experience is consistent regardless of path.
+
+#### 6.6.6 Acceptance criteria
 - [ ] Completes in < 60s end-to-end
 - [ ] Works without any LLM configured (rule-based path)
 - [ ] Every applied default traceable ("review defaults" banner links to list)
 - [ ] Resulting project is a normal project (editable, deletable, exportable)
-- [ ] LLM-assist hook placeholder exists but stubbed to rule-based in v0.4a
+- [ ] LLM-assist active when `quick-sizing-assist` feature is assigned; falls back silently otherwise
 
 ---
 
@@ -1014,6 +1094,49 @@ OPENAI_COMPATIBLE_MODEL=...
 2. "Ask Claude" in ExplainBox (customer-tailored explanations)
 3. Draft RFI response sections
 4. Explain sizing decisions ("why 4 H100s and not 2?")
+
+### 8.5 LLM Settings & Multi-Model Routing (v0.4b)
+
+Replaces the single-provider `.env` assumption. Multiple models are configurable simultaneously, each assigned to specific features.
+
+#### 8.5.1 Configured models
+
+See `ConfiguredModel` type in §5.1. Stored in `configured_models` table (§5.2) with API keys encrypted via AES-256-GCM (`MODEL_STORE_SECRET` env var).
+
+#### 8.5.2 LLM features (routable)
+
+Six features can be routed to a configured model (see `LlmFeatureId` in §5.1): `rfp-extract`, `rfi-draft-response`, `explain-field`, `explain-sizing`, `build-report-summary`, `quick-sizing-assist`.
+
+#### 8.5.3 Exclusive assignment
+
+A feature is assigned to **at most one model**. UI enforces this: checking a feature on Model A disables that checkbox on all other models. A feature with no model assigned is **disabled in the app** — relevant buttons grey out with tooltip "Configure a model for [feature] in Settings."
+
+#### 8.5.4 Clear per model
+
+Each model row has a "Clear assignments" button that releases all features assigned to it (they become unassigned).
+
+#### 8.5.5 Provider credentials storage
+
+- API keys stored encrypted with key derived from `MODEL_STORE_SECRET` (32+ chars). On first boot, if unset, app auto-generates and appends to `.env`, logs backup warning.
+- Keys never returned to UI in plaintext — masked as `sk-...****`. Re-enter to change.
+- If decryption fails: Settings shows "Stored credentials cannot be decrypted — re-enter them."
+
+#### 8.5.6 Settings page (`/settings`)
+
+Replaces v0.4a stub. Layout:
+- "Configured Models" section — list with "+ Add Model" button
+- Each model row (expandable): label, provider, model id, API key field, feature checkboxes, "Test Connection" + "Clear assignments" + Delete buttons
+- "Feature Routing Summary" table at bottom: each feature → assigned model or "None — feature disabled"
+
+**Test Connection** sends a minimal prompt (<10 tokens); reports success or error.
+
+#### 8.5.7 Runtime routing
+
+`getLlmProviderForFeature(feature: LlmFeatureId): LlmProvider | null` replaces `getLlmProvider()`. Callers must handle `null`. `getLlmProvider()` retained as deprecated shim reading `.env` for backward compat.
+
+#### 8.5.8 Backward compatibility
+
+On first boot after v0.4b upgrade: if `configured_models` is empty AND `.env` has `LLM_PROVIDER` set → auto-create a default `ConfiguredModel` from env and assign to all six features. Idempotent.
 
 ---
 
@@ -1447,6 +1570,7 @@ Minimum pairings:
 | v0.2 | 2026-04-19 | Claude + owner | §5.1: added TTFT/ITL targets, optimizations object, TP/PP/EP + latency estimates in BuildDerived. §5.2: added `description` column to projects table. §7.1: reorganized into memory footprint, prefill phase, decode phase, sharding strategy (TP/PP/EP), and capacity. §7.6: new "Inference Optimizations" section. §7.7: new worked example for Llama 3.1 70B. |
 | v0.3 | 2026-04-21 | Claude + owner | UX redesign: two-level left nav (§6.0), merged landing/projects page (§6.0.7), onboarding page (§6.0.8), autosave indicator instead of save button (§6.1 revised), Build Report export in PDF + Markdown (§6.4 revised). New §10 Phase 7+ file-structure additions. New §13 Design System (color tokens, typography, spacing, motion, accessibility). Known bugs + BoM pricing audit queued for Phase 8. |
 | v0.4a | 2026-04-22 | Claude + owner | §6.1 required/skippable/optional field classes with full classification table and defaults; §6.6 Quick Sizing mode with rule-based recommender (LLM-assist stub to be activated in v0.4b); §5.1 adds `_skipped`, `_source`; §6.0 sidebar reorder + ML Sizer home link; §6.2 explicit Apply flow for RFI; §13.9 accessible text rules |
+| v0.4b | 2026-04-22 | Claude + owner | **§8.5 multi-model LLM routing** with per-feature exclusive assignment, encrypted credential storage, `/settings` page replacing v0.4a stub. **§5.1 adds** `hardware.preferredServer`, `build.bomOverrides`, `LlmFeatureId`, `ConfiguredModel`, `settings` store slice. **§5.2 adds** `configured_models`, `settings_kv` tables. **§6.4 adds** BoM override UI (§6.4.x) and export behavior (§6.4.y). **§6.6.3 updated** Quick Sizing step 2 for LLM-assist; **§6.6.5** LLM-assist recommender spec (activates v0.4a stub). **§6.2.y** routes RFI extraction through assigned model. |
 
 ---
 

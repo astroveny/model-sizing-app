@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { HelpCircle, Sparkles, AlertTriangle, Link2, Loader2, RotateCcw } from "lucide-react";
 import { getExplainEntry } from "@/lib/explain/loader";
 import { useProjectStore } from "@/lib/store";
-import { llmComplete } from "@/lib/llm/client";
+import { llmComplete, LlmFeatureUnassignedError } from "@/lib/llm/client";
 import { EXPLAIN_FIELD_SYSTEM, buildExplainFieldPrompt } from "@/lib/llm/prompts/explain-field";
 
 type Props = {
@@ -49,7 +49,7 @@ export function ExplainBox({ fieldId, label }: Props) {
         messages: [{ role: "user", content: buildExplainFieldPrompt(ctx) }],
         maxTokens: 400,
         json: true,
-      });
+      }, "explain-field");
 
       const parsed = JSON.parse(result.text) as { explain?: string; example?: string };
       if (!parsed.explain || !parsed.example) throw new Error("Unexpected response shape");
@@ -60,7 +60,11 @@ export function ExplainBox({ fieldId, label }: Props) {
         example: parsed.example,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "LLM call failed");
+      if (err instanceof LlmFeatureUnassignedError) {
+        setError("No model configured for this feature. Configure one in Settings.");
+      } else {
+        setError(err instanceof Error ? err.message : "LLM call failed");
+      }
     } finally {
       setLoading(false);
     }

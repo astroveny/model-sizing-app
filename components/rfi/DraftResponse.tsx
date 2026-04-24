@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useProjectStore } from "@/lib/store";
 import { useBuildDerived } from "@/lib/hooks/useBuildDerived";
-import { llmComplete } from "@/lib/llm/client";
+import { llmComplete, LlmFeatureUnassignedError } from "@/lib/llm/client";
 import { DRAFT_RESPONSE_SYSTEM, buildDraftResponsePrompt } from "@/lib/llm/prompts/draft-response";
 import { Loader2, Copy, Check } from "lucide-react";
 import { getBestServer } from "@/lib/sizing/catalog";
@@ -49,11 +49,15 @@ export function DraftResponse() {
         messages: [{ role: "user", content: buildDraftResponsePrompt(ctx) }],
         maxTokens: 8192,
         temperature: 0.4,
-      });
+      }, "rfi-draft-response");
 
       updateField("rfi.draftResponse", llmResult.text);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Generation failed");
+      if (err instanceof LlmFeatureUnassignedError) {
+        setError("No model configured for draft response. Go to Settings to assign one.");
+      } else {
+        setError(err instanceof Error ? err.message : "Generation failed");
+      }
     } finally {
       setLoading(false);
     }

@@ -12,7 +12,7 @@ import { createProjectAction } from "@/lib/actions/projects";
 import { defaultProject } from "@/lib/store";
 import { DISCOVERY_DEFAULTS } from "@/lib/discovery/defaults";
 import { SKIPPABLE_FIELDS } from "@/lib/discovery/field-meta";
-import { recommend } from "@/lib/quick-sizing/recommender";
+import { recommend, recommendWithLlm } from "@/lib/quick-sizing/recommender";
 import type { QuickSizingInput, ModelCandidate } from "@/lib/quick-sizing/recommender";
 import modelsData from "@/data/models.json";
 
@@ -130,7 +130,9 @@ export default function QuickSizingPage() {
       deploymentTarget: form.deploymentTarget,
       knownModelId: form.modelChoice === "known" ? form.knownModelId : undefined,
     };
-    const recs = recommend(input);
+    const recs = form.modelChoice === "recommend"
+      ? await recommendWithLlm(input)
+      : recommend(input);
     setCandidates(recs);
     if (recs.length === 1) {
       setSelectedCandidate(recs[0]);

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useProjectStore } from "@/lib/store";
-import { llmComplete } from "@/lib/llm/client";
+import { llmComplete, LlmFeatureUnassignedError } from "@/lib/llm/client";
 import { EXTRACT_RFP_SYSTEM, buildExtractRfpPrompt } from "@/lib/llm/prompts/extract-rfp";
 import { safeJsonParse } from "@/lib/llm/json";
 import type { ExtractedRequirement } from "@/lib/store";
@@ -25,7 +25,7 @@ export function RfpPaster() {
         messages: [{ role: "user", content: buildExtractRfpPrompt(text) }],
         maxTokens: 8000,
         temperature: 0.1,
-      });
+      }, "rfp-extract");
 
       const { data: parsed, truncated } = safeJsonParse(result.text);
       if (!parsed) throw new Error("Could not parse extraction response — try a shorter document.");
@@ -37,7 +37,11 @@ export function RfpPaster() {
       updateField("rfi.extracted.evaluationCriteria", parsed.evaluationCriteria ?? []);
       updateField("rfi.extracted.mandatoryItems",   parsed.mandatoryItems   ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Extraction failed");
+      if (err instanceof LlmFeatureUnassignedError) {
+        setError("No model configured for RFP extraction. Go to Settings to assign one.");
+      } else {
+        setError(err instanceof Error ? err.message : "Extraction failed");
+      }
     } finally {
       setLoading(false);
     }

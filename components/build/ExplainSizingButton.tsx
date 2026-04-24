@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2, X } from "lucide-react";
-import { llmComplete } from "@/lib/llm/client";
+import { llmComplete, LlmFeatureUnassignedError } from "@/lib/llm/client";
 import { EXPLAIN_SIZING_SYSTEM, buildExplainSizingPrompt } from "@/lib/llm/prompts/explain-sizing";
 import type { ExplainSizingContext } from "@/lib/llm/prompts/explain-sizing";
 
@@ -28,10 +28,14 @@ export function ExplainSizingButton({ context }: Props) {
         system: EXPLAIN_SIZING_SYSTEM,
         messages: [{ role: "user", content: buildExplainSizingPrompt(context) }],
         maxTokens: 600,
-      });
+      }, "explain-sizing");
       setExplanation(result.text);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "LLM call failed");
+      if (err instanceof LlmFeatureUnassignedError) {
+        setError("No model configured. Go to Settings to assign one.");
+      } else {
+        setError(err instanceof Error ? err.message : "LLM call failed");
+      }
     } finally {
       setLoading(false);
     }

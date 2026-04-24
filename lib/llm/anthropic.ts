@@ -8,11 +8,11 @@ export class AnthropicProvider implements LlmProvider {
   private client: Anthropic;
   private model: string;
 
-  constructor() {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) throw new LlmFatalError("ANTHROPIC_API_KEY is not set");
-    this.client = new Anthropic({ apiKey });
-    this.model = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+  constructor(apiKey?: string, model?: string) {
+    const key = apiKey ?? process.env.ANTHROPIC_API_KEY;
+    if (!key) throw new LlmFatalError("ANTHROPIC_API_KEY is not set");
+    this.client = new Anthropic({ apiKey: key });
+    this.model = model ?? process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
   }
 
   async complete(params: LlmCompleteParams): Promise<LlmCompleteResult> {

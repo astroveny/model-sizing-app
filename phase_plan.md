@@ -2,139 +2,166 @@
 - [Phase Plan — model-sizing-app](#phase-plan--model-sizing-app)
   - [Legend](#legend)
   - [Phase 0 — Scaffold \& Dockerize](#phase-0--scaffold--dockerize)
-    - [P0.1 — Initialize Next.js project](#p01--initialize-nextjs-project)
-    - [P0.2 — Install core dependencies](#p02--install-core-dependencies)
-    - [P0.3 — Install shadcn/ui](#p03--install-shadcnui)
-    - [P0.4 — Create folder structure](#p04--create-folder-structure)
-    - [P0.5 — Set up Drizzle + SQLite](#p05--set-up-drizzle--sqlite)
-    - [P0.6 — Zustand store skeleton](#p06--zustand-store-skeleton)
-    - [P0.7 — Project persistence wiring](#p07--project-persistence-wiring)
-    - [P0.8 — Minimal UI: project list + create + detail shell](#p08--minimal-ui-project-list--create--detail-shell)
-    - [P0.8b — Light/dark mode theming](#p08b--lightdark-mode-theming)
-    - [P0.9 — Dockerfile (multi-stage)](#p09--dockerfile-multi-stage)
-    - [P0.10 — docker-compose.yml](#p010--docker-composeyml)
-    - [P0.11 — Environment template](#p011--environment-template)
-    - [P0.12 — Git hygiene](#p012--git-hygiene)
-    - [P0.13 — Smoke test](#p013--smoke-test)
+    - [☑ P0.1 — Initialize Next.js project](#-p01--initialize-nextjs-project)
+    - [☑ P0.2 — Install core dependencies](#-p02--install-core-dependencies)
+    - [☑ P0.3 — Install shadcn/ui](#-p03--install-shadcnui)
+    - [☑ P0.4 — Create folder structure](#-p04--create-folder-structure)
+    - [☑ P0.5 — Set up Drizzle + SQLite](#-p05--set-up-drizzle--sqlite)
+    - [☑ P0.6 — Zustand store skeleton](#-p06--zustand-store-skeleton)
+    - [☑ P0.7 — Project persistence wiring](#-p07--project-persistence-wiring)
+    - [☑ P0.8 — Minimal UI: project list + create + detail shell](#-p08--minimal-ui-project-list--create--detail-shell)
+    - [☑ P0.8b — Light/dark mode theming](#-p08b--lightdark-mode-theming)
+    - [☑ P0.9 — Dockerfile (multi-stage)](#-p09--dockerfile-multi-stage)
+    - [☑ P0.10 — docker-compose.yml](#-p010--docker-composeyml)
+    - [☑ P0.11 — Environment template](#-p011--environment-template)
+    - [☑ P0.12 — Git hygiene](#-p012--git-hygiene)
+    - [☑ P0.13 — Smoke test](#-p013--smoke-test)
   - [Phase 1 — Discovery Section](#phase-1--discovery-section)
-    - [P1.1 — Discovery types + Zod schemas](#p11--discovery-types--zod-schemas)
-    - [P1.2 — ExplainBox component](#p12--explainbox-component)
-    - [P1.3 — Discovery layout \& tab navigation](#p13--discovery-layout--tab-navigation)
-    - [P1.4 — Workload tab form](#p14--workload-tab-form)
-    - [P1.5 — Hardware tab form](#p15--hardware-tab-form)
-    - [P1.6 — Infra tab form](#p16--infra-tab-form)
-    - [P1.7 — Model Platform tab form](#p17--model-platform-tab-form)
-    - [P1.8 — Application tab form](#p18--application-tab-form)
-    - [P1.9 — Seed ExplainBox content (round 1)](#p19--seed-explainbox-content-round-1)
-    - [P1.10 — Required-field validation gate](#p110--required-field-validation-gate)
-    - [P1.11 — Defer "Ask Claude" button (placeholder)](#p111--defer-ask-claude-button-placeholder)
-    - [P1.12 — Phase 1 integration test](#p112--phase-1-integration-test)
+    - [☑ P1.1 — Discovery types + Zod schemas](#-p11--discovery-types--zod-schemas)
+    - [☑ P1.2 — ExplainBox component](#-p12--explainbox-component)
+    - [☑ P1.3 — Discovery layout \& tab navigation](#-p13--discovery-layout--tab-navigation)
+    - [☑ P1.4 — Workload tab form](#-p14--workload-tab-form)
+    - [☑ P1.5 — Hardware tab form](#-p15--hardware-tab-form)
+    - [☑ P1.6 — Infra tab form](#-p16--infra-tab-form)
+    - [☑ P1.7 — Model Platform tab form](#-p17--model-platform-tab-form)
+    - [☑ P1.8 — Application tab form](#-p18--application-tab-form)
+    - [☑ P1.9 — Seed ExplainBox content (round 1)](#-p19--seed-explainbox-content-round-1)
+    - [☑ P1.10 — Required-field validation gate](#-p110--required-field-validation-gate)
+    - [☑ P1.11 — Defer "Ask Claude" button (placeholder)](#-p111--defer-ask-claude-button-placeholder)
+    - [☑ P1.12 — Phase 1 integration test](#-p112--phase-1-integration-test)
   - [Phase 2 — Sizing Engine](#phase-2--sizing-engine)
-    - [P2.1 — GPU catalog data](#p21--gpu-catalog-data)
-    - [P2.2 — Server catalog data](#p22--server-catalog-data)
-    - [P2.3 — Cloud instance catalog data](#p23--cloud-instance-catalog-data)
-    - [P2.4 — Throughput lookup table](#p24--throughput-lookup-table)
-    - [P2.5 — Model catalog data](#p25--model-catalog-data)
-    - [P2.6 — Memory footprint calculator](#p26--memory-footprint-calculator)
-    - [P2.7 — Prefill calculator](#p27--prefill-calculator)
-    - [P2.8 — Decode calculator](#p28--decode-calculator)
-    - [P2.9 — Sharding decision logic](#p29--sharding-decision-logic)
-    - [P2.10 — Capacity calculator (replicas + totals)](#p210--capacity-calculator-replicas--totals)
-    - [P2.11 — Optimization modifiers](#p211--optimization-modifiers)
-    - [P2.12 — Deployment-pattern adjustments](#p212--deployment-pattern-adjustments)
-    - [P2.13 — Public sizing API](#p213--public-sizing-api)
-    - [P2.14 — Unit test suite](#p214--unit-test-suite)
-    - [P2.15 — Engine notes generator](#p215--engine-notes-generator)
+    - [☑ P2.1 — GPU catalog data](#-p21--gpu-catalog-data)
+    - [☑ P2.2 — Server catalog data](#-p22--server-catalog-data)
+    - [☑ P2.3 — Cloud instance catalog data](#-p23--cloud-instance-catalog-data)
+    - [☑ P2.4 — Throughput lookup table](#-p24--throughput-lookup-table)
+    - [☑ P2.5 — Model catalog data](#-p25--model-catalog-data)
+    - [☑ P2.6 — Memory footprint calculator](#-p26--memory-footprint-calculator)
+    - [☑ P2.7 — Prefill calculator](#-p27--prefill-calculator)
+    - [☑ P2.8 — Decode calculator](#-p28--decode-calculator)
+    - [☑ P2.9 — Sharding decision logic](#-p29--sharding-decision-logic)
+    - [☑ P2.10 — Capacity calculator (replicas + totals)](#-p210--capacity-calculator-replicas--totals)
+    - [☑ P2.11 — Optimization modifiers](#-p211--optimization-modifiers)
+    - [☑ P2.12 — Deployment-pattern adjustments](#-p212--deployment-pattern-adjustments)
+    - [☑ P2.13 — Public sizing API](#-p213--public-sizing-api)
+    - [☑ P2.14 — Unit test suite](#-p214--unit-test-suite)
+    - [☑ P2.15 — Engine notes generator](#-p215--engine-notes-generator)
   - [Phase 3 — Build Section](#phase-3--build-section)
-    - [P3.1 — Build page shell](#p31--build-page-shell)
-    - [P3.2 — Derived state subscription](#p32--derived-state-subscription)
-    - [P3.3 — Hardware panel](#p33--hardware-panel)
-    - [P3.4 — Infra panel](#p34--infra-panel)
-    - [P3.5 — Model Platform panel](#p35--model-platform-panel)
-    - [P3.6 — Application panel](#p36--application-panel)
-    - [P3.7 — Summary totals](#p37--summary-totals)
-    - [P3.8 — Override handling](#p38--override-handling)
-    - [P3.9 — Vendor comparison view](#p39--vendor-comparison-view)
-    - [P3.10 — Engine notes surface](#p310--engine-notes-surface)
-    - [P3.11 — BoM generation](#p311--bom-generation)
-    - [P3.12 — Rack layout diagram (basic)](#p312--rack-layout-diagram-basic)
-    - [P3.13 — Architecture diagram (basic)](#p313--architecture-diagram-basic)
-    - [P3.14 — Phase 3 integration test](#p314--phase-3-integration-test)
+    - [☑ P3.1 — Build page shell](#-p31--build-page-shell)
+    - [☑ P3.2 — Derived state subscription](#-p32--derived-state-subscription)
+    - [☑ P3.3 — Hardware panel](#-p33--hardware-panel)
+    - [☑ P3.4 — Infra panel](#-p34--infra-panel)
+    - [☑ P3.5 — Model Platform panel](#-p35--model-platform-panel)
+    - [☑ P3.6 — Application panel](#-p36--application-panel)
+    - [☑ P3.7 — Summary totals](#-p37--summary-totals)
+    - [☑ P3.8 — Override handling](#-p38--override-handling)
+    - [☑ P3.9 — Vendor comparison view](#-p39--vendor-comparison-view)
+    - [☑ P3.10 — Engine notes surface](#-p310--engine-notes-surface)
+    - [☑ P3.11 — BoM generation](#-p311--bom-generation)
+    - [☑ P3.12 — Rack layout diagram (basic)](#-p312--rack-layout-diagram-basic)
+    - [☑ P3.13 — Architecture diagram (basic)](#-p313--architecture-diagram-basic)
+    - [☑ P3.14 — Phase 3 integration test](#-p314--phase-3-integration-test)
   - [Phase 4 — RFI Section](#phase-4--rfi-section)
-    - [P4.1 — RFI page shell](#p41--rfi-page-shell)
-    - [P4.2 — LLM provider abstraction](#p42--llm-provider-abstraction)
-    - [P4.3 — LLM API route](#p43--llm-api-route)
-    - [P4.4 — RFP paste flow](#p44--rfp-paste-flow)
-    - [P4.5 — RFP upload flow](#p45--rfp-upload-flow)
-    - [P4.6 — Extraction prompt](#p46--extraction-prompt)
-    - [P4.7 — Extraction result UI](#p47--extraction-result-ui)
-    - [P4.8 — Mapping + Apply to Discovery](#p48--mapping--apply-to-discovery)
-    - [P4.9 — Qualification panel](#p49--qualification-panel)
-    - [P4.10 — Draft response generator](#p410--draft-response-generator)
-    - [P4.11 — OpenAI-compatible adapter (Gemma/Kimi/Nemotron)](#p411--openai-compatible-adapter-gemmakiminemotron)
-    - [P4.12 — Retry + error handling](#p412--retry--error-handling)
-    - [P4.13 — Phase 4 integration test](#p413--phase-4-integration-test)
+    - [☑ P4.1 — RFI page shell](#-p41--rfi-page-shell)
+    - [☑ P4.2 — LLM provider abstraction](#-p42--llm-provider-abstraction)
+    - [☑ P4.3 — LLM API route](#-p43--llm-api-route)
+    - [☑ P4.4 — RFP paste flow](#-p44--rfp-paste-flow)
+    - [☑ P4.5 — RFP upload flow](#-p45--rfp-upload-flow)
+    - [☑ P4.6 — Extraction prompt](#-p46--extraction-prompt)
+    - [☑ P4.7 — Extraction result UI](#-p47--extraction-result-ui)
+    - [☑ P4.8 — Mapping + Apply to Discovery](#-p48--mapping--apply-to-discovery)
+    - [☑ P4.9 — Qualification panel](#-p49--qualification-panel)
+    - [☑ P4.10 — Draft response generator](#-p410--draft-response-generator)
+    - [☑ P4.11 — OpenAI-compatible adapter (Gemma/Kimi/Nemotron)](#-p411--openai-compatible-adapter-gemmakiminemotron)
+    - [☑ P4.12 — Retry + error handling](#-p412--retry--error-handling)
+    - [☑ P4.13 — Phase 4 integration test](#-p413--phase-4-integration-test)
   - [Phase 5 — Export](#phase-5--export)
-    - [P5.1 — Export page shell](#p51--export-page-shell)
-    - [P5.2 — JSON BoM schema + export](#p52--json-bom-schema--export)
-    - [P5.3 — PDF components](#p53--pdf-components)
-    - [P5.4 — PDF export route](#p54--pdf-export-route)
-    - [P5.5 — Word (DOCX) export](#p55--word-docx-export)
-    - [P5.6 — PDF preview in UI](#p56--pdf-preview-in-ui)
-    - [P5.7 — Phase 5 integration test](#p57--phase-5-integration-test)
+    - [☑ P5.1 — Export page shell](#-p51--export-page-shell)
+    - [☑ P5.2 — JSON BoM schema + export](#-p52--json-bom-schema--export)
+    - [☑ P5.3 — PDF components](#-p53--pdf-components)
+    - [☑ P5.4 — PDF export route](#-p54--pdf-export-route)
+    - [☑ P5.5 — Word (DOCX) export](#-p55--word-docx-export)
+    - [☑ P5.6 — PDF preview in UI](#-p56--pdf-preview-in-ui)
+    - [☑ P5.7 — Phase 5 integration test](#-p57--phase-5-integration-test)
   - [Phase 6 — Polish \& LLM Expansion](#phase-6--polish--llm-expansion)
-    - [P6.1 — "Ask Claude" in ExplainBox](#p61--ask-claude-in-explainbox)
-    - [P6.2 — "Explain this sizing" in Build](#p62--explain-this-sizing-in-build)
-    - [P6.3 — Improved architecture diagram](#p63--improved-architecture-diagram)
-    - [P6.4 — Improved rack diagram](#p64--improved-rack-diagram)
-    - [P6.5 — Loading states](#p65--loading-states)
-    - [P6.6 — Error states](#p66--error-states)
-    - [P6.7 — Empty states](#p67--empty-states)
-    - [P6.8 — Documentation sweep](#p68--documentation-sweep)
-    - [P6.9 — Audit log hookup](#p69--audit-log-hookup)
-    - [P6.10 — Phase 6 demo dry-run](#p610--phase-6-demo-dry-run)
+    - [☑ P6.1 — "Ask Claude" in ExplainBox](#-p61--ask-claude-in-explainbox)
+    - [☑ P6.2 — "Explain this sizing" in Build](#-p62--explain-this-sizing-in-build)
+    - [☑ P6.3 — Improved architecture diagram](#-p63--improved-architecture-diagram)
+    - [☑ P6.4 — Improved rack diagram](#-p64--improved-rack-diagram)
+    - [☑ P6.5 — Loading states](#-p65--loading-states)
+    - [☑ P6.6 — Error states](#-p66--error-states)
+    - [☑ P6.7 — Empty states](#-p67--empty-states)
+    - [☑ P6.8 — Documentation sweep](#-p68--documentation-sweep)
+    - [☑ P6.9 — Audit log hookup](#-p69--audit-log-hookup)
+    - [☑ P6.10 — Phase 6 demo dry-run](#-p610--phase-6-demo-dry-run)
   - [Phase 7 — UX Redesign](#phase-7--ux-redesign)
-    - [P7.1 — Install theming dependencies](#p71--install-theming-dependencies)
-    - [P7.2 — Theme provider + layout integration](#p72--theme-provider--layout-integration)
-    - [P7.3 — Typography setup](#p73--typography-setup)
-    - [P7.4 — Sidebar component — layout shell](#p74--sidebar-component--layout-shell)
-    - [P7.5 — Sidebar nav items](#p75--sidebar-nav-items)
-    - [P7.6 — Current project section in sidebar](#p76--current-project-section-in-sidebar)
-    - [P7.7 — Theme toggle with moon/sun flip](#p77--theme-toggle-with-moonsun-flip)
-    - [P7.8 — Root layout rewrite](#p78--root-layout-rewrite)
-    - [P7.9 — Breadcrumbs component](#p79--breadcrumbs-component)
-    - [P7.10 — Landing/Projects page rebuild](#p710--landingprojects-page-rebuild)
-    - [P7.11 — Search + filter bar](#p711--search--filter-bar)
-    - [P7.12 — Delete project confirmation dialog](#p712--delete-project-confirmation-dialog)
-    - [P7.13 — Empty states](#p713--empty-states)
-    - [P7.14 — Project page layout rework](#p714--project-page-layout-rework)
-    - [P7.15 — Discovery autosave indicator](#p715--discovery-autosave-indicator)
-    - [P7.16 — Remove any explicit Save buttons](#p716--remove-any-explicit-save-buttons)
-    - [P7.17 — Onboarding page](#p717--onboarding-page)
-    - [P7.18 — First-run onboarding banner](#p718--first-run-onboarding-banner)
-    - [P7.19 — Apply Design System tokens to existing components](#p719--apply-design-system-tokens-to-existing-components)
-    - [P7.20 — Smoke test](#p720--smoke-test)
+    - [☑ P7.1 — Install theming dependencies](#-p71--install-theming-dependencies)
+    - [☑ P7.2 — Theme provider + layout integration](#-p72--theme-provider--layout-integration)
+    - [☑ P7.3 — Typography setup](#-p73--typography-setup)
+    - [☑ P7.4 — Sidebar component — layout shell](#-p74--sidebar-component--layout-shell)
+    - [☑ P7.5 — Sidebar nav items](#-p75--sidebar-nav-items)
+    - [☑ P7.6 — Current project section in sidebar](#-p76--current-project-section-in-sidebar)
+    - [☑ P7.7 — Theme toggle with moon/sun flip](#-p77--theme-toggle-with-moonsun-flip)
+    - [☑ P7.8 — Root layout rewrite](#-p78--root-layout-rewrite)
+    - [☑ P7.9 — Breadcrumbs component](#-p79--breadcrumbs-component)
+    - [☑ P7.10 — Landing/Projects page rebuild](#-p710--landingprojects-page-rebuild)
+    - [☑ P7.11 — Search + filter bar](#-p711--search--filter-bar)
+    - [☑ P7.12 — Delete project confirmation dialog](#-p712--delete-project-confirmation-dialog)
+    - [☑ P7.13 — Empty states](#-p713--empty-states)
+    - [☑ P7.14 — Project page layout rework](#-p714--project-page-layout-rework)
+    - [☑ P7.15 — Discovery autosave indicator](#-p715--discovery-autosave-indicator)
+    - [☑ P7.16 — Remove any explicit Save buttons](#-p716--remove-any-explicit-save-buttons)
+    - [☑ P7.17 — Onboarding page](#-p717--onboarding-page)
+    - [☑ P7.18 — First-run onboarding banner](#-p718--first-run-onboarding-banner)
+    - [☑ P7.19 — Apply Design System tokens to existing components](#-p719--apply-design-system-tokens-to-existing-components)
+    - [☑ P7.20 — Smoke test](#-p720--smoke-test)
   - [Phase 8 — Bug Fixes + BoM Pricing Audit](#phase-8--bug-fixes--bom-pricing-audit)
-    - [P8.1 — Interconnect preference bug — reproduce](#p81--interconnect-preference-bug--reproduce)
-    - [P8.2 — Interconnect preference bug — fix](#p82--interconnect-preference-bug--fix)
-    - [P8.3 — RFP JSON truncation bug — reproduce](#p83--rfp-json-truncation-bug--reproduce)
-    - [P8.4 — RFP JSON truncation bug — fix](#p84--rfp-json-truncation-bug--fix)
-    - [P8.5 — RFP file upload bug — diagnose](#p85--rfp-file-upload-bug--diagnose)
-    - [P8.6 — RFP file upload bug — fix](#p86--rfp-file-upload-bug--fix)
-    - [P8.7 — RFP file upload — edge-case test fixtures](#p87--rfp-file-upload--edge-case-test-fixtures)
-    - [P8.8 — BoM pricing audit — data review](#p88--bom-pricing-audit--data-review)
-    - [P8.9 — BoM pricing disclaimer in UI](#p89--bom-pricing-disclaimer-in-ui)
-    - [P8.10 — BoM override price surface in UI](#p810--bom-override-price-surface-in-ui)
-    - [P8.11 — Phase 8 smoke test](#p811--phase-8-smoke-test)
+    - [☑ P8.1 — Interconnect preference bug — reproduce](#-p81--interconnect-preference-bug--reproduce)
+    - [☑ P8.2 — Interconnect preference bug — fix](#-p82--interconnect-preference-bug--fix)
+    - [☑ P8.3 — RFP JSON truncation bug — reproduce](#-p83--rfp-json-truncation-bug--reproduce)
+    - [☑ P8.4 — RFP JSON truncation bug — fix](#-p84--rfp-json-truncation-bug--fix)
+    - [☑ P8.5 — RFP file upload bug — diagnose](#-p85--rfp-file-upload-bug--diagnose)
+    - [☑ P8.6 — RFP file upload bug — fix](#-p86--rfp-file-upload-bug--fix)
+    - [☑ P8.7 — RFP file upload — edge-case test fixtures](#-p87--rfp-file-upload--edge-case-test-fixtures)
+    - [☑ P8.8 — BoM pricing audit — data review](#-p88--bom-pricing-audit--data-review)
+    - [☑ P8.9 — BoM pricing disclaimer in UI](#-p89--bom-pricing-disclaimer-in-ui)
+    - [☑ P8.10 — BoM override price surface in UI](#-p810--bom-override-price-surface-in-ui)
+    - [☑ P8.11 — Phase 8 smoke test](#-p811--phase-8-smoke-test)
+    - [☑ P8.12 — Hydration mismatch warning on `<body>`](#-p812--hydration-mismatch-warning-on-body)
+    - [☑ P8.13 — RFP upload: DOMMatrix error](#-p813--rfp-upload-dommatrix-error)
+    - [☑ P8.14 — PDF download: "site not available" crash](#-p814--pdf-download-site-not-available-crash)
+    - [☑ P8.15 — Build Report MD data mismatch](#-p815--build-report-md-data-mismatch)
+    - [☑ P8.16 — Build Report: remove Node Pool table](#-p816--build-report-remove-node-pool-table)
+    - [☑ P8.17 — Build Report: Engine Notes missing](#-p817--build-report-engine-notes-missing)
+    - [☑ P8.18 — RFI "Apply to Discovery" broken](#-p818--rfi-apply-to-discovery-broken)
+    - [☑ P8.19 — RFI: confirm no auto-apply](#-p819--rfi-confirm-no-auto-apply)
   - [Phase 9 — Build Report Export](#phase-9--build-report-export)
-    - [P9.1 — Build Report content spec](#p91--build-report-content-spec)
-    - [P9.2 — Build Report data extractor](#p92--build-report-data-extractor)
-    - [P9.3 — Build Report Markdown renderer](#p93--build-report-markdown-renderer)
-    - [P9.4 — Build Report PDF components](#p94--build-report-pdf-components)
-    - [P9.5 — Build Report API routes](#p95--build-report-api-routes)
-    - [P9.6 — Export page — add Build Report buttons](#p96--export-page--add-build-report-buttons)
-    - [P9.7 — Export filename convention](#p97--export-filename-convention)
-    - [P9.8 — Phase 9 smoke test](#p98--phase-9-smoke-test)
+    - [☑ P9.1 — Build Report content spec](#-p91--build-report-content-spec)
+    - [☑ P9.2 — Build Report data extractor](#-p92--build-report-data-extractor)
+    - [☑ P9.3 — Build Report Markdown renderer](#-p93--build-report-markdown-renderer)
+    - [☑ P9.4 — Build Report PDF components](#-p94--build-report-pdf-components)
+    - [☑ P9.5 — Build Report API routes](#-p95--build-report-api-routes)
+    - [☑ P9.6 — Export page — add Build Report buttons](#-p96--export-page--add-build-report-buttons)
+    - [☑ P9.7 — Export filename convention](#-p97--export-filename-convention)
+    - [☑ P9.8 — Phase 9 smoke test](#-p98--phase-9-smoke-test)
+  - [Phase 11 — UX Polish Round 2](#phase-11--ux-polish-round-2)
+    - [☑ P11.1 — Text color contrast audit](#-p111--text-color-contrast-audit)
+    - [☑ P11.2 — Sidebar reorder](#-p112--sidebar-reorder)
+    - [☑ P11.3 — "ML Sizer" home link](#-p113--ml-sizer-home-link)
+    - [☑ P11.4 — Field meta + defaults](#-p114--field-meta--defaults)
+    - [☑ P11.5 — Required markers on form fields](#-p115--required-markers-on-form-fields)
+    - [☑ P11.6 — Skippable "Use default" toggle](#-p116--skippable-use-default-toggle)
+    - [☑ P11.7 — Validation respects \_skipped](#-p117--validation-respects-_skipped)
+    - [☑ P11.8 — Progress banner](#-p118--progress-banner)
+    - [☑ P11.9 — Review Defaults modal](#-p119--review-defaults-modal)
+    - [☑ P11.10 — Build gate uses new validation](#-p1110--build-gate-uses-new-validation)
+    - [☑ P11.11 — Quick Sizing sidebar entry](#-p1111--quick-sizing-sidebar-entry)
+    - [☑ P11.12 — Quick Sizing form](#-p1112--quick-sizing-form)
+    - [☑ P11.13 — Rule-based recommender](#-p1113--rule-based-recommender)
+    - [☑ P11.14 — Quick Sizing apply flow](#-p1114--quick-sizing-apply-flow)
+    - [☑ P11.15 — LLM-assist stub](#-p1115--llm-assist-stub)
+    - [☑ P11.16 — Quick Sizing banner on Discovery](#-p1116--quick-sizing-banner-on-discovery)
+    - [☑ P11.17 — RFI Apply polish](#-p1117--rfi-apply-polish)
+    - [☑ P11.18 — Smoke test](#-p1118--smoke-test)
   - [Future phases (v2+)](#future-phases-v2)
   - [Troubleshooting reference by step](#troubleshooting-reference-by-step)
   - [Revision log](#revision-log)
@@ -1209,13 +1236,183 @@
 
 ---
 
+## Phase 10 — LLM Settings & Multi-Model Routing
+[Back to ToC](#phase-plan--model-sizing-app)
+
+**Goal:** Ship `/settings` page. Users configure multiple models, assign features exclusively, test connections, clear assignments. Backward-compatible with `.env`.
+
+**Exit criteria:** `/settings` page functional. All LLM-dependent features use the configured model for their feature. Backward-compat migration works.
+
+### ☑ P10.1 — Database schema: configured_models + settings_kv
+- **Action:** Add `configured_models` and `settings_kv` tables per PRD §5.2 (v0.4b). Write Drizzle migration.
+- **Deliverable:** schema + migration
+- **Verify:** `npm run db:migrate`; inspect tables in Drizzle Studio
+- **Refs:** PRD §5.2 (v0.4b)
+
+### ☑ P10.2 — Encryption utility
+- **Action:** Create `lib/utils/crypto.ts` with `encrypt(plaintext)` and `decrypt(ciphertext)` using Node `crypto`, AES-256-GCM. Key derived from `MODEL_STORE_SECRET`. On missing secret: auto-generate 32-byte hex, append to `.env`, log warning. On malformed: fail loudly.
+- **Deliverable:** crypto util + env bootstrap
+- **Verify:** encrypt → decrypt round-trips; wrong key → explicit error; missing secret on fresh boot → auto-generated
+- **Refs:** PRD §8.5.5
+
+### ☑ P10.3 — ConfiguredModel CRUD
+- **Action:** `lib/settings/models.ts` — `listModels()`, `createModel()`, `updateModel()`, `deleteModel()`, `testModel()`. Provider config encrypted on write; API key masked in returned DTO.
+- **Deliverable:** CRUD module + unit tests (create → list masked → update preserves key → test → delete)
+- **Refs:** PRD §8.5.1
+
+### ☑ P10.4 — Feature routing store
+- **Action:** `lib/settings/routing.ts` — `getRouting()`, `assign(feature, modelId)`, `unassign(feature)`. Enforces exclusive assignment atomically. Persists to `configured_models.assigned_features_json`.
+- **Deliverable:** routing logic + unit tests (exclusive assignment enforcement)
+- **Verify:** Assign Feature X to Model A → to Model B → Model A no longer has X
+- **Refs:** PRD §8.5.3
+
+### ☑ P10.5 — getLlmProviderForFeature wiring
+- **Action:** Update `lib/llm/provider.ts`: add `getLlmProviderForFeature(feature: LlmFeatureId): LlmProvider | null`. Retain `getLlmProvider()` as deprecated shim (`.env` fallback). Add `LlmFeatureId` type export.
+- **Deliverable:** updated provider module
+- **Refs:** PRD §8.5.7
+
+### ☑ P10.6 — Call-site migration
+- **Action:** Migrate every LLM call site to pass a feature identifier. `app/api/llm/route.ts` accepts `feature` in request body; returns 503 with structured error if provider is null. Migrate: `rfp-extract`, `explain-field`, `explain-sizing`, `rfi-draft-response`, `build-report-summary` (if used), `quick-sizing-assist` (stub hook from P11.15).
+- **Deliverable:** call sites updated
+- **Verify:** Each feature hits the right model per routing; unassigned → structured 503
+- **Refs:** PRD §8.5.7
+
+### ☑ P10.7 — Backward-compat migration
+- **Action:** On app boot in `lib/db/client.ts`: if `configured_models` empty AND `.env` has `LLM_PROVIDER` → create default ConfiguredModel from env, assign to all 6 features, log once. Idempotent.
+- **Deliverable:** migration function + log
+- **Verify:** Fresh install with `.env` configured → default model auto-created → all features work
+- **Refs:** PRD §8.5.8
+
+### ☑ P10.8 — Settings page shell
+- **Action:** Rewrite `app/settings/page.tsx` (replacing v0.4a stub). Layout: header + "Configured Models" list + "+ Add Model" button + Feature Routing Summary at bottom.
+- **Deliverable:** page shell
+- **Refs:** PRD §8.5.6
+
+### ☑ P10.9 — Add Model dialog
+- **Action:** `components/settings/AddModelDialog.tsx`. Fields: Label, Provider (radio), Model identifier, API key (password), Base URL (conditional). On submit: `createModel` → `testModel` → save if valid.
+- **Deliverable:** dialog component
+- **Verify:** Add Anthropic model with valid key → saved; invalid key → error shown
+- **Refs:** PRD §8.5.6
+
+### ☑ P10.10 — Edit model row
+- **Action:** Expandable row per configured model. All fields editable. API key masked; re-enter to change (empty = no change).
+- **Deliverable:** row component
+- **Refs:** PRD §8.5.6
+
+### ☑ P10.11 — Feature assignment checkboxes
+- **Action:** 6 checkboxes per model row (one per `LlmFeatureId`). Disabled with tooltip when owned by another model ("Currently: \<label\>"). Toggle → `assign` / `unassign`.
+- **Deliverable:** checkbox UI + routing wire
+- **Verify:** Exclusive assignment visible; unchecking does not auto-enable on others
+- **Refs:** PRD §8.5.3
+
+### ☑ P10.12 — Test Connection button
+- **Action:** Button calls `testModel(id)`. Shows spinner → green "Connected" or red error.
+- **Deliverable:** button + state
+- **Refs:** PRD §8.5.6
+
+### ☑ P10.13 — Clear Assignments button
+- **Action:** Confirms then removes all features assigned to this model (become unassigned).
+- **Deliverable:** button + confirmation dialog
+- **Refs:** PRD §8.5.4
+
+### ☑ P10.14 — Feature Routing Summary
+- **Action:** Bottom of Settings page: table (Feature / Assigned Model / Status). Status green ✓ when assigned, red ✗ when unassigned. Rows clickable to scroll to the relevant model.
+- **Deliverable:** summary table
+- **Refs:** PRD §8.5.6
+
+### ☑ P10.15 — UI disables for unassigned features
+- **Action:** Audit and update: ExplainBox "Ask Claude", RFI extract buttons, Build "explain sizing" buttons. Each disabled state shows tooltip linking to `/settings`. Quick Sizing LLM path: gracefully falls back to rule-based (no disable).
+- **Deliverable:** all entry points routing-aware
+- **Verify:** Clear all assignments → LLM actions grey out with tooltip or fall back
+- **Refs:** PRD §8.5.3
+
+### ☑ P10.16 — Quick Sizing LLM-assist activation
+- **Action:** Update `lib/quick-sizing/recommender.ts` (v0.4a stub): call `getLlmProviderForFeature('quick-sizing-assist')` when "Let the app recommend". On null or failure → rule-based fallback. Create `lib/llm/prompts/quick-sizing.ts` with `PROMPT_VERSION`.
+- **Deliverable:** activated LLM path + prompt + fallback
+- **Verify:** With feature assigned → LLM candidates; remove assignment → rule-based; LLM failure → rule-based silently
+- **Refs:** PRD §6.6.3, §6.6.5
+
+### ☐ P10.17 — Smoke test
+- **Action:** End-to-end:
+  1. Configure Anthropic model → assign all features → Test Connection ✓
+  2. Test ExplainBox "Ask Claude", RFI extract, Build explain sizing — all use configured model
+  3. Clear all assignments → buttons grey out / fallback
+  4. Re-assign → works again
+  5. Delete model → features become unassigned
+- **Deliverable:** CHANGELOG entry
+- **Refs:** PRD §8.5
+
+---
+
+## Phase 12 — Server & BoM Override
+[Back to ToC](#phase-plan--model-sizing-app)
+
+**Goal:** Discovery server SKU override + Build BoM per-line price/swap/reset. All 5 exports reflect overrides.
+
+**Exit criteria:** Discovery has server selector; Build BoM allows per-line price + swap + reset; all 5 exports reflect overrides.
+
+### ☐ P12.1 — Discovery schema: preferredServer
+- **Action:** Add `discovery.hardware.preferredServer?: string` per PRD §5.1 (v0.4b). Update Zod schema + TypeScript types + `lib/discovery/field-meta.ts` (skippable, default = blank).
+- **Deliverable:** schema + types
+- **Refs:** PRD §5.1 (v0.4b)
+
+### ☐ P12.2 — Server selector UI
+- **Action:** `components/discovery/HardwareForm.tsx`: add server dropdown below preferred GPU. Filter by `preferredVendor` + GPU compatibility (`supported_gpu_ids` in `data/servers.json`). Optional (blank = auto-select). Zero-match helper text: "No servers match your GPU + vendor. Clear a filter." Add ExplainBox entry.
+- **Deliverable:** dropdown + filter logic
+- **Verify:** Vendor = Dell → Dell servers only; GPU = MI300X → AMD-capable only; Vendor = either → all
+- **Refs:** PRD §5.1 (v0.4b)
+
+### ☐ P12.3 — Sizing engine respects preferredServer
+- **Action:** In `lib/sizing/index.ts` server selection: if `preferredServer` set AND GPU-compatible → use it. If incompatible → auto-select + engine note: "Preferred server '\<label\>' doesn't support \<gpu\>; auto-selected '\<actual\>'."
+- **Deliverable:** engine update + note
+- **Verify:** Unit test — preferred honored when compatible; warning issued when not
+- **Refs:** PRD §5.1 (v0.4b)
+
+### ☐ P12.4 — BoM overrides data model
+- **Action:** Add `build.bomOverrides: Record<string, Partial<BomItem>>` to store (PRD §5.1 v0.4b). Wire into SQLite autosave.
+- **Deliverable:** store slice + persistence
+- **Refs:** PRD §5.1 (v0.4b)
+
+### ☐ P12.5 — BoM table: editable unit price
+- **Action:** Build page BoM table — each line's `unitPriceUsd` is an inline editable input. Change → save to `bomOverrides[itemId].unitPriceUsd`. Show "✎" icon + distinct background when overridden. Total capex recomputes.
+- **Deliverable:** editable cell + state wiring
+- **Verify:** Edit price → total updates immediately; reload → override persists
+- **Refs:** PRD §6.4.x (v0.4b)
+
+### ☐ P12.6 — BoM table: swap item dropdown
+- **Action:** "Swap" dropdown per line — shows alternative catalog items of the same `category`. On select → save swapped item fields to `bomOverrides[itemId]`. Totals recompute.
+- **Deliverable:** dropdown + swap logic
+- **Verify:** Swap an item → total updates → exports reflect swap
+- **Refs:** PRD §6.4.x (v0.4b)
+
+### ☐ P12.7 — BoM table: Reset to catalog
+- **Action:** "Reset" link per overridden line — removes `bomOverrides[itemId]`; line reverts to catalog.
+- **Deliverable:** reset action
+- **Verify:** Override a line → Reset → back to catalog
+- **Refs:** PRD §6.4.x (v0.4b)
+
+### ☐ P12.8 — Exports reflect overrides
+- **Action:** Update all 5 export paths to read `build.bomOverrides` and merge before rendering. Include BoM header note "Prices/items overridden from catalog" when any overrides present.
+- **Deliverable:** override merging in all 5 export routes
+- **Verify:** Override a line → export all 5 formats → override visible in each
+- **Refs:** PRD §6.4.y (v0.4b)
+
+### ☐ P12.9 — Smoke test
+- **Action:** End-to-end:
+  1. Discovery: vendor = AMD + preferredServer = Dell XE9680 (incompatible) → engine note flags mismatch
+  2. Change to Supermicro SMC (compatible) → honored, no warning
+  3. Build BoM: override 2 lines (one price, one swap) → export all 5 formats → overrides present
+  4. Reset one override → catalog returns
+- **Deliverable:** CHANGELOG entry
+- **Refs:** PRD §5.1, §6.4.x (v0.4b)
+
+---
+
 ## Future phases (v2+)
 [Back to ToC](#phase-plan--model-sizing-app)
 
 Not assigned step IDs yet — will be enumerated when scoped.
 
-- **Phase 10** — LLM Settings (model routing, provider config, v0.4b)
-- **Phase 12** — Server/BoM override (v0.4b)
 - **Phase 13** — Fine-tuning workload module (LoRA, QLoRA, full FT sizing)
 - **Phase 14** — MCP integrations (live catalog / pricing lookups)
 - **Phase 15** — Additional accelerators (Intel Gaudi, AWS Trainium/Inferentia, Google TPU)
@@ -1312,3 +1509,4 @@ P8.18 — RFI Apply to Discovery broken
 | v0.1 | 2026-04-19 | Initial phase plan with P0–P6 steps |
 | v0.3 | 2026-04-21 | Added Phase 7 (UX redesign: left-nav, themes, landing, autosave indicator), Phase 8 (bug fixes: interconnect, RFP JSON, RFP upload, BoM pricing audit), Phase 9 (Build Report export in PDF and Markdown). Renumbered old Phase 7–13 futures to Phase 10–16. Added prepopulated troubleshooting entries for P8.1, P8.3, P8.5. |
 | v0.4a | 2026-04-22 | **Phase 8 extension (P8.12–P8.19):** hydration warning, DOMMatrix, PDF download crash, Build Report MD data, Node Pool table removed, Engine Notes restored, RFI Apply fixed, RFI confirm-before-apply. **Phase 11 (P11.1–P11.18):** text contrast, sidebar reorder + theme-toggle-to-top, ML Sizer home link, required field markers, skippable toggle + defaults, progress banner, Review Defaults modal, Quick Sizing flow (rule-based; LLM-assist stub), RFI Apply polish. Added prepopulated troubleshooting entries for P8.12–P8.18. |
+| v0.4b | 2026-04-22 | **Phase 10 (P10.1–P10.17):** LLM Settings page, multi-model routing with exclusive feature assignment, encrypted credential storage, `.env` backward compat, Quick Sizing LLM-assist activation. **Phase 12 (P12.1–P12.9):** Discovery preferredServer override with GPU-compatibility filtering, Build BoM per-line price + swap + reset, all 5 exports reflect overrides. Removed Phase 10 + 12 from Future phases stub. |
