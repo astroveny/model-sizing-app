@@ -1332,7 +1332,7 @@
 - **Verify:** With feature assigned → LLM candidates; remove assignment → rule-based; LLM failure → rule-based silently
 - **Refs:** PRD §6.6.3, §6.6.5
 
-### ☐ P10.17 — Smoke test
+### ☑ P10.17 — Smoke test
 - **Action:** End-to-end:
   1. Configure Anthropic model → assign all features → Test Connection ✓
   2. Test ExplainBox "Ask Claude", RFI extract, Build explain sizing — all use configured model
