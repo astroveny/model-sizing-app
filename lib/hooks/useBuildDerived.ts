@@ -91,6 +91,7 @@ function toSizingInput(
     chunkedPrefill:      modelPlatform.optimizations.chunkedPrefill,
     deploymentPattern: mapPattern(deploymentPattern),
     networkingPreference: hardware.networking ?? undefined,
+    preferredServerId: hardware.preferredServer ?? undefined,
   };
 }
 

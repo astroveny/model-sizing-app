@@ -126,6 +126,7 @@ export async function buildDocx(project: Project, bom: BomExport): Promise<Buffe
 
           // Bill of Materials
           heading1("Bill of Materials"),
+          ...(bom.hasOverrides ? [para("* Prices/items overridden from catalog — verify with vendor before committing.")] : []),
           bomTable(bom.items),
           new Paragraph({ spacing: { before: 200, after: 100 } }),
           kvPara("Total CapEx (Est.)", bom.totals.capexUsd > 0 ? `$${bom.totals.capexUsd.toLocaleString()}` : "—"),

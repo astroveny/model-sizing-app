@@ -127,6 +127,11 @@ export function SizingPdfDocument({ project, bom }: Props) {
         <Footer projectName={project.name} />
         <SectionTitle>Bill of Materials</SectionTitle>
 
+        {bom.hasOverrides && (
+          <Text style={{ fontSize: 8, color: "#b45309", marginBottom: 6 }}>
+            * Prices/items overridden from catalog — verify with vendor before committing.
+          </Text>
+        )}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableCellBold, { flex: 2 }]}>Item</Text>

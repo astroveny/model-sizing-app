@@ -20,9 +20,37 @@ export function getModelById(id: string): ModelCatalogEntry | undefined {
   return modelCatalog.find((m) => m.id === id);
 }
 
+export function getServerById(id: string): Server | undefined {
+  return servers.find((s) => s.id === id);
+}
+
 /** Best-match server for a given GPU id */
 export function getBestServer(gpuId: string): Server | undefined {
   return servers.find((s) => s.supported_gpu_ids.includes(gpuId));
+}
+
+/**
+ * Resolves the server to use for a sizing run.
+ * Returns the chosen server and, when the preferred server was rejected due to
+ * GPU incompatibility, a note string (otherwise null).
+ */
+export function resolveServer(
+  gpuId: string,
+  preferredServerId?: string
+): { server: Server | undefined; incompatibilityNote: string | null } {
+  if (preferredServerId) {
+    const preferred = getServerById(preferredServerId);
+    if (preferred) {
+      if (preferred.supported_gpu_ids.includes(gpuId)) {
+        return { server: preferred, incompatibilityNote: null };
+      }
+      // Preferred server doesn't support the GPU — fall back + emit note
+      const auto = getBestServer(gpuId);
+      const note = `Preferred server "${preferred.model}" doesn't support ${gpuId}; auto-selected "${auto?.model ?? "unknown"}" instead.`;
+      return { server: auto, incompatibilityNote: note };
+    }
+  }
+  return { server: getBestServer(gpuId), incompatibilityNote: null };
 }
 
 /**

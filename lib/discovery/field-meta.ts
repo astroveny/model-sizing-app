@@ -43,6 +43,7 @@ export const FIELD_META: Record<string, FieldClass> = {
   // Hardware — skippable
   "hardware.preferredVendor": "skippable",
   "hardware.preferredGpu": "optional",
+  "hardware.preferredServer": "optional",
   "hardware.cooling": "skippable",
   "hardware.networking": "skippable",
 

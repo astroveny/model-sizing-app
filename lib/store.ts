@@ -46,6 +46,7 @@ export type DiscoveryState = {
   hardware: {
     preferredVendor: "nvidia" | "amd" | "either";
     preferredGpu?: string;
+    preferredServer?: string;
     cooling: "air" | "liquid" | "either";
     networking: "25G" | "100G" | "400G" | "infiniband";
   };
@@ -174,6 +175,8 @@ export type BuildState = {
   overrides: Partial<BuildDerived>;
   final: BuildDerived;
   bom: BomItem[];
+  /** Per-line BoM overrides. Key = "<category>:<name>". Values merged over catalog-derived BomItem. */
+  bomOverrides: Record<string, Partial<BomItem>>;
   totals: {
     gpuCount: number;
     serverCount: number;
@@ -348,6 +351,7 @@ export function defaultProject(id: string, name: string): Project {
     build: {
       derived: defaultBuildDerived(),
       overrides: {},
+      bomOverrides: {},
       final: defaultBuildDerived(),
       bom: [],
       totals: {
@@ -382,6 +386,9 @@ type ProjectStore = {
   clearBuildOverride: (key: string) => void;
   // Clear all overrides
   clearAllBuildOverrides: () => void;
+  // BoM per-line overrides
+  setBomOverride: (itemKey: string, patch: Partial<BomItem>) => void;
+  clearBomOverride: (itemKey: string) => void;
 };
 
 function setDeep(obj: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
@@ -440,5 +447,23 @@ export const useProjectStore = create<ProjectStore>()((set, get) => ({
 
   clearAllBuildOverrides: () => {
     get().updateField("build.overrides", {});
+  },
+
+  setBomOverride: (itemKey, patch) => {
+    const { activeProject } = get();
+    if (!activeProject) return;
+    const current = activeProject.build.bomOverrides ?? {};
+    get().updateField("build.bomOverrides", {
+      ...current,
+      [itemKey]: { ...(current[itemKey] ?? {}), ...patch },
+    });
+  },
+
+  clearBomOverride: (itemKey) => {
+    const { activeProject } = get();
+    if (!activeProject) return;
+    const current = { ...(activeProject.build.bomOverrides ?? {}) };
+    delete current[itemKey];
+    get().updateField("build.bomOverrides", current);
   },
 }));

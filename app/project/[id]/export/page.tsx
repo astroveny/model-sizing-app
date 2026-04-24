@@ -4,14 +4,14 @@ import { useParams } from "next/navigation";
 import { useProjectStore } from "@/lib/store";
 import { buildBomExport } from "@/lib/export/build-bom-export";
 import { PdfPreview } from "@/components/export/PdfPreview";
+import { BomTable } from "@/components/export/BomTable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, FileCode2, FileJson, FileText, FileType, RotateCcw, X } from "lucide-react";
+import { AlertTriangle, FileCode2, FileJson, FileText, FileType, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { buildExportFilename } from "@/lib/export/filename";
-
-const BOM_PRICE_PREFIX = "bom:price:";
+import type { BomItem } from "@/lib/store";
 
 function downloadUrl(href: string, filename: string) {
   const a = document.createElement("a");
@@ -23,8 +23,8 @@ function downloadUrl(href: string, filename: string) {
 export default function ExportPage() {
   const { id } = useParams<{ id: string }>();
   const project = useProjectStore((s) => s.activeProject);
-  const setBuildOverride = useProjectStore((s) => s.setBuildOverride);
-  const clearBuildOverride = useProjectStore((s) => s.clearBuildOverride);
+  const setBomOverride = useProjectStore((s) => s.setBomOverride);
+  const clearBomOverride = useProjectStore((s) => s.clearBomOverride);
 
   const [pricingDismissed, setPricingDismissed] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -41,51 +41,18 @@ export default function ExportPage() {
     return buildBomExport(project);
   }, [project]);
 
-  // Read per-item price overrides from build.overrides (key = "bom:price:<name>")
-  const priceOverrides = useMemo<Record<string, number>>(() => {
-    if (!project) return {};
-    const raw = project.build.overrides as Record<string, unknown>;
-    const result: Record<string, number> = {};
-    for (const [k, v] of Object.entries(raw)) {
-      if (k.startsWith(BOM_PRICE_PREFIX) && typeof v === "number") {
-        result[k.slice(BOM_PRICE_PREFIX.length)] = v;
-      }
-    }
-    return result;
+  const bomOverrides = useMemo<Record<string, Partial<BomItem>>>(() => {
+    return (project?.build?.bomOverrides as Record<string, Partial<BomItem>>) ?? {};
   }, [project]);
 
-  // Apply overrides to compute effective items + totals
-  const effectiveItems = useMemo(() => {
-    if (!bom) return [];
-    return bom.items.map((item) => {
-      const overridePrice = priceOverrides[item.name];
-      if (overridePrice !== undefined) {
-        return {
-          ...item,
-          unitPriceUsd: overridePrice,
-          totalPriceUsd: overridePrice * item.quantity,
-          overridden: true,
-        };
-      }
-      return { ...item, overridden: false };
-    });
-  }, [bom, priceOverrides]);
+  const hasOverrides = Object.keys(bomOverrides).length > 0;
 
-  const effectiveCapex = useMemo(
-    () => effectiveItems.reduce((sum, i) => sum + (i.totalPriceUsd ?? 0), 0),
-    [effectiveItems]
-  );
-
-  function handlePriceChange(itemName: string, raw: string) {
-    const val = parseFloat(raw.replace(/[^0-9.]/g, ""));
-    if (!isNaN(val) && val >= 0) {
-      setBuildOverride(`${BOM_PRICE_PREFIX}${itemName}`, val);
-    }
-  }
-
-  function handlePriceReset(itemName: string) {
-    clearBuildOverride(`${BOM_PRICE_PREFIX}${itemName}`);
-  }
+  // GPU id used by the sizing engine — needed to filter compatible swap servers
+  const currentGpuId = useMemo(() => {
+    if (!project) return "h100-sxm";
+    const hw = project.discovery.hardware;
+    return hw.preferredGpu ?? (hw.preferredVendor === "amd" ? "mi300x" : "h100-sxm");
+  }, [project]);
 
   if (!project || !bom) {
     return (
@@ -95,7 +62,7 @@ export default function ExportPage() {
     );
   }
 
-  const slug = project.name; // buildExportFilename handles slugification
+  const slug = project.name;
 
   return (
     <div className="p-6 space-y-6 max-w-5xl">
@@ -246,9 +213,8 @@ export default function ExportPage() {
             <CardHeader>
               <CardTitle className="text-base">Bill of Materials</CardTitle>
               <CardDescription>
-                {effectiveItems.length} items · Est. CapEx{" "}
-                {effectiveCapex > 0 ? `$${effectiveCapex.toLocaleString()}` : "—"}
-                {effectiveItems.some((i) => i.overridden) && (
+                {bom.items.length} items
+                {hasOverrides && (
                   <span className="ml-2 text-[var(--accent-primary)] text-xs">(includes overrides)</span>
                 )}
               </CardDescription>
@@ -259,7 +225,7 @@ export default function ExportPage() {
                   <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                   <span className="flex-1">
                     Indicative pricing only — confirm all figures with your vendor before committing to a budget.
-                    You can override unit prices per row below.
+                    Edit unit prices or swap items per row. All 5 export formats reflect your changes.
                   </span>
                   <button
                     onClick={dismissPricing}
@@ -270,75 +236,18 @@ export default function ExportPage() {
                   </button>
                 </div>
               )}
-              {effectiveItems.length === 0 ? (
+              {bom.items.length === 0 ? (
                 <p className="text-sm text-[var(--text-secondary)]">
                   Complete Discovery to generate the bill of materials.
                 </p>
               ) : (
-                <div className="overflow-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-[var(--border-default)] text-left text-[var(--text-secondary)]">
-                        <th className="pb-2 pr-4 font-medium">Item</th>
-                        <th className="pb-2 pr-4 font-medium">Category</th>
-                        <th className="pb-2 pr-4 font-medium text-right">Qty</th>
-                        <th className="pb-2 pr-4 font-medium text-right">Unit Price</th>
-                        <th className="pb-2 font-medium text-right">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {effectiveItems.map((item, i) => (
-                        <tr key={i} className="border-b border-[var(--border-muted)] last:border-0">
-                          <td className="py-2 pr-4">{item.name}</td>
-                          <td className="py-2 pr-4 text-[var(--text-secondary)] capitalize">{item.category}</td>
-                          <td className="py-2 pr-4 text-right">{item.quantity}</td>
-                          <td className="py-2 pr-4 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              {item.overridden && (
-                                <button
-                                  onClick={() => handlePriceReset(item.name)}
-                                  title="Reset to catalog price"
-                                  className="text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors"
-                                >
-                                  <RotateCcw className="h-3 w-3" />
-                                </button>
-                              )}
-                              <input
-                                type="text"
-                                defaultValue={item.unitPriceUsd?.toLocaleString() ?? ""}
-                                placeholder="—"
-                                onBlur={(e) => handlePriceChange(item.name, e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                                }}
-                                className={[
-                                  "w-24 text-right bg-transparent border rounded px-1.5 py-0.5 text-sm",
-                                  "focus:outline-none focus:border-[var(--accent-primary)]",
-                                  item.overridden
-                                    ? "border-[var(--accent-primary)] text-[var(--accent-primary)]"
-                                    : "border-[var(--border-muted)] hover:border-[var(--border-default)]",
-                                ].join(" ")}
-                              />
-                            </div>
-                          </td>
-                          <td className="py-2 text-right font-medium">
-                            {item.totalPriceUsd ? `$${item.totalPriceUsd.toLocaleString()}` : "—"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <td colSpan={4} className="pt-3 font-semibold text-right pr-4">
-                          Total CapEx (Est.)
-                        </td>
-                        <td className="pt-3 font-semibold text-right">
-                          {effectiveCapex > 0 ? `$${effectiveCapex.toLocaleString()}` : "—"}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
+                <BomTable
+                  bom={bom}
+                  bomOverrides={bomOverrides}
+                  currentGpuId={currentGpuId}
+                  onSetOverride={setBomOverride}
+                  onClearOverride={clearBomOverride}
+                />
               )}
             </CardContent>
           </Card>

@@ -63,6 +63,7 @@ export const ConstraintsSchema = z.object({
 export const HardwareSchema = z.object({
   preferredVendor: z.enum(["nvidia", "amd", "either"]),
   preferredGpu: z.string().optional(),
+  preferredServer: z.string().optional(),
   cooling: z.enum(["air", "liquid", "either"]),
   networking: z.enum(["25G", "100G", "400G", "infiniband"]),
 });

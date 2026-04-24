@@ -124,6 +124,12 @@ export type SizingInput = {
   // to infiniband-400g. An engine note is added when the preference may be
   // undersized for the required bandwidth.
   networkingPreference?: string;
+
+  // User server preference (from Discovery hardware.preferredServer).
+  // When set and GPU-compatible, the engine uses this server model for BoM
+  // and capacity calculations. If incompatible, falls back to auto-select
+  // and emits an engine note.
+  preferredServerId?: string;
 };
 
 // ---------------------------------------------------------------------------

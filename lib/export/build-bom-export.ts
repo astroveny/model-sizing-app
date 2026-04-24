@@ -48,6 +48,24 @@ function toSizingInput(project: Project): SizingInput | null {
   };
 }
 
+/** Applies bomOverrides to a flat BoM array. Key = "<category>:<name>". */
+function applyBomOverrides(
+  items: BomExport["items"],
+  overrides: Record<string, Partial<{ name: string; vendor?: string; unitPriceUsd?: number; totalPriceUsd?: number; notes?: string }>>
+): BomExport["items"] {
+  if (!overrides || Object.keys(overrides).length === 0) return items;
+  return items.map((item) => {
+    const key = `${item.category}:${item.name}`;
+    const patch = overrides[key];
+    if (!patch || Object.keys(patch).length === 0) return item;
+    const merged = { ...item, ...patch };
+    if (patch.unitPriceUsd !== undefined && patch.totalPriceUsd === undefined) {
+      merged.totalPriceUsd = patch.unitPriceUsd * item.quantity;
+    }
+    return merged;
+  });
+}
+
 export function buildBomExport(project: Project): BomExport {
   const input = toSizingInput(project);
   let items: BomExport["items"] = [];
@@ -56,7 +74,7 @@ export function buildBomExport(project: Project): BomExport {
   if (input) {
     const result = computeSizing(input);
     const bomItems = buildBom(input, result.capacity);
-    items = bomItems.map((item) => ({
+    const rawItems = bomItems.map((item) => ({
       category: item.category,
       name: item.name,
       quantity: item.quantity,
@@ -65,6 +83,8 @@ export function buildBomExport(project: Project): BomExport {
       vendor: item.vendor,
       notes: item.notes,
     }));
+    const bomOverrides = (project.build.bomOverrides ?? {}) as Record<string, Partial<typeof rawItems[0]>>;
+    items = applyBomOverrides(rawItems, bomOverrides);
     sizing = {
       totalGpus:    result.capacity.totalGpus,
       serverCount:  result.capacity.serverCount,
@@ -80,6 +100,8 @@ export function buildBomExport(project: Project): BomExport {
   }
 
   const capexUsd = items.reduce((sum, i) => sum + (i.totalPriceUsd ?? 0), 0);
+  const bomOverrides = (project.build.bomOverrides ?? {}) as Record<string, unknown>;
+  const hasOverrides = Object.keys(bomOverrides).length > 0;
 
   return {
     schemaVersion: BOM_SCHEMA_VERSION,
@@ -93,5 +115,6 @@ export function buildBomExport(project: Project): BomExport {
     sizing,
     items,
     totals: { itemCount: items.length, capexUsd },
+    hasOverrides,
   };
 }

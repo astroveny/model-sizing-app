@@ -10,6 +10,7 @@ import { applyOptimizations } from "./optimizations";
 import { applyDeploymentPattern } from "./patterns";
 import { computeCapacity } from "./capacity";
 import { generateNotes } from "./notes";
+import { resolveServer } from "./catalog";
 
 /**
  * Full sizing pipeline: memory → sharding → prefill → decode →
@@ -28,7 +29,9 @@ export function computeSizing(input: SizingInput): SizingEngineResult {
   const capacity = computeCapacity(input, sharding, optimizations, pattern);
 
   const engineNotes = generateNotes(input, memory, sharding, prefill, decode, optimizations, capacity);
+  const { incompatibilityNote } = resolveServer(input.gpu.id, input.preferredServerId);
   const noteMessages = [
+    ...(incompatibilityNote ? [`[WARNING] ${incompatibilityNote}`] : []),
     ...engineNotes.map((n) => `[${n.category.toUpperCase()}] ${n.message}`),
     ...pattern.notes,
   ];

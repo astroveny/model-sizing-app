@@ -181,14 +181,14 @@
     - [☑ P10.16 — Quick Sizing LLM-assist activation](#-p1016--quick-sizing-llm-assist-activation)
     - [☑ P10.17 — Smoke test](#-p1017--smoke-test)
   - [Phase 12 — Server \& BoM Override](#phase-12--server--bom-override)
-    - [☐ P12.1 — Discovery schema: preferredServer](#-p121--discovery-schema-preferredserver)
-    - [☐ P12.2 — Server selector UI](#-p122--server-selector-ui)
-    - [☐ P12.3 — Sizing engine respects preferredServer](#-p123--sizing-engine-respects-preferredserver)
-    - [☐ P12.4 — BoM overrides data model](#-p124--bom-overrides-data-model)
-    - [☐ P12.5 — BoM table: editable unit price](#-p125--bom-table-editable-unit-price)
-    - [☐ P12.6 — BoM table: swap item dropdown](#-p126--bom-table-swap-item-dropdown)
-    - [☐ P12.7 — BoM table: Reset to catalog](#-p127--bom-table-reset-to-catalog)
-    - [☐ P12.8 — Exports reflect overrides](#-p128--exports-reflect-overrides)
+    - [☑ P12.1 — Discovery schema: preferredServer](#-p121--discovery-schema-preferredserver)
+    - [☑ P12.2 — Server selector UI](#-p122--server-selector-ui)
+    - [☑ P12.3 — Sizing engine respects preferredServer](#-p123--sizing-engine-respects-preferredserver)
+    - [☑ P12.4 — BoM overrides data model](#-p124--bom-overrides-data-model)
+    - [☑ P12.5 — BoM table: editable unit price](#-p125--bom-table-editable-unit-price)
+    - [☑ P12.6 — BoM table: swap item dropdown](#-p126--bom-table-swap-item-dropdown)
+    - [☑ P12.7 — BoM table: Reset to catalog](#-p127--bom-table-reset-to-catalog)
+    - [☑ P12.8 — Exports reflect overrides](#-p128--exports-reflect-overrides)
     - [☐ P12.9 — Smoke test](#-p129--smoke-test)
   - [Future phases (v2+)](#future-phases-v2)
   - [Troubleshooting reference by step](#troubleshooting-reference-by-step)
@@ -1379,47 +1379,47 @@
 
 **Exit criteria:** Discovery has server selector; Build BoM allows per-line price + swap + reset; all 5 exports reflect overrides.
 
-### ☐ P12.1 — Discovery schema: preferredServer
+### ☑ P12.1 — Discovery schema: preferredServer
 - **Action:** Add `discovery.hardware.preferredServer?: string` per PRD §5.1 (v0.4b). Update Zod schema + TypeScript types + `lib/discovery/field-meta.ts` (skippable, default = blank).
 - **Deliverable:** schema + types
 - **Refs:** PRD §5.1 (v0.4b)
 
-### ☐ P12.2 — Server selector UI
+### ☑ P12.2 — Server selector UI
 - **Action:** `components/discovery/HardwareForm.tsx`: add server dropdown below preferred GPU. Filter by `preferredVendor` + GPU compatibility (`supported_gpu_ids` in `data/servers.json`). Optional (blank = auto-select). Zero-match helper text: "No servers match your GPU + vendor. Clear a filter." Add ExplainBox entry.
 - **Deliverable:** dropdown + filter logic
 - **Verify:** Vendor = Dell → Dell servers only; GPU = MI300X → AMD-capable only; Vendor = either → all
 - **Refs:** PRD §5.1 (v0.4b)
 
-### ☐ P12.3 — Sizing engine respects preferredServer
+### ☑ P12.3 — Sizing engine respects preferredServer
 - **Action:** In `lib/sizing/index.ts` server selection: if `preferredServer` set AND GPU-compatible → use it. If incompatible → auto-select + engine note: "Preferred server '\<label\>' doesn't support \<gpu\>; auto-selected '\<actual\>'."
 - **Deliverable:** engine update + note
 - **Verify:** Unit test — preferred honored when compatible; warning issued when not
 - **Refs:** PRD §5.1 (v0.4b)
 
-### ☐ P12.4 — BoM overrides data model
+### ☑ P12.4 — BoM overrides data model
 - **Action:** Add `build.bomOverrides: Record<string, Partial<BomItem>>` to store (PRD §5.1 v0.4b). Wire into SQLite autosave.
 - **Deliverable:** store slice + persistence
 - **Refs:** PRD §5.1 (v0.4b)
 
-### ☐ P12.5 — BoM table: editable unit price
+### ☑ P12.5 — BoM table: editable unit price
 - **Action:** Build page BoM table — each line's `unitPriceUsd` is an inline editable input. Change → save to `bomOverrides[itemId].unitPriceUsd`. Show "✎" icon + distinct background when overridden. Total capex recomputes.
 - **Deliverable:** editable cell + state wiring
 - **Verify:** Edit price → total updates immediately; reload → override persists
 - **Refs:** PRD §6.4.x (v0.4b)
 
-### ☐ P12.6 — BoM table: swap item dropdown
+### ☑ P12.6 — BoM table: swap item dropdown
 - **Action:** "Swap" dropdown per line — shows alternative catalog items of the same `category`. On select → save swapped item fields to `bomOverrides[itemId]`. Totals recompute.
 - **Deliverable:** dropdown + swap logic
 - **Verify:** Swap an item → total updates → exports reflect swap
 - **Refs:** PRD §6.4.x (v0.4b)
 
-### ☐ P12.7 — BoM table: Reset to catalog
+### ☑ P12.7 — BoM table: Reset to catalog
 - **Action:** "Reset" link per overridden line — removes `bomOverrides[itemId]`; line reverts to catalog.
 - **Deliverable:** reset action
 - **Verify:** Override a line → Reset → back to catalog
 - **Refs:** PRD §6.4.x (v0.4b)
 
-### ☐ P12.8 — Exports reflect overrides
+### ☑ P12.8 — Exports reflect overrides
 - **Action:** Update all 5 export paths to read `build.bomOverrides` and merge before rendering. Include BoM header note "Prices/items overridden from catalog" when any overrides present.
 - **Deliverable:** override merging in all 5 export routes
 - **Verify:** Override a line → export all 5 formats → override visible in each

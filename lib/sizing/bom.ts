@@ -2,7 +2,7 @@
 
 import type { BomItem } from "@/lib/store";
 import type { SizingInput, CapacityResult } from "./types";
-import { getBestServer } from "./catalog";
+import { resolveServer } from "./catalog";
 
 /**
  * Transform sizing results into a flat Bill of Materials.
@@ -11,7 +11,7 @@ import { getBestServer } from "./catalog";
 export function buildBom(input: SizingInput, capacity: CapacityResult): BomItem[] {
   const items: BomItem[] = [];
 
-  const server = getBestServer(input.gpu.id);
+  const { server } = resolveServer(input.gpu.id, input.preferredServerId);
 
   // GPUs
   items.push({

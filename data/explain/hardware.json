@@ -20,6 +20,14 @@
       "relatedFields": ["discovery.hardware.preferredVendor"]
     },
     {
+      "fieldId": "discovery.hardware.preferredServer",
+      "title": "Preferred Server",
+      "explain": "The server chassis to use for GPU nodes. Each server supports specific GPU models — the dropdown filters by your vendor preference and chosen GPU. Leave on 'Auto' to let the engine pick the best available match. If you specify a server that's incompatible with your chosen GPU, the engine will flag the mismatch in its notes and auto-select.",
+      "example": "A customer standardised on Dell PowerEdge XE9680 for H100 SXM workloads selects it here so the BoM reflects their exact server model and pricing. A greenfield customer leaves it on Auto.",
+      "customerFriendlyHint": "Do you have a preferred server vendor or model, or should we recommend based on the GPU choice?",
+      "relatedFields": ["discovery.hardware.preferredVendor", "discovery.hardware.preferredGpu"]
+    },
+    {
       "fieldId": "discovery.hardware.cooling",
       "title": "Cooling",
       "explain": "High-density GPU servers (especially H100/H200 SXM) generate 10–14 kW per server. Air cooling typically handles up to ~30–40 kW per rack. Liquid cooling (direct liquid cooling or rear-door heat exchangers) is required for high-density deployments and is standard for DGX/HGX systems. Liquid cooling also reduces cooling energy cost by 30–50%.",

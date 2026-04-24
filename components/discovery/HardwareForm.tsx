@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,9 @@ import {
 import { ExplainBox } from "@/components/ExplainBox";
 import { SkippableField } from "@/components/discovery/SkippableField";
 import { useProjectStore } from "@/lib/store";
+import serversData from "@/data/servers.json";
+
+type ServerEntry = { id: string; vendor: string; model: string; supported_gpu_ids: string[] };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -78,6 +81,23 @@ export function HardwareForm() {
   const constraints = useProjectStore((s) => s.activeProject?.discovery.constraints);
   const updateField = useProjectStore((s) => s.updateField);
 
+  const filteredServers = useMemo(() => {
+    if (!hardware) return [];
+    const allServers = (serversData.servers as ServerEntry[]);
+    const vendor = hardware.preferredVendor;
+    const gpuId = hardware.preferredGpu?.toLowerCase();
+
+    return allServers.filter((s) => {
+      const lv = s.vendor.toLowerCase();
+      const vendorMatch =
+        vendor === "either" ||
+        (vendor === "nvidia" && ["dell", "hpe", "supermicro", "nvidia"].includes(lv)) ||
+        (vendor === "amd" && ["supermicro", "amd"].includes(lv));
+      const gpuMatch = !gpuId || s.supported_gpu_ids.some((g) => g.includes(gpuId) || gpuId.includes(g));
+      return vendorMatch && gpuMatch;
+    });
+  }, [hardware]);
+
   if (!hardware || !constraints) {
     return <p className="text-sm text-[var(--text-secondary)] p-6">Loading…</p>;
   }
@@ -133,6 +153,43 @@ export function HardwareForm() {
                 }
                 placeholder="Auto"
               />
+            </FieldRow>
+
+            <FieldRow
+              label="Preferred Server"
+              fieldId="discovery.hardware.preferredServer"
+              activeField={activeField}
+              onInfo={setActiveField}
+              optional
+              hint="Leave blank to auto-select the best match"
+            >
+              <Select
+                value={hardware.preferredServer ?? "__auto__"}
+                onValueChange={(v) => upd("hardware.preferredServer", v === "__auto__" ? undefined : v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__auto__">Auto (recommended)</SelectItem>
+                  {filteredServers.length === 0 ? (
+                    <SelectItem value="__none__" disabled>
+                      No servers match your GPU + vendor filters
+                    </SelectItem>
+                  ) : (
+                    filteredServers.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.vendor} {s.model}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              {filteredServers.length === 0 && (
+                <p className="text-xs text-[var(--warning)] mt-1">
+                  No servers match your GPU + vendor filters. Clear a filter to see options.
+                </p>
+              )}
             </FieldRow>
 
             <FieldRow

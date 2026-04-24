@@ -78,4 +78,5 @@ export type BomExport = {
     vendor?: string; notes?: string;
   }[];
   totals: { itemCount: number; capexUsd: number };
+  hasOverrides?: boolean;
 };

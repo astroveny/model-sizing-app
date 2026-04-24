@@ -2,7 +2,7 @@
 // Ref: [4] Kwon et al. 2023 — throughput-driven capacity planning
 
 import type { SizingInput, ShardingResult, OptimizationsResult, PatternResult, CapacityResult } from "./types";
-import { getBestServer } from "./catalog";
+import { resolveServer } from "./catalog";
 
 /**
  * Number of replicas required to meet end-to-end throughput target.
@@ -35,8 +35,8 @@ export function computeCapacity(
   const gpusPerReplica = sharding.gpusPerReplica;
   const totalGpus = replicas * gpusPerReplica;
 
-  // Server sizing
-  const server = getBestServer(input.gpu.id);
+  // Server sizing — respect preferredServerId if GPU-compatible
+  const { server } = resolveServer(input.gpu.id, input.preferredServerId);
   const gpusPerServer = server?.max_gpus ?? 8;
   const serverCount = Math.ceil(totalGpus / gpusPerServer);
   const rackUnitsPerServer = server?.rack_units ?? 4;

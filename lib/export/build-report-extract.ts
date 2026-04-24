@@ -4,7 +4,7 @@ import type { Project } from "@/lib/store";
 import type { SizingInput } from "@/lib/sizing/types";
 import { computeSizing } from "@/lib/sizing/index";
 import { buildBom } from "@/lib/sizing/bom";
-import { getGpuById, getBestServer, modelCatalog } from "@/lib/sizing/catalog";
+import { getGpuById, resolveServer, modelCatalog } from "@/lib/sizing/catalog";
 import {
   BUILD_REPORT_VERSION,
   type BuildReport,
@@ -12,6 +12,7 @@ import {
   type BuildReportBomRow,
 } from "./build-report-spec";
 
+// Legacy key prefix kept for reading old data; new overrides use build.bomOverrides
 const BOM_PRICE_PREFIX = "bom:price:";
 
 function toSizingInput(project: Project): SizingInput | null {
@@ -57,6 +58,7 @@ function toSizingInput(project: Project): SizingInput | null {
       : project.deploymentPattern === "external-api" ? "external-api"
       : "internal-tool",
     networkingPreference: hardware.networking ?? undefined,
+    preferredServerId: hardware.preferredServer ?? undefined,
   };
 }
 
@@ -93,39 +95,37 @@ export function extractBuildReport(project: Project): BuildReport | null {
   const sizing = computeSizing(input);
   const bomItems = buildBom(input, sizing.capacity);
 
-  // Read per-item price overrides from build.overrides
-  const rawOverrides = project.build.overrides as Record<string, unknown>;
-  const priceOverrides: Record<string, number> = {};
-  for (const [k, v] of Object.entries(rawOverrides)) {
+  // Read per-item overrides from build.bomOverrides (new model, P12.4)
+  // Fall back to legacy build.overrides["bom:price:*"] for older projects
+  type BomPatch = { name?: string; vendor?: string; unitPriceUsd?: number; totalPriceUsd?: number; notes?: string };
+  const bomOverrides = (project.build.bomOverrides ?? {}) as Record<string, BomPatch>;
+
+  // Also pick up legacy price overrides for backward compat
+  const legacyPrices: Record<string, number> = {};
+  for (const [k, v] of Object.entries(project.build.overrides as Record<string, unknown>)) {
     if (k.startsWith(BOM_PRICE_PREFIX) && typeof v === "number") {
-      priceOverrides[k.slice(BOM_PRICE_PREFIX.length)] = v;
+      legacyPrices[k.slice(BOM_PRICE_PREFIX.length)] = v;
     }
   }
 
-  const hasOverrides = Object.keys(rawOverrides).length > 0;
+  const hasOverrides = Object.keys(bomOverrides).length > 0 || Object.keys(legacyPrices).length > 0;
 
   const bom: BuildReportBomRow[] = bomItems.map((item) => {
-    const override = priceOverrides[item.name];
-    if (override !== undefined) {
-      return {
-        category: item.category,
-        name: item.name,
-        quantity: item.quantity,
-        unitPriceUsd: override,
-        totalPriceUsd: override * item.quantity,
-        vendor: item.vendor,
-        overridden: true,
-      };
+    const key = `${item.category}:${item.name}`;
+    const patch = bomOverrides[key];
+    const legacyPrice = legacyPrices[item.name];
+
+    if (patch && Object.keys(patch).length > 0) {
+      const merged = { ...item, ...patch };
+      if (patch.unitPriceUsd !== undefined && !patch.totalPriceUsd) {
+        merged.totalPriceUsd = patch.unitPriceUsd * item.quantity;
+      }
+      return { category: merged.category, name: merged.name, quantity: item.quantity, unitPriceUsd: merged.unitPriceUsd, totalPriceUsd: merged.totalPriceUsd, vendor: merged.vendor, overridden: true };
     }
-    return {
-      category: item.category,
-      name: item.name,
-      quantity: item.quantity,
-      unitPriceUsd: item.unitPriceUsd,
-      totalPriceUsd: item.totalPriceUsd,
-      vendor: item.vendor,
-      overridden: false,
-    };
+    if (legacyPrice !== undefined) {
+      return { category: item.category, name: item.name, quantity: item.quantity, unitPriceUsd: legacyPrice, totalPriceUsd: legacyPrice * item.quantity, vendor: item.vendor, overridden: true };
+    }
+    return { category: item.category, name: item.name, quantity: item.quantity, unitPriceUsd: item.unitPriceUsd, totalPriceUsd: item.totalPriceUsd, vendor: item.vendor, overridden: false };
   });
 
   const capexUsd = bom.reduce((s, r) => s + (r.totalPriceUsd ?? 0), 0);
@@ -134,7 +134,7 @@ export function extractBuildReport(project: Project): BuildReport | null {
   const { infra, modelPlatform: mp, application: app } = discovery;
 
   // Hardware: derived from sizing engine + GPU/server catalog
-  const server = getBestServer(input.gpu.id);
+  const { server } = resolveServer(input.gpu.id, input.preferredServerId);
   const gpusPerServer = server?.max_gpus ?? sizing.sharding.gpusPerReplica;
   const endToEndMs = sizing.optimizations.adjustedTtftMs + sizing.optimizations.adjustedItlMs * input.avgOutputTokens;
 
