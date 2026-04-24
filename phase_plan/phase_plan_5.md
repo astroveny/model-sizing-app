@@ -63,12 +63,13 @@
 - **Verify:** Override a line → export all 5 formats → override visible in each
 - **Refs:** PRD §6.4.y (v0.4b)
 
-### ☐ P12.9 — Smoke test
+### ☑ P12.9 — Smoke test
 - **Action:** End-to-end:
-  1. Discovery: vendor = AMD + preferredServer = Dell XE9680 (incompatible) → engine note flags mismatch
-  2. Change to Supermicro SMC (compatible) → honored, no warning
-  3. Build BoM: override 2 lines (one price, one swap) → export all 5 formats → overrides present
-  4. Reset one override → catalog returns
+  1. Discovery: set GPU = H100 SXM + Server = Dell XE9680 (compatible). Then change GPU to MI300X. The Dell server stays in store but is now incompatible. Build → Engine Notes should show incompatibility warning.
+  2. Change server back to "AMD / OEM MI300X 8-GPU Server" (compatible) → Build → no incompatibility warning.
+  3. Export → BoM Summary: override GPU unit price. Swap server row (Swap column, server row only). Export all 5 formats → overrides present. Swap dropdown only appears on gpu/server rows.
+  4. Reset one override (click "Reset" below the overridden price input) → price reverts to catalog.
+  - Note: PDF exports (Proposal PDF + Build Report PDF) generate client-side via @react-pdf/renderer; DOCX and MD force-save to DB before hitting API route.
 - **Deliverable:** CHANGELOG entry
 - **Refs:** PRD §5.1, §6.4.x (v0.4b)
 

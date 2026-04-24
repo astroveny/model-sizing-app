@@ -3,15 +3,28 @@
 import { useParams } from "next/navigation";
 import { useProjectStore } from "@/lib/store";
 import { buildBomExport } from "@/lib/export/build-bom-export";
-import { PdfPreview } from "@/components/export/PdfPreview";
+import { extractBuildReport } from "@/lib/export/build-report-extract";
 import { BomTable } from "@/components/export/BomTable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, FileCode2, FileJson, FileText, FileType, X } from "lucide-react";
+import { AlertTriangle, FileCode2, FileJson, FileText, FileType, Loader2, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import React from "react";
 import { buildExportFilename } from "@/lib/export/filename";
+import { saveProjectAction } from "@/lib/actions/projects";
+import { toast } from "sonner";
 import type { BomItem } from "@/lib/store";
+
+type Generating = "proposal-pdf" | "build-report-pdf" | "proposal-docx" | "build-report-md" | "bom-json" | null;
+
+function downloadBlob(blob: Blob, filename: string) {
+  const href = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(href);
+}
 
 function downloadUrl(href: string, filename: string) {
   const a = document.createElement("a");
@@ -26,6 +39,7 @@ export default function ExportPage() {
   const setBomOverride = useProjectStore((s) => s.setBomOverride);
   const clearBomOverride = useProjectStore((s) => s.clearBomOverride);
 
+  const [generating, setGenerating] = useState<Generating>(null);
   const [pricingDismissed, setPricingDismissed] = useState(() => {
     if (typeof window === "undefined") return false;
     return sessionStorage.getItem("ml-sizer:bom-pricing-dismissed") === "1";
@@ -47,7 +61,6 @@ export default function ExportPage() {
 
   const hasOverrides = Object.keys(bomOverrides).length > 0;
 
-  // GPU id used by the sizing engine — needed to filter compatible swap servers
   const currentGpuId = useMemo(() => {
     if (!project) return "h100-sxm";
     const hw = project.discovery.hardware;
@@ -55,14 +68,91 @@ export default function ExportPage() {
   }, [project]);
 
   if (!project || !bom) {
-    return (
-      <div className="p-8 text-[var(--text-secondary)]">
-        No project loaded.
-      </div>
-    );
+    return <div className="p-8 text-[var(--text-secondary)]">No project loaded.</div>;
   }
 
   const slug = project.name;
+
+  // --- download helpers ---
+
+  async function downloadProposalPdf() {
+    if (!project || !bom) return;
+    setGenerating("proposal-pdf");
+    try {
+      const { pdf } = await import("@react-pdf/renderer");
+      const { SizingPdfDocument } = await import("@/lib/export/pdf");
+      // Cast: our doc components extend Document; pdf() types are narrower than runtime allows
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob = await (pdf as any)(React.createElement(SizingPdfDocument, { project, bom })).toBlob();
+      downloadBlob(blob, buildExportFilename(slug, "proposal", "pdf"));
+    } catch (err) {
+      console.error("[proposal-pdf]", err);
+      toast.error("PDF generation failed");
+    } finally {
+      setGenerating(null);
+    }
+  }
+
+  async function downloadBuildReportPdf() {
+    if (!project) return;
+    const report = extractBuildReport(project);
+    if (!report) {
+      toast.error("Complete Discovery (model params + concurrent users) first.");
+      return;
+    }
+    setGenerating("build-report-pdf");
+    try {
+      const { pdf } = await import("@react-pdf/renderer");
+      const { BuildReportPdfDocument } = await import("@/lib/export/build-report-pdf");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob = await (pdf as any)(React.createElement(BuildReportPdfDocument, { report })).toBlob();
+      downloadBlob(blob, buildExportFilename(slug, "build-report", "pdf"));
+    } catch (err) {
+      console.error("[build-report-pdf]", err);
+      toast.error("PDF generation failed");
+    } finally {
+      setGenerating(null);
+    }
+  }
+
+  async function downloadProposalDocx() {
+    if (!project) return;
+    setGenerating("proposal-docx");
+    try {
+      await saveProjectAction(project);
+      downloadUrl(`/api/export/docx?projectId=${id}`, buildExportFilename(slug, "proposal", "docx"));
+    } catch (err) {
+      console.error("[proposal-docx]", err);
+      toast.error("Export failed");
+    } finally {
+      setGenerating(null);
+    }
+  }
+
+  async function downloadBuildReportMd() {
+    if (!project) return;
+    setGenerating("build-report-md");
+    try {
+      await saveProjectAction(project);
+      downloadUrl(`/api/export/build-report-md?projectId=${id}`, buildExportFilename(slug, "build-report", "md"));
+    } catch (err) {
+      console.error("[build-report-md]", err);
+      toast.error("Export failed");
+    } finally {
+      setGenerating(null);
+    }
+  }
+
+  function downloadJsonBom() {
+    if (!bom) return;
+    const json = JSON.stringify(bom, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    downloadBlob(blob, buildExportFilename(slug, "bom", "json"));
+  }
+
+  function isGenerating(key: Generating) {
+    return generating === key;
+  }
 
   return (
     <div className="p-6 space-y-6 max-w-5xl">
@@ -95,9 +185,12 @@ export default function ExportPage() {
             <CardContent>
               <Button
                 className="w-full"
-                onClick={() => downloadUrl(`/api/export/pdf?projectId=${id}`, buildExportFilename(slug, "proposal", "pdf"))}
+                disabled={isGenerating("proposal-pdf")}
+                onClick={downloadProposalPdf}
               >
-                Download PDF
+                {isGenerating("proposal-pdf") ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" />Generating…</>
+                ) : "Download PDF"}
               </Button>
             </CardContent>
           </Card>
@@ -115,9 +208,12 @@ export default function ExportPage() {
             <CardContent>
               <Button
                 className="w-full"
-                onClick={() => downloadUrl(`/api/export/docx?projectId=${id}`, buildExportFilename(slug, "proposal", "docx"))}
+                disabled={isGenerating("proposal-docx")}
+                onClick={downloadProposalDocx}
               >
-                Download DOCX
+                {isGenerating("proposal-docx") ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving…</>
+                ) : "Download DOCX"}
               </Button>
             </CardContent>
           </Card>
@@ -133,10 +229,7 @@ export default function ExportPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button
-                className="w-full"
-                onClick={() => downloadUrl(`/api/export/bom?projectId=${id}`, buildExportFilename(slug, "bom", "json"))}
-              >
+              <Button className="w-full" onClick={downloadJsonBom}>
                 Download JSON
               </Button>
             </CardContent>
@@ -167,9 +260,12 @@ export default function ExportPage() {
               <Button
                 className="w-full"
                 variant="outline"
-                onClick={() => downloadUrl(`/api/export/build-report-pdf?projectId=${id}`, buildExportFilename(slug, "build-report", "pdf"))}
+                disabled={isGenerating("build-report-pdf")}
+                onClick={downloadBuildReportPdf}
               >
-                Download PDF
+                {isGenerating("build-report-pdf") ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" />Generating…</>
+                ) : "Download PDF"}
               </Button>
             </CardContent>
           </Card>
@@ -188,71 +284,60 @@ export default function ExportPage() {
               <Button
                 className="w-full"
                 variant="outline"
-                onClick={() => downloadUrl(`/api/export/build-report-md?projectId=${id}`, buildExportFilename(slug, "build-report", "md"))}
+                disabled={isGenerating("build-report-md")}
+                onClick={downloadBuildReportMd}
               >
-                Download MD
+                {isGenerating("build-report-md") ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving…</>
+                ) : "Download MD"}
               </Button>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Preview */}
-      <Tabs defaultValue="pdf">
-        <TabsList>
-          <TabsTrigger value="pdf">PDF Preview</TabsTrigger>
-          <TabsTrigger value="bom">BoM Summary</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="pdf" className="mt-4">
-          <PdfPreview project={project} bom={bom} />
-        </TabsContent>
-
-        <TabsContent value="bom" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Bill of Materials</CardTitle>
-              <CardDescription>
-                {bom.items.length} items
-                {hasOverrides && (
-                  <span className="ml-2 text-[var(--accent-primary)] text-xs">(includes overrides)</span>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!pricingDismissed && (
-                <div className="flex items-start gap-2 rounded-md border border-[var(--warning)] bg-[var(--bg-subtle)] px-3 py-2 mb-4 text-sm text-[var(--warning)]">
-                  <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                  <span className="flex-1">
-                    Indicative pricing only — confirm all figures with your vendor before committing to a budget.
-                    Edit unit prices or swap items per row. All 5 export formats reflect your changes.
-                  </span>
-                  <button
-                    onClick={dismissPricing}
-                    aria-label="Dismiss pricing notice"
-                    className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-              {bom.items.length === 0 ? (
-                <p className="text-sm text-[var(--text-secondary)]">
-                  Complete Discovery to generate the bill of materials.
-                </p>
-              ) : (
-                <BomTable
-                  bom={bom}
-                  bomOverrides={bomOverrides}
-                  currentGpuId={currentGpuId}
-                  onSetOverride={setBomOverride}
-                  onClearOverride={clearBomOverride}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* BoM Summary */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Bill of Materials</CardTitle>
+          <CardDescription>
+            {bom.items.length} items — edit unit prices or swap items per row. All exports reflect your changes.
+            {hasOverrides && (
+              <span className="ml-2 text-[var(--accent-primary)] text-xs">(includes overrides)</span>
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!pricingDismissed && (
+            <div className="flex items-start gap-2 rounded-md border border-[var(--warning)] bg-[var(--bg-subtle)] px-3 py-2 mb-4 text-sm text-[var(--warning)]">
+              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+              <span className="flex-1">
+                Indicative pricing only — confirm all figures with your vendor before committing to a budget.
+              </span>
+              <button
+                onClick={dismissPricing}
+                aria-label="Dismiss pricing notice"
+                className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+          {bom.items.length === 0 ? (
+            <p className="text-sm text-[var(--text-secondary)]">
+              Complete Discovery to generate the bill of materials.
+            </p>
+          ) : (
+            <BomTable
+              bom={bom}
+              bomOverrides={bomOverrides}
+              currentGpuId={currentGpuId}
+              onSetOverride={setBomOverride}
+              onClearOverride={clearBomOverride}
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

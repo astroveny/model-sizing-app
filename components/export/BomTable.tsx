@@ -187,18 +187,10 @@ export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onCle
               <td className="py-2 pr-3 text-right">{item.quantity}</td>
 
               {/* Unit price — editable */}
-              <td className="py-2 pr-3 text-right">
-                <div className="flex items-center justify-end gap-1">
-                  {item.overridden && (
-                    <button
-                      onClick={() => onClearOverride(item.key)}
-                      title="Reset to catalog"
-                      className="text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors"
-                    >
-                      <RotateCcw className="h-3 w-3" />
-                    </button>
-                  )}
+              <td className="py-2 pr-3">
+                <div className="flex flex-col items-end gap-1">
                   <input
+                    key={item.unitPriceUsd}
                     type="text"
                     defaultValue={item.unitPriceUsd?.toLocaleString() ?? ""}
                     placeholder="—"
@@ -214,6 +206,15 @@ export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onCle
                         : "border-[var(--border-muted)] hover:border-[var(--border-default)]",
                     ].join(" ")}
                   />
+                  {item.overridden && (
+                    <button
+                      onClick={() => onClearOverride(item.key)}
+                      className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors"
+                    >
+                      <RotateCcw className="h-2.5 w-2.5" />
+                      Reset
+                    </button>
+                  )}
                 </div>
               </td>
 
