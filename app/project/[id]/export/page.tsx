@@ -74,17 +74,22 @@ export default function ExportPage() {
   const slug = project.name;
 
   // --- download helpers ---
+  // Use getState() to read the latest Zustand state at click time, bypassing
+  // the stale-closure problem (blur fires setBomOverride → React hasn't re-rendered
+  // yet when the user immediately clicks download).
 
   async function downloadProposalPdf() {
-    if (!project || !bom) return;
+    const p = useProjectStore.getState().activeProject;
+    if (!p) return;
+    const freshBom = buildBomExport(p);
     setGenerating("proposal-pdf");
     try {
       const { pdf } = await import("@react-pdf/renderer");
       const { SizingPdfDocument } = await import("@/lib/export/pdf");
       // Cast: our doc components extend Document; pdf() types are narrower than runtime allows
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const blob = await (pdf as any)(React.createElement(SizingPdfDocument, { project, bom })).toBlob();
-      downloadBlob(blob, buildExportFilename(slug, "proposal", "pdf"));
+      const blob = await (pdf as any)(React.createElement(SizingPdfDocument, { project: p, bom: freshBom })).toBlob();
+      downloadBlob(blob, buildExportFilename(p.name, "proposal", "pdf"));
     } catch (err) {
       console.error("[proposal-pdf]", err);
       toast.error("PDF generation failed");
@@ -94,8 +99,9 @@ export default function ExportPage() {
   }
 
   async function downloadBuildReportPdf() {
-    if (!project) return;
-    const report = extractBuildReport(project);
+    const p = useProjectStore.getState().activeProject;
+    if (!p) return;
+    const report = extractBuildReport(p);
     if (!report) {
       toast.error("Complete Discovery (model params + concurrent users) first.");
       return;
@@ -106,7 +112,7 @@ export default function ExportPage() {
       const { BuildReportPdfDocument } = await import("@/lib/export/build-report-pdf");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const blob = await (pdf as any)(React.createElement(BuildReportPdfDocument, { report })).toBlob();
-      downloadBlob(blob, buildExportFilename(slug, "build-report", "pdf"));
+      downloadBlob(blob, buildExportFilename(p.name, "build-report", "pdf"));
     } catch (err) {
       console.error("[build-report-pdf]", err);
       toast.error("PDF generation failed");
@@ -116,11 +122,12 @@ export default function ExportPage() {
   }
 
   async function downloadProposalDocx() {
-    if (!project) return;
+    const p = useProjectStore.getState().activeProject;
+    if (!p) return;
     setGenerating("proposal-docx");
     try {
-      await saveProjectAction(project);
-      downloadUrl(`/api/export/docx?projectId=${id}`, buildExportFilename(slug, "proposal", "docx"));
+      await saveProjectAction(p);
+      downloadUrl(`/api/export/docx?projectId=${id}`, buildExportFilename(p.name, "proposal", "docx"));
     } catch (err) {
       console.error("[proposal-docx]", err);
       toast.error("Export failed");
@@ -130,11 +137,12 @@ export default function ExportPage() {
   }
 
   async function downloadBuildReportMd() {
-    if (!project) return;
+    const p = useProjectStore.getState().activeProject;
+    if (!p) return;
     setGenerating("build-report-md");
     try {
-      await saveProjectAction(project);
-      downloadUrl(`/api/export/build-report-md?projectId=${id}`, buildExportFilename(slug, "build-report", "md"));
+      await saveProjectAction(p);
+      downloadUrl(`/api/export/build-report-md?projectId=${id}`, buildExportFilename(p.name, "build-report", "md"));
     } catch (err) {
       console.error("[build-report-md]", err);
       toast.error("Export failed");
@@ -144,10 +152,12 @@ export default function ExportPage() {
   }
 
   function downloadJsonBom() {
-    if (!bom) return;
-    const json = JSON.stringify(bom, null, 2);
+    const p = useProjectStore.getState().activeProject;
+    if (!p) return;
+    const freshBom = buildBomExport(p);
+    const json = JSON.stringify(freshBom, null, 2);
     const blob = new Blob([json], { type: "application/json" });
-    downloadBlob(blob, buildExportFilename(slug, "bom", "json"));
+    downloadBlob(blob, buildExportFilename(p.name, "bom", "json"));
   }
 
   function isGenerating(key: Generating) {
