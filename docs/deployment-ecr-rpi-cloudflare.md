@@ -594,6 +594,40 @@ SQLite volume not persisted. Confirm `volumes:` block in compose mounts `./data:
 **`MODEL_STORE_SECRET` warning on every boot**
 The encryption secret regenerates because it's not persisted. Set it explicitly in `.env` on the rpi (not in `.env.example` in the repo!). Back it up — losing it means re-entering API keys.
 
+
+**Container exits with code 159 immediately, no logs in `docker compose logs`**
+
+Affects: Docker 25+ on Raspberry Pi OS with kernel 6.1.x (default on Pi OS as of early 2026). The default seccomp profile denies the `brk()` syscall on ARM64, killing every container with SIGSYS before any output is flushed — so `docker compose logs` shows nothing useful.
+
+Confirm the diagnosis:
+```bash
+sudo dmesg -T | grep audit | tail -5
+# Look for lines like:
+#   audit: type=1326 ... sig=31 ... syscall=214 ... comm="docker-entrypoi"
+# sig=31 = SIGSYS, syscall=214 = brk()
+```
+
+Workaround (immediate) — add to the service in `docker-compose.yml`:
+```yaml
+services:
+  ml-sizer:
+    # ... existing fields ...
+    security_opt:
+      - seccomp=unconfined
+```
+
+Then `docker compose up -d`. The container will start normally.
+
+Tradeoff: `seccomp=unconfined` removes the per-syscall sandbox for that container. It's still isolated by namespaces, cgroups, and user — for a self-hosted internal app behind Cloudflare on a home network, this is acceptable. Public-facing or shared-host deployments should prefer the permanent fix.
+
+Permanent fix — upgrade the rpi kernel to 6.6+:
+```bash
+sudo apt update && sudo apt full-upgrade -y
+sudo reboot
+uname -r    # should now be 6.6.x or higher
+```
+After upgrade, remove the `security_opt` block and `docker compose up -d` again. The default seccomp profile works correctly with newer kernels.
+
 ---
 
 ## 13. Quick reference card
