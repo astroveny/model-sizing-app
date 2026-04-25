@@ -25,8 +25,12 @@ RUN npm run build
 FROM node:20-slim AS runtime
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3300
 ENV HOSTNAME=0.0.0.0
 
 # Standalone output includes its own minimal node_modules
@@ -48,6 +52,6 @@ COPY --from=builder /app/lib/db/migrations ./lib/db/migrations
 # DB + uploads live on volumes — create mount points
 RUN mkdir -p /app/data /app/uploads
 
-EXPOSE 3000
+EXPOSE 3300
 
 CMD ["node", "server.js"]

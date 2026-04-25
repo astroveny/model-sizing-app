@@ -111,11 +111,11 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Open **http://localhost:3000**.
+Open **http://localhost:3300**.
 
 ### Sharing with your team
 
-Run the container on a shared host (a Linux box on your LAN, a small VM, etc.) and your team reaches it at `http://<host-ip>:3000`. No auth in v1 — if you expose it beyond a trusted network, put a reverse proxy with basic auth in front.
+Run the container on a shared host (a Linux box on your LAN, a small VM, etc.) and your team reaches it at `http://<host-ip>:3300`. No auth in v1 — if you expose it beyond a trusted network, put a reverse proxy with basic auth in front.
 
 ### Data persistence
 
