@@ -1,13 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle, Sparkles, AlertTriangle, Link2, Loader2, RotateCcw } from "lucide-react";
 import { getExplainEntry } from "@/lib/explain/loader";
 import { useProjectStore } from "@/lib/store";
 import { llmComplete, LlmFeatureUnassignedError } from "@/lib/llm/client";
 import { EXPLAIN_FIELD_SYSTEM, buildExplainFieldPrompt } from "@/lib/llm/prompts/explain-field";
+import type { LlmFeatureId } from "@/lib/settings/feature-ids";
+
+// Module-level cache so we only fetch once per page session.
+let _featureLabelsCache: Record<string, string | null> | null = null;
+let _featureLabelsFetch: Promise<Record<string, string | null>> | null = null;
+
+async function getFeatureLabels(): Promise<Record<string, string | null>> {
+  if (_featureLabelsCache) return _featureLabelsCache;
+  if (!_featureLabelsFetch) {
+    _featureLabelsFetch = fetch("/api/settings/feature-labels")
+      .then((r) => r.json() as Promise<Record<string, string | null>>)
+      .then((data) => { _featureLabelsCache = data; return data; })
+      .catch(() => ({}));
+  }
+  return _featureLabelsFetch;
+}
 
 type Props = {
   fieldId: string;
@@ -15,9 +32,20 @@ type Props = {
   label?: string;
 };
 
+const FEATURE: LlmFeatureId = "explain-field";
+const MAX_LABEL_LEN = 12; // chars before truncating to "Ask AI"
+
 export function ExplainBox({ fieldId, label }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // null = unassigned/loading, string = assigned model label
+  const [assignedLabel, setAssignedLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    getFeatureLabels().then((labels) => {
+      setAssignedLabel(labels[FEATURE] ?? null);
+    });
+  }, []);
 
   const activeProject = useProjectStore((s) => s.activeProject);
   const updateField = useProjectStore((s) => s.updateField);
@@ -27,6 +55,10 @@ export function ExplainBox({ fieldId, label }: Props) {
   const isOverridden = !!explainOverrides?.[fieldId];
 
   const title = entry?.title ?? label ?? fieldId;
+  const displayLabel =
+    assignedLabel !== null && assignedLabel.length > MAX_LABEL_LEN
+      ? "AI"
+      : assignedLabel ?? "AI";
 
   async function handleAskClaude() {
     if (!activeProject) return;
@@ -49,7 +81,7 @@ export function ExplainBox({ fieldId, label }: Props) {
         messages: [{ role: "user", content: buildExplainFieldPrompt(ctx) }],
         maxTokens: 400,
         json: true,
-      }, "explain-field");
+      }, FEATURE);
 
       const parsed = JSON.parse(result.text) as { explain?: string; example?: string };
       if (!parsed.explain || !parsed.example) throw new Error("Unexpected response shape");
@@ -154,20 +186,31 @@ export function ExplainBox({ fieldId, label }: Props) {
       )}
 
       <div className="mt-2 border-t pt-2 flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 gap-1.5 px-2 text-xs text-[var(--text-secondary)]"
-          disabled={loading || !activeProject}
-          onClick={handleAskClaude}
-        >
-          {loading ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            <Sparkles className="h-3 w-3" />
-          )}
-          {loading ? "Asking Claude…" : "Ask Claude"}
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 gap-1.5 px-2 text-xs text-[var(--text-secondary)]"
+                disabled={loading || !activeProject || assignedLabel === null}
+                onClick={handleAskClaude}
+              >
+                {loading ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+                {loading ? `Asking ${displayLabel}…` : `Ask ${displayLabel}`}
+              </Button>
+            </TooltipTrigger>
+            {assignedLabel === null && (
+              <TooltipContent>
+                Configure a model for Explain Field in Settings → LLM
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
 
         {isOverridden && (
           <Button

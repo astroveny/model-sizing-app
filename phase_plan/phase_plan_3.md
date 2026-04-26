@@ -344,7 +344,7 @@
 - **Verify:** Paste RFP → extracted items appear; Discovery is NOT modified until user clicks Apply
 - **Refs:** PRD §6.2.x (v0.4a)
 
-### ☐ P8.20 — ExplainBox routing regression
+### ☑ P8.20 — ExplainBox routing regression
 - **Action:** ExplainBox "Ask AI" doesn't respect the configured model after switching providers in `/settings/llm`. Diagnose:
   1. Confirm whether the button calls `getLlmProviderForFeature('explain-field')` or the deprecated `getLlmProvider()`
   2. Confirm whether `explain-field` has a model assigned in current routing
