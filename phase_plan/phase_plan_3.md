@@ -366,7 +366,7 @@
 - **Deliverable:** fix + regression guard
 - **Refs:** P8.13, user reported
 
-### ☐ P8.22 — App version display infrastructure
+### ☑ P8.22 — App version display infrastructure
 - **Action:** Wire build-time env vars so P13.18 sidebar version has data to read.
   - `Dockerfile`: add `ARG BUILD_SHA` and `ARG BUILD_DATE` in the builder stage; set `ENV NEXT_PUBLIC_BUILD_SHA=$BUILD_SHA` and `ENV NEXT_PUBLIC_BUILD_DATE=$BUILD_DATE` in the runtime stage
   - `bin/release.sh`: add `--build-arg BUILD_SHA=$(git rev-parse --short HEAD)` and `--build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)` to the `BUILDX_ARGS` array

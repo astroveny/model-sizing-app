@@ -204,6 +204,8 @@ else
 fi
 
 BUILDX_ARGS+=(
+  --build-arg "BUILD_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   --file "$BUILD_CONTEXT/$DOCKERFILE"
   "$BUILD_CONTEXT"
 )

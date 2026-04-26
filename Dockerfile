@@ -16,6 +16,11 @@ RUN npm ci --no-audit --no-fund
 FROM node:20-slim AS builder
 WORKDIR /app
 
+ARG BUILD_SHA
+ARG BUILD_DATE
+ENV NEXT_PUBLIC_BUILD_SHA=$BUILD_SHA
+ENV NEXT_PUBLIC_BUILD_DATE=$BUILD_DATE
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -32,6 +37,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV NODE_ENV=production
 ENV PORT=3300
 ENV HOSTNAME=0.0.0.0
+
+ARG BUILD_SHA
+ARG BUILD_DATE
+ENV NEXT_PUBLIC_BUILD_SHA=$BUILD_SHA
+ENV NEXT_PUBLIC_BUILD_DATE=$BUILD_DATE
 
 # Standalone output includes its own minimal node_modules
 COPY --from=builder /app/.next/standalone ./
