@@ -1,0 +1,46 @@
+{
+  "workload_references": [
+    {
+      "id": "hf-open-llm-leaderboard",
+      "label": "HF Open LLM Leaderboard",
+      "url": "https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard",
+      "description": "Open-source model benchmark rankings across MMLU, ARC, HellaSwag, TruthfulQA, and more.",
+      "sort_order": 1
+    },
+    {
+      "id": "lmsys-arena",
+      "label": "LMSYS Chatbot Arena",
+      "url": "https://chat.lmsys.org",
+      "description": "Crowd-sourced ELO rankings from blind A/B human preference comparisons.",
+      "sort_order": 2
+    },
+    {
+      "id": "nvidia-model-performance",
+      "label": "NVIDIA Model Performance",
+      "url": "https://www.nvidia.com/en-us/data-center/resources/inference-calculator/",
+      "description": "NVIDIA inference throughput estimates by GPU and model.",
+      "sort_order": 3
+    },
+    {
+      "id": "amd-rocm-models",
+      "label": "AMD ROCm Model Hub",
+      "url": "https://www.amd.com/en/products/software/rocm.html",
+      "description": "AMD ROCm-compatible model list and performance data.",
+      "sort_order": 4
+    },
+    {
+      "id": "hf-model-hub",
+      "label": "Hugging Face Model Hub",
+      "url": "https://huggingface.co/models?sort=downloads&filter=text-generation",
+      "description": "Popular open text-generation models sorted by downloads.",
+      "sort_order": 5
+    },
+    {
+      "id": "vllm-benchmarks",
+      "label": "vLLM Benchmark Results",
+      "url": "https://blog.vllm.ai/",
+      "description": "vLLM project benchmarks: throughput and latency across GPU types and models.",
+      "sort_order": 6
+    }
+  ]
+}

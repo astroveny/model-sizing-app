@@ -87,7 +87,7 @@
 - **Verify:** `npm run db:migrate`; all 5 tables exist; `npm run typecheck` passes
 - **Refs:** PRD §5.2 (v0.5)
 
-### ☐ P13.2 — Seed file structure + loader
+### ☑ P13.2 — Seed file structure + loader
 - **Action:**
   - Create `data/seed/` directory
   - Convert existing static catalogs: `data/gpus.json` → `data/seed/gpus.seed.json`; `data/servers.json` → `data/seed/servers.seed.json` (split `server_gpu_configs` into nested structure); `data/models.json` → `data/seed/models.seed.json`

@@ -4,5 +4,7 @@ export async function register() {
     const path = await import("path");
     const { getDb } = await import("./lib/db/client");
     migrate(getDb(), { migrationsFolder: path.join(process.cwd(), "lib/db/migrations") });
+    const { runSeedLoader } = await import("./lib/catalogs/seed-loader");
+    runSeedLoader(getDb());
   }
 }

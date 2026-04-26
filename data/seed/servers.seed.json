@@ -1,0 +1,93 @@
+{
+  "servers": [
+    {
+      "id": "dell-xe9680",
+      "vendor": "Dell",
+      "model": "PowerEdge XE9680",
+      "rack_units": 8,
+      "tdp_watts": 10200,
+      "notes": "8x H100 SXM reference server. Most common H100 platform outside DGX.",
+      "gpu_configs": [
+        { "id": "dell-xe9680-h100-sxm", "gpu_id": "h100-sxm", "gpu_count": 8, "is_default": 1, "list_price_usd": 300000 },
+        { "id": "dell-xe9680-h200-sxm", "gpu_id": "h200-sxm", "gpu_count": 8, "is_default": 0, "list_price_usd": null },
+        { "id": "dell-xe9680-a100-80gb", "gpu_id": "a100-80gb", "gpu_count": 8, "is_default": 0, "list_price_usd": null },
+        { "id": "dell-xe9680-a100-40gb", "gpu_id": "a100-40gb", "gpu_count": 8, "is_default": 0, "list_price_usd": null }
+      ]
+    },
+    {
+      "id": "hpe-cray-xd670",
+      "vendor": "HPE",
+      "model": "Cray XD670",
+      "rack_units": 8,
+      "tdp_watts": 10000,
+      "notes": "HPE liquid-cooled 8x H100 SXM platform. Common in HPC/supercomputing environments.",
+      "gpu_configs": [
+        { "id": "hpe-cray-xd670-h100-sxm", "gpu_id": "h100-sxm", "gpu_count": 8, "is_default": 1, "list_price_usd": 290000 },
+        { "id": "hpe-cray-xd670-h200-sxm", "gpu_id": "h200-sxm", "gpu_count": 8, "is_default": 0, "list_price_usd": null },
+        { "id": "hpe-cray-xd670-a100-80gb", "gpu_id": "a100-80gb", "gpu_count": 8, "is_default": 0, "list_price_usd": null }
+      ]
+    },
+    {
+      "id": "smc-as-8125gs",
+      "vendor": "Supermicro",
+      "model": "AS-8125GS-TNMR2",
+      "rack_units": 8,
+      "tdp_watts": 6000,
+      "notes": "Cost-effective 8x PCIe GPU server. Good for H100 PCIe or L40S deployments.",
+      "gpu_configs": [
+        { "id": "smc-as-8125gs-h100-pcie", "gpu_id": "h100-pcie", "gpu_count": 8, "is_default": 1, "list_price_usd": 60000 },
+        { "id": "smc-as-8125gs-a100-80gb", "gpu_id": "a100-80gb", "gpu_count": 8, "is_default": 0, "list_price_usd": null },
+        { "id": "smc-as-8125gs-a100-40gb", "gpu_id": "a100-40gb", "gpu_count": 8, "is_default": 0, "list_price_usd": null },
+        { "id": "smc-as-8125gs-l40s", "gpu_id": "l40s", "gpu_count": 8, "is_default": 0, "list_price_usd": null }
+      ]
+    },
+    {
+      "id": "nvidia-dgx-h100",
+      "vendor": "NVIDIA",
+      "model": "DGX H100",
+      "rack_units": 10,
+      "tdp_watts": 10200,
+      "notes": "NVIDIA reference DGX H100. 8x H100 SXM with full NVLink 4 fabric and NVSwitch.",
+      "spec_sheet_url": "https://www.nvidia.com/en-us/data-center/dgx-h100/",
+      "gpu_configs": [
+        { "id": "nvidia-dgx-h100-h100-sxm", "gpu_id": "h100-sxm", "gpu_count": 8, "is_default": 1, "list_price_usd": 350000 }
+      ]
+    },
+    {
+      "id": "nvidia-dgx-h200",
+      "vendor": "NVIDIA",
+      "model": "DGX H200",
+      "rack_units": 10,
+      "tdp_watts": 10200,
+      "notes": "NVIDIA reference DGX H200. 8x H200 SXM. Drop-in upgrade from DGX H100.",
+      "spec_sheet_url": "https://www.nvidia.com/en-us/data-center/dgx-h200/",
+      "gpu_configs": [
+        { "id": "nvidia-dgx-h200-h200-sxm", "gpu_id": "h200-sxm", "gpu_count": 8, "is_default": 1, "list_price_usd": 380000 }
+      ]
+    },
+    {
+      "id": "nvidia-hgx-b200",
+      "vendor": "NVIDIA",
+      "model": "HGX B200",
+      "rack_units": 10,
+      "tdp_watts": 14400,
+      "notes": "Blackwell HGX platform. 8x B200 SXM with NVLink 5. Requires liquid cooling.",
+      "spec_sheet_url": "https://www.nvidia.com/en-us/data-center/dgx-b200/",
+      "gpu_configs": [
+        { "id": "nvidia-hgx-b200-b200-sxm", "gpu_id": "b200-sxm", "gpu_count": 8, "is_default": 1, "list_price_usd": 500000 }
+      ]
+    },
+    {
+      "id": "amd-mi300x-server",
+      "vendor": "AMD / OEM",
+      "model": "MI300X 8-GPU Server (reference)",
+      "rack_units": 8,
+      "tdp_watts": 8000,
+      "notes": "Generic reference 8x MI300X/MI325X OAM server (Dell, Gigabyte, Supermicro variants). Pricing varies significantly.",
+      "gpu_configs": [
+        { "id": "amd-mi300x-server-mi300x", "gpu_id": "mi300x", "gpu_count": 8, "is_default": 1, "list_price_usd": 200000 },
+        { "id": "amd-mi300x-server-mi325x", "gpu_id": "mi325x", "gpu_count": 8, "is_default": 0, "list_price_usd": null }
+      ]
+    }
+  ]
+}

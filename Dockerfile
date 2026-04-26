@@ -48,12 +48,11 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Static data catalogs (JSON — not the SQLite DB, which lives on a volume)
-COPY --from=builder /app/data/gpus.json ./data/gpus.json
-COPY --from=builder /app/data/servers.json ./data/servers.json
+# Seed catalog files (seeded into DB on first boot via seed-loader)
+COPY --from=builder /app/data/seed ./data/seed
+# Non-catalog static data
 COPY --from=builder /app/data/instances.json ./data/instances.json
 COPY --from=builder /app/data/throughput.json ./data/throughput.json
-COPY --from=builder /app/data/models.json ./data/models.json
 COPY --from=builder /app/data/explain ./data/explain
 
 # Migration files (applied at startup via instrumentation.ts)
