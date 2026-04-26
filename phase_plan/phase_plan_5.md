@@ -99,7 +99,7 @@
 - **Verify:** Fresh DB → boot → all catalog rows present with `origin='seed'`. Edit a row → boot again → row preserved (not re-seeded)
 - **Refs:** PRD §8.6.1
 
-### ☐ P13.3 — Catalog read API + caching
+### ☑ P13.3 — Catalog read API + caching
 - **Action:** `lib/catalogs/index.ts` — export `listServers()`, `listGpus()`, `listLlmModels()`, `listWorkloadReferences()`. Each returns DB rows, sorted appropriately (by vendor+model, by family+params, etc.). Add a simple in-process module-level cache (invalidated on any catalog write) to avoid re-querying SQLite on every Discovery render.
 - **Deliverable:** read module + unit tests
 - **Refs:** PRD §8.6.7

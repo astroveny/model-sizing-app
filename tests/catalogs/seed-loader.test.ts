@@ -2,6 +2,7 @@ import { describe, it, expect, afterAll } from "vitest";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { eq } from "drizzle-orm";
 import path from "path";
 import * as schema from "@/lib/db/schema";
 import { runSeedLoader } from "@/lib/catalogs/seed-loader";
@@ -58,7 +59,7 @@ describe("runSeedLoader", () => {
       const defaults = db
         .select()
         .from(schema.serverGpuConfigs)
-        .where(schema.serverGpuConfigs.serverId === s.id as never)
+        .where(eq(schema.serverGpuConfigs.serverId, s.id))
         .all()
         .filter((c) => c.isDefault === 1);
       expect(defaults.length, `server ${s.id} has no default config`).toBeGreaterThanOrEqual(1);
