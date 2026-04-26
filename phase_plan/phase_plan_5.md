@@ -75,16 +75,155 @@
 
 ---
 
+## Phase 13 — Dynamic Catalogs + UX Additions
+
+**Goal:** Migrate static catalogs (gpus, servers, models) to DB-backed dynamic catalogs with admin UI. Add workload reference URLs, ExplainBox maximize, sidebar version display.
+
+**Exit criteria:** All three catalogs editable via `/settings/catalogs/*`; URL-assisted extraction works for at least one catalog; all use sites read from DB; version visible in sidebar.
+
+### ☐ P13.1 — Schema migration
+- **Action:** Add the 5 tables from PRD §5.2 / §A.6 (servers, server_gpu_configs, gpus, llm_models, workload_references) via a new Drizzle migration.
+- **Deliverable:** migration file + Drizzle types
+- **Verify:** `npm run db:migrate`; all 5 tables exist; `npm run typecheck` passes
+- **Refs:** PRD §5.2 (v0.5)
+
+### ☐ P13.2 — Seed file structure + loader
+- **Action:**
+  - Create `data/seed/` directory
+  - Convert existing static catalogs: `data/gpus.json` → `data/seed/gpus.seed.json`; `data/servers.json` → `data/seed/servers.seed.json` (split `server_gpu_configs` into nested structure); `data/models.json` → `data/seed/models.seed.json`
+  - New file: `data/seed/workload-references.seed.json` with default references (HF leaderboard, LMSYS Arena, vendor model hubs)
+  - Create `lib/catalogs/seed-loader.ts`: on boot, for each seed file, insert rows whose `id` doesn't already exist. Set `origin = 'seed'`. Idempotent.
+  - Wire seed-loader into app startup (same hook used by DB migrations in `instrumentation.ts` or `lib/db/client.ts`)
+  - Update `Dockerfile` to copy `data/seed/` instead of individual `data/*.json` files
+- **Deliverable:** seed files + loader + boot wiring + Dockerfile update
+- **Verify:** Fresh DB → boot → all catalog rows present with `origin='seed'`. Edit a row → boot again → row preserved (not re-seeded)
+- **Refs:** PRD §8.6.1
+
+### ☐ P13.3 — Catalog read API + caching
+- **Action:** `lib/catalogs/index.ts` — export `listServers()`, `listGpus()`, `listLlmModels()`, `listWorkloadReferences()`. Each returns DB rows, sorted appropriately (by vendor+model, by family+params, etc.). Add a simple in-process module-level cache (invalidated on any catalog write) to avoid re-querying SQLite on every Discovery render.
+- **Deliverable:** read module + unit tests
+- **Refs:** PRD §8.6.7
+
+### ☐ P13.4 — Migrate read sites
+- **Action:** Replace every call that reads from the old static JSON files. Audit:
+  ```bash
+  grep -rn "data/gpus\.json\|data/servers\.json\|data/models\.json" --include="*.ts" --include="*.tsx" .
+  ```
+  Known sites: `lib/sizing/*.ts` (sizing engine), `components/discovery/HardwareForm.tsx` (dropdowns), `lib/quick-sizing/recommender.ts` (candidate models), export renderers that embed server names.
+- **Deliverable:** all call sites migrated; grep returns zero matches outside `data/seed/` and the seed-loader
+- **Verify:** Full smoke test — Discovery → Build → Export — functions identically to v0.4b. No JSON read errors in server logs.
+- **Refs:** PRD §8.6.7
+
+### ☐ P13.5 — Catalog write API
+- **Action:** `lib/catalogs/admin.ts` — `createServer()`, `updateServer()`, `deprecateServer()`, `deleteServer()` (only `origin='user'` rows deletable; `seed` / `seed-edited` rows can only be deprecated). Same pattern for gpus, llm_models, workload_references. On any update to a `seed` row → set `origin='seed-edited'`. On reset-to-seed → restore values from seed file and set `origin='seed'`. Invalidate read cache on all writes.
+- **Deliverable:** CRUD functions + tests for origin transitions
+- **Refs:** PRD §8.6.1
+
+### ☐ P13.6 — Settings catalogs index page
+- **Action:** Create `app/settings/catalogs/page.tsx` — index with cards: Servers, GPUs, LLM Models, Workload References. Each card links to its admin page and shows row count + deprecated count.
+- **Deliverable:** page
+- **Refs:** PRD §8.6.5
+
+### ☐ P13.7 — Servers admin page
+- **Action:** Create `app/settings/catalogs/servers/page.tsx`. Table: vendor, model, GPU configs summary (e.g., "8×H100, 8×H200"), TDP, origin badge, actions. Search by vendor/model. Deprecated rows hidden by default with "Show deprecated" toggle. "Add Server" button.
+- **Deliverable:** page + table component
+- **Refs:** PRD §8.6.5
+
+### ☐ P13.8 — Add/Edit Server dialog (manual)
+- **Action:** Modal (shadcn Dialog) with form fields per §8.6.2. Nested editor for `server_gpu_configs` rows (add/remove). Validation. On submit → `createServer()` or `updateServer()`. "Reset to seed" button shown on `seed-edited` rows.
+- **Deliverable:** dialog component
+- **Refs:** PRD §8.6.6
+
+### ☐ P13.9 — `catalog-extract` LLM feature wiring
+- **Action:** Add `'catalog-extract'` to the `LlmFeatureId` union in `lib/store.ts` (or wherever the type lives). Verify it surfaces automatically in `/settings/llm` feature assignment UI (the existing per-feature checkbox mechanism). Run `npm run typecheck` — fix any exhaustive-match errors.
+- **Deliverable:** type update + typecheck passing
+- **Refs:** PRD §8.5 (v0.5)
+
+### ☐ P13.10 — URL-assisted extraction (server)
+- **Action:**
+  - In Add Server dialog, add "Extract from URL" tab alongside "Manual entry"
+  - User pastes URL → server-side fetch via new utility (`lib/catalogs/url-fetch.ts`): timeout 10s, redirect handling, user-agent set, max body 500KB
+  - POST fetched HTML to LLM via `getLlmProviderForFeature('catalog-extract')` using prompt at `lib/llm/prompts/catalog-extract-server.ts`
+  - LLM returns JSON matching server schema; pre-populate the manual form fields
+  - User reviews, edits, saves
+  - "Extract from URL" tab disabled when `catalog-extract` feature unassigned (tooltip to Settings)
+- **Deliverable:** url-fetch utility + prompt + UI integration
+- **Verify:** Paste a real Dell PowerEdge spec URL; extraction returns sensible fields for at least 5 of the server schema fields
+- **Refs:** PRD §8.6.6
+
+### ☐ P13.11 — GPUs admin page + dialogs
+- **Action:** Apply P13.7–P13.10 patterns to GPUs catalog. URL extraction prompt: `lib/llm/prompts/catalog-extract-gpu.ts`. Key GPU fields to verify: `vram_gb`, `memory_bandwidth_gbps`, `fp16_tflops`, `tdp_watts`.
+- **Deliverable:** page + dialogs + prompt
+- **Refs:** PRD §8.6.3
+
+### ☐ P13.12 — LLM models admin page + dialogs
+- **Action:** Apply same patterns to LLM models. URL extraction prompt: `lib/llm/prompts/catalog-extract-llm-model.ts`. Common test source: Hugging Face model card pages (expose specs in structured meta). Key fields: `params_b`, `layers`, `hidden_size`, `num_kv_heads`, `head_dim`, `context_length_max`.
+- **Deliverable:** page + dialogs + prompt
+- **Refs:** PRD §8.6.4
+
+### ☐ P13.13 — Workload references admin page (lightweight)
+- **Action:** Create `app/settings/catalogs/workload-references/page.tsx`. Simpler than other catalogs — just `label`, `url`, `description`, `sort_order`. Manual entry only; no URL extraction needed.
+- **Deliverable:** page + add/edit dialog
+- **Refs:** PRD §6.1.z
+
+### ☐ P13.14 — Workload tab references block
+- **Action:** Create `components/discovery/WorkloadReferences.tsx`. Renders a horizontal flex row of link-buttons from `listWorkloadReferences()`. Each opens in a new tab. Tooltip shows `description`. Hidden entirely when no active references. Place at the top of `WorkloadForm.tsx` content area.
+- **Deliverable:** component + integration in WorkloadForm
+- **Refs:** PRD §6.1.z
+
+### ☐ P13.15 — ExplainBox maximize button
+- **Action:** Add maximize icon (`Maximize2` from lucide-react) to ExplainBox header. Clicking opens a shadcn Dialog with the same Explain + Example + Ask AI content. Dialog: `max-w-2xl`, `max-h-[80vh]`, scrollable body. Close: × button, Esc, click-outside. Body scroll-lock while open (shadcn Dialog handles this). On phone: full-screen per responsive-design.md §3.5.
+- **Deliverable:** maximize trigger + modal mode in ExplainBox
+- **Refs:** PRD §6.5.x
+
+### ☐ P13.16 — ExplainBox routing parity in modal
+- **Action:** Verify the Ask AI call path inside the maximize modal uses `getLlmProviderForFeature('explain-field')` (same fix as P8.20, not a separate call path). Confirm by integration test: maximize → click Ask AI → request goes to the assigned model's endpoint.
+- **Deliverable:** verified by test
+- **Refs:** P8.20, PRD §6.5.x
+
+### ☐ P13.17 — Sidebar version footer component
+- **Action:** Create `components/Sidebar/SidebarVersion.tsx`. Reads:
+  - `process.env.NEXT_PUBLIC_BUILD_SHA` (set by P8.22)
+  - `process.env.NEXT_PUBLIC_BUILD_DATE`
+  - `package.json` `version` (import at build time via `import pkg from '../../package.json'`)
+  Renders: expanded → `v{version}` text; collapsed → nothing visible. Both states: tooltip on hover showing `v{version} · build {sha} · built {date}`. Guard against undefined env vars (show "dev build" when running locally without the vars).
+- **Deliverable:** component
+- **Refs:** PRD §6.0.z
+
+### ☐ P13.18 — Sidebar version integration
+- **Action:** Place `<SidebarVersion>` in the Sidebar footer, above the collapse toggle. Confirm:
+  - Hidden when sidebar is collapsed (no label visible; tooltip still works on hover)
+  - Present and readable when expanded
+  - Deployed build shows the correct SHA from P8.22 infrastructure
+- **Deliverable:** integration + deployed smoke test
+- **Refs:** PRD §6.0.z
+
+### ☐ P13.19 — Smoke test
+- **Action:** End-to-end:
+  1. Fresh DB (or clear tables): boot → confirm all seed rows loaded for servers, GPUs, LLM models, workload references
+  2. Workload tab: references block visible at top
+  3. ExplainBox on any Discovery field: maximize → modal opens; tabs work; Ask AI works inside modal
+  4. `/settings/catalogs/servers`: table renders; Add → Manual → form submits; Add → Extract from URL → extraction fills form (need `catalog-extract` feature assigned)
+  5. `/settings/catalogs/gpus` and `/llm-models`: same flows
+  6. Edit a seed row: origin badge changes to `seed-edited`; Reset → returns to `seed`; values revert
+  7. Deprecate a server: disappears from Discovery dropdown; still shown with "Show deprecated" toggle in admin
+  8. Sidebar: version visible with correct build SHA (only verifiable in a built container from P8.22)
+  9. Discovery dropdowns: reflect any catalog edits within one render cycle (no page reload needed)
+- **Deliverable:** CHANGELOG entry
+- **Refs:** PRD §8.6.8
+
+---
+
 ## Future phases (v2+)
 
 Not assigned step IDs yet — will be enumerated when scoped.
 
-- **Phase 13** — Fine-tuning workload module (LoRA, QLoRA, full FT sizing)
-- **Phase 14** — MCP integrations (live catalog / pricing lookups)
-- **Phase 15** — Additional accelerators (Intel Gaudi, AWS Trainium/Inferentia, Google TPU)
-- **Phase 16** — IaC export (Terraform modules, Helm charts)
-- **Phase 17** — RAG / vector DB sizing sub-module
-- **Phase 18** — Multi-region & DR sizing
+- **Phase 14** — Fine-tuning workload module (LoRA, QLoRA, full FT sizing)
+- **Phase 15** — MCP integrations (live catalog / pricing lookups)
+- **Phase 16** — Additional accelerators (Intel Gaudi, AWS Trainium/Inferentia, Google TPU)
+- **Phase 17** — IaC export (Terraform modules, Helm charts)
+- **Phase 18** — RAG / vector DB sizing sub-module
+- **Phase 19** — Multi-region & DR sizing
 
 ---
 
@@ -164,6 +303,19 @@ P8.18 — RFI Apply to Discovery broken
   Root cause: TBD
   Fix: wire Apply to store dispatch + integration test
   Regression test: tests/rfi/apply.test.ts
+
+P8.20 — ExplainBox "Ask AI" not respecting configured model
+  Symptom: changed model in Settings → LLM, ExplainBox still uses old model
+  Root cause: ExplainBox call site uses getLlmProvider() instead of
+              getLlmProviderForFeature('explain-field')
+  Fix: migrate to per-feature routing; dynamic button label
+  Regression test: tests/explainbox/routing.test.ts
+
+P8.21 — DOMMatrix regression on PDF upload
+  Symptom: "DOMMatrix is not defined" returned after P8.13 fix
+  Root cause: pdfjs-dist reintroduced by a later change
+  Fix: re-apply pdf-parse migration; add static check to prevent regression
+  Regression test: package.json lint + tests/upload/pdf-parse.test.ts
 ```
 
 ---
@@ -177,3 +329,4 @@ P8.18 — RFI Apply to Discovery broken
 | v0.4a | 2026-04-22 | **Phase 8 extension (P8.12–P8.19):** hydration warning, DOMMatrix, PDF download crash, Build Report MD data, Node Pool table removed, Engine Notes restored, RFI Apply fixed, RFI confirm-before-apply. **Phase 11 (P11.1–P11.18):** text contrast, sidebar reorder + theme-toggle-to-top, ML Sizer home link, required field markers, skippable toggle + defaults, progress banner, Review Defaults modal, Quick Sizing flow (rule-based; LLM-assist stub), RFI Apply polish. Added prepopulated troubleshooting entries for P8.12–P8.18. |
 | v0.4b | 2026-04-22 | **Phase 10 (P10.1–P10.17):** LLM Settings page, multi-model routing with exclusive feature assignment, encrypted credential storage, `.env` backward compat, Quick Sizing LLM-assist activation. **Phase 12 (P12.1–P12.9):** Discovery preferredServer override with GPU-compatibility filtering, Build BoM per-line price + swap + reset, all 5 exports reflect overrides. Removed Phase 10 + 12 from Future phases stub. |
 | v0.4c | 2026-04-24 | Split PHASE_PLAN.md into 5 files (phase_plan_1.md … phase_plan_5.md). Corrected phase order: Phase 10 now precedes Phase 11 (they were built out of order). PHASE_PLAN.md is now an index. |
+| v0.5 | 2026-04-26 | **Phase 8 extension (P8.20–P8.22):** ExplainBox routing regression fix, DOMMatrix regression fix, version display build infrastructure. **Phase 13 (P13.1–P13.19):** dynamic catalogs (servers + GPUs + LLM models + workload references) with hybrid seed + DB storage, append-only seed merge, admin UIs at `/settings/catalogs/*`, manual + URL-assisted entry via `catalog-extract` LLM feature, origin tracking, ExplainBox maximize, workload tab references block, sidebar version display. Former Phase 13 (fine-tuning) renumbered to Phase 14; phases 14–18 → 15–19. Troubleshooting entries added for P8.20 and P8.21. |

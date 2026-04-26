@@ -343,3 +343,33 @@
 - **Deliverable:** audit + removal if needed; integration test
 - **Verify:** Paste RFP → extracted items appear; Discovery is NOT modified until user clicks Apply
 - **Refs:** PRD §6.2.x (v0.4a)
+
+### ☐ P8.20 — ExplainBox routing regression
+- **Action:** ExplainBox "Ask AI" doesn't respect the configured model after switching providers in `/settings/llm`. Diagnose:
+  1. Confirm whether the button calls `getLlmProviderForFeature('explain-field')` or the deprecated `getLlmProvider()`
+  2. Confirm whether `explain-field` has a model assigned in current routing
+  3. Check `/api/llm` forwards the `feature` parameter correctly
+- **Fix:**
+  - Migrate all ExplainBox call sites to `getLlmProviderForFeature('explain-field')`
+  - When feature has no assigned model: button disabled with tooltip pointing to `/settings/llm`
+  - When feature has a model assigned: button label reflects model's `label` (e.g., "Ask Opus", "Ask Llama-Local"); fallback to "Ask AI" if label overflows
+- **Deliverable:** code fix + integration test (assign feature to OpenAI provider, click Ask AI, verify request goes to OpenAI endpoint)
+- **Refs:** PRD §8.5.x (v0.5)
+
+### ☐ P8.21 — DOMMatrix regression
+- **Action:** "DOMMatrix is not defined" error has returned on RFP file upload (regression from P8.13). Diagnose:
+  1. `git log --all -p -- package.json | grep -A2 -B2 "pdfjs\|pdf-parse"` — find when pdfjs-dist reintroduced
+  2. `grep -rn "pdfjs\|pdf-parse" --include="*.ts" --include="*.tsx" .` — confirm current usage across all upload paths
+- **Fix:**
+  - Remove pdfjs-dist usage everywhere (re-apply P8.13 fix on all paths)
+  - Add static check: test/lint that no module imports `pdfjs-dist`
+- **Deliverable:** fix + regression guard
+- **Refs:** P8.13, user reported
+
+### ☐ P8.22 — App version display infrastructure
+- **Action:** Wire build-time env vars so P13.18 sidebar version has data to read.
+  - `Dockerfile`: add `ARG BUILD_SHA` and `ARG BUILD_DATE` in the builder stage; set `ENV NEXT_PUBLIC_BUILD_SHA=$BUILD_SHA` and `ENV NEXT_PUBLIC_BUILD_DATE=$BUILD_DATE` in the runtime stage
+  - `bin/release.sh`: add `--build-arg BUILD_SHA=$(git rev-parse --short HEAD)` and `--build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)` to the `BUILDX_ARGS` array
+- **Deliverable:** Dockerfile + release.sh updates
+- **Verify:** Build the image; `docker exec ml-sizer env | grep NEXT_PUBLIC_BUILD` shows correct SHA + date
+- **Refs:** PRD §6.0.z (v0.5)

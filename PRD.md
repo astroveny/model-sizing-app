@@ -353,6 +353,7 @@ type LlmFeatureId =
   | 'explain-sizing'        // Build panels "Why this choice?"
   | 'build-report-summary'  // Export: narrative exec summary
   | 'quick-sizing-assist'   // Quick Sizing LLM recommendation
+  | 'catalog-extract'       // NEW v0.5: extract structured fields from vendor spec page
 
 type ConfiguredModel = {
   id: string
@@ -401,6 +402,48 @@ settings_kv
   (key TEXT PRIMARY KEY,
    value_json TEXT NOT NULL,
    updated_at TEXT NOT NULL)
+
+-- NEW v0.5
+servers
+  (id TEXT PRIMARY KEY, vendor TEXT, model TEXT, cpu TEXT, memory_gb REAL,
+   storage TEXT, network TEXT, tdp_watts INTEGER, rack_units INTEGER,
+   release_year INTEGER, spec_sheet_url TEXT, notes TEXT,
+   is_deprecated INTEGER DEFAULT 0,
+   origin TEXT NOT NULL,             -- 'seed' | 'seed-edited' | 'user'
+   created_at TEXT NOT NULL, updated_at TEXT NOT NULL)
+
+server_gpu_configs
+  (id TEXT PRIMARY KEY, server_id TEXT NOT NULL REFERENCES servers(id),
+   gpu_id TEXT NOT NULL,             -- references gpus.id (loose; allows deprecated GPUs)
+   gpu_count INTEGER NOT NULL, interconnect TEXT,
+   list_price_usd REAL, is_default INTEGER DEFAULT 0)
+
+gpus
+  (id TEXT PRIMARY KEY, vendor TEXT, family TEXT, model TEXT,
+   vram_gb REAL, memory_type TEXT, memory_bandwidth_gbps REAL,
+   fp16_tflops REAL, bf16_tflops REAL, fp8_tflops REAL,
+   int8_tops REAL, int4_tops REAL, tdp_watts INTEGER,
+   interconnect_json TEXT,           -- nested obj as JSON
+   supported_features_json TEXT,     -- string[]
+   list_price_usd REAL, availability TEXT, notes TEXT, sources_json TEXT,
+   origin TEXT NOT NULL,
+   created_at TEXT NOT NULL, updated_at TEXT NOT NULL)
+
+llm_models
+  (id TEXT PRIMARY KEY, family TEXT, name TEXT,
+   params_b REAL, architecture TEXT, active_params_b REAL,
+   layers INTEGER, hidden_size INTEGER, num_kv_heads INTEGER, head_dim INTEGER,
+   context_length_max INTEGER, quantizations_supported_json TEXT,
+   release_date TEXT, huggingface_id TEXT, notes TEXT,
+   is_deprecated INTEGER DEFAULT 0,
+   origin TEXT NOT NULL,
+   created_at TEXT NOT NULL, updated_at TEXT NOT NULL)
+
+workload_references
+  (id TEXT PRIMARY KEY, label TEXT, url TEXT, description TEXT,
+   sort_order INTEGER, is_deprecated INTEGER DEFAULT 0,
+   origin TEXT NOT NULL,
+   created_at TEXT NOT NULL, updated_at TEXT NOT NULL)
 ```
 
 `description` is nullable text (free-form project description / notes).
@@ -445,6 +488,25 @@ The application uses a persistent **two-level left navigation sidebar** modeled 
 #### 6.0.x ML Sizer home link
 
 Clicking "ML Sizer" in the sidebar header routes to `/`. Applies to both expanded and collapsed states (collapsed logo still clickable; `aria-label="Home"`). Keyboard focusable.
+
+#### 6.0.z Version display
+
+In the footer area of the sidebar (above or near the collapse toggle), render the running app version:
+
+- **Expanded sidebar:** small text `v1.2.3` — on hover, tooltip shows full info (`v1.2.3 · build a3f2c81 · built 2026-04-25`)
+- **Collapsed sidebar:** tooltip only on hover (no visible label when collapsed)
+
+**Source of truth:**
+- `package.json` `version` field (read at build time)
+- Git short SHA injected at build time as `NEXT_PUBLIC_BUILD_SHA`
+- Build date injected at build time as `NEXT_PUBLIC_BUILD_DATE`
+
+**Build pipeline:** `bin/release.sh` passes `--build-arg BUILD_SHA` and `--build-arg BUILD_DATE`; Dockerfile exposes them as `ENV NEXT_PUBLIC_*` so they're embedded in the runtime image.
+
+**Acceptance criteria:**
+- [ ] Version visible in sidebar footer when expanded
+- [ ] Tooltip shows full build info on hover
+- [ ] Reflects the actually-running build (changes after each release)
 
 #### 6.0.2 Collapse behavior
 
@@ -624,6 +686,27 @@ Top-of-Discovery banner:
 - 🟡 "Ready to size — N defaults in use" (with "Review defaults" link)
 - 🟢 "All fields filled" (no skips)
 
+#### 6.1.z Workload tab — reference URLs
+
+At the top of the Workload sub-tab, render a "Model References" block: a horizontal flex row of small button-like links pointing to up-to-date model directories.
+
+**Default references (shipped in seed):**
+- Hugging Face Open LLM Leaderboard
+- LMSYS Chatbot Arena
+- Vendor pages for major model families (Meta Llama, Mistral, Qwen, DeepSeek)
+
+**Configuration:**
+- URLs stored in `data/seed/workload-references.seed.json` using the same hybrid seed + DB pattern as catalogs (§8.6.1)
+- Editable in `/settings/catalogs/workload-references`
+- Per-project overrides deferred to v0.6+
+
+**Rendering:** horizontal flex row, wraps on small screens. Each entry: short label + small external link icon. Tooltip on hover with full description. Empty block hidden when no active references.
+
+**Acceptance criteria:**
+- [ ] References block visible at top of Workload tab
+- [ ] Each link opens in a new tab
+- [ ] References editable via Settings
+
 ### 6.2 RFI section
 
 **Structure:**
@@ -751,6 +834,23 @@ All five export outputs (Proposal PDF, Proposal Word, JSON BoM, Build Report PDF
 - [ ] Content can be edited via a simple JSON file without code changes
 - [ ] "Ask Claude" produces context-aware explanations within 5s
 - [ ] Custom explanations persist per-project in SQLite
+
+#### 6.5.x Maximize / popup view
+
+ExplainBox header gets a new icon button: **"⛶" (maximize)**. Clicking it opens a centered modal with the full Explain + Example + Ask AI content at full width. Modal behavior:
+- Close button ("×") top-right
+- Esc key closes
+- Click outside closes
+- Body scroll-lock while open
+- All ExplainBox functionality (tabs, "Ask AI") works the same inside the modal
+- On phone: full-screen takeover per responsive design spec (§`docs/responsive-design.md` §3.5)
+
+**Acceptance criteria:**
+- [ ] Maximize icon present on every ExplainBox
+- [ ] Modal: `max-w-2xl`, `max-h-[80vh]`, scrollable body
+- [ ] Close via button, Esc, and outside-click all work
+- [ ] Tabs and "Ask AI" function inside modal
+- [ ] "Ask AI" inside modal respects `getLlmProviderForFeature('explain-field')` (parity with P8.20 fix)
 
 ### 6.6 Quick Sizing Mode
 
@@ -1137,6 +1237,110 @@ Replaces v0.4a stub. Layout:
 #### 8.5.8 Backward compatibility
 
 On first boot after v0.4b upgrade: if `configured_models` is empty AND `.env` has `LLM_PROVIDER` set → auto-create a default `ConfiguredModel` from env and assign to all six features. Idempotent.
+
+#### 8.5.x Disabled-state and dynamic button labels
+
+The "Ask Claude" / "Ask AI" buttons throughout the app must reflect the **assigned model** for their feature:
+
+- Feature has **no assigned model** → button **disabled** with tooltip: "Configure a model for [feature] in Settings → LLM" (links to `/settings/llm`)
+- Feature has **a model assigned** → button label uses the model's `label` (e.g., "Ask Opus", "Ask Llama-Local"); fallback to "Ask AI" if label would overflow
+- All call sites must use `getLlmProviderForFeature(feature)` — the deprecated `getLlmProvider()` must not be called from UI components
+
+This fixes the v0.4b regression where ExplainBox "Ask Claude" ignored feature routing and always used the env-var provider.
+
+---
+
+## 8.6 Dynamic Catalogs (Servers, GPUs, LLM Models)
+
+Replaces the v0.3 assumption that catalogs are static JSON files. From v0.5 onward, all three catalogs (servers, GPUs, LLM models) are **DB-backed and admin-editable**, with seed files providing curated defaults on first boot.
+
+### 8.6.1 Storage model — hybrid seed + DB
+
+Three catalogs follow the same pattern:
+
+```
+data/seed/servers.seed.json   →  servers + server_gpu_configs   →  Settings UI (CRUD)
+data/seed/gpus.seed.json      →  gpus                            →  Settings UI (CRUD)
+data/seed/models.seed.json    →  llm_models                      →  Settings UI (CRUD)
+       (committed, append-only)         (mutable, per install)
+```
+
+**Seed loading on boot:**
+- On every app boot, the seed loader runs as a startup task
+- For each entry in a seed file, if no row with that `id` exists in the corresponding table → **insert it** with `origin = 'seed'`
+- If a row with that `id` already exists → **leave it untouched** (user edits always win)
+- To fix a seed entry a user may have edited: ship a new entry with a new id and deprecate the old one
+
+**Origin tracking:** every catalog row has an `origin` column:
+- `seed` — came from seed file, unmodified
+- `seed-edited` — came from seed file, then edited by admin
+- `user` — created by admin via UI
+
+Origin drives UI affordances (e.g., "Reset to seed defaults" button only on `seed-edited` rows).
+
+### 8.6.2 Servers catalog
+
+**Fields per server:** `id`, `vendor` (`'dell' | 'hpe' | 'supermicro' | 'nvidia' | 'lenovo' | 'cisco' | 'other'`), `model`, `cpu`, `memory_gb`, `storage`, `network`, `tdp_watts`, `rack_units`, `release_year` (optional), `spec_sheet_url` (optional), `notes` (optional), `is_deprecated` (default false), `origin`, `created_at`, `updated_at`.
+
+**Multiple GPU configurations** — child table `server_gpu_configs`:
+`id`, `server_id` (FK → servers), `gpu_id` (loose ref to gpus.id), `gpu_count`, `interconnect` (`'nvlink' | 'infinity-fabric' | 'pcie' | 'none'`), `list_price_usd` (optional), `is_default` (one config per server marked default).
+
+A single server (e.g., Dell XE9680) can have multiple configs (8×H100, 8×H200, 8×MI300X). Sizing engine selects the config matching Discovery's GPU preference.
+
+### 8.6.3 GPUs catalog
+
+Migrates `data/gpus.json` schema into `data/seed/gpus.seed.json`. Fields unchanged from `docs/adding-a-gpu.md`: `id`, `vendor`, `family`, `model`, `vram_gb`, `memory_type`, `memory_bandwidth_gbps`, `fp16_tflops`, `fp8_tflops`, `bf16_tflops`, `int8_tops`, `tdp_watts`, `interconnect` (as JSON), `supported_features`, `list_price_usd`, `availability`, `notes`, `sources`, `origin`.
+
+### 8.6.4 LLM models catalog
+
+Migrates `data/models.json`. Fields: `id`, `family`, `name`, `params_b`, `architecture` (`'dense' | 'moe'`), `active_params_b` (MoE only), `layers`, `hidden_size`, `num_kv_heads`, `head_dim`, `context_length_max`, `quantizations_supported` (JSON array), `release_date`, `huggingface_id`, `notes`, `is_deprecated`, `origin`.
+
+This list is what Quick Sizing recommends from and what Discovery dropdowns populate from.
+
+### 8.6.5 Catalog admin UI
+
+New routes under `/settings`:
+
+```
+/settings/catalogs              — index page with cards for each catalog
+/settings/catalogs/servers      — server catalog admin
+/settings/catalogs/gpus         — GPU catalog admin
+/settings/catalogs/llm-models   — LLM model catalog admin
+/settings/catalogs/workload-references  — workload reference URLs (lightweight)
+```
+
+Each catalog admin page: search/filter bar, table view, "Add entry" button, per-row actions (Edit, Deprecate, Reset to seed if `seed-edited`, Delete for `user` rows only), origin badge.
+
+### 8.6.6 Add/Edit dialog — manual + URL-assisted
+
+**Option A — Manual entry:** form fields per catalog schema, user fills and submits.
+
+**Option B — Extract from URL:**
+1. User pastes a vendor spec sheet URL
+2. App fetches the page server-side (with timeout, redirect handling, user-agent set, max body size)
+3. App calls LLM via `getLlmProviderForFeature('catalog-extract')` with a structured-output prompt
+4. LLM returns JSON matching the catalog schema; form is pre-filled
+5. User reviews, edits any wrong values, saves
+
+Disabled when `catalog-extract` feature has no assigned model; tooltip says "Configure a model for catalog extraction in Settings → LLM."
+
+**Editing existing entries:** same form, with "Re-extract from URL" button if `spec_sheet_url` is set.
+
+### 8.6.7 Use of catalogs in the app
+
+After this phase, every code path that reads `data/gpus.json`, `data/servers.json`, or `data/models.json` is updated to read from the DB. The seed JSON files remain in the repo as the canonical defaults, loaded only by the seed loader on boot.
+
+**Caching:** catalogs are queried frequently (every Discovery render, every Build compute). Use a request-scoped in-memory cache invalidated on any catalog-write event.
+
+### 8.6.8 Acceptance criteria
+
+- [ ] First boot loads all three seed files into DB
+- [ ] Subsequent boots skip already-present entries (append-only; idempotent)
+- [ ] Admin can add/edit/deprecate entries via UI
+- [ ] URL extraction pre-fills form when `catalog-extract` model is assigned
+- [ ] User edits to seed entries persist across app upgrades
+- [ ] Discovery dropdowns and Quick Sizing recommender pull from DB, not JSON files
+- [ ] Sizing engine reads server/GPU specs from DB
 
 ---
 
@@ -1571,6 +1775,7 @@ Minimum pairings:
 | v0.3 | 2026-04-21 | Claude + owner | UX redesign: two-level left nav (§6.0), merged landing/projects page (§6.0.7), onboarding page (§6.0.8), autosave indicator instead of save button (§6.1 revised), Build Report export in PDF + Markdown (§6.4 revised). New §10 Phase 7+ file-structure additions. New §13 Design System (color tokens, typography, spacing, motion, accessibility). Known bugs + BoM pricing audit queued for Phase 8. |
 | v0.4a | 2026-04-22 | Claude + owner | §6.1 required/skippable/optional field classes with full classification table and defaults; §6.6 Quick Sizing mode with rule-based recommender (LLM-assist stub to be activated in v0.4b); §5.1 adds `_skipped`, `_source`; §6.0 sidebar reorder + ML Sizer home link; §6.2 explicit Apply flow for RFI; §13.9 accessible text rules |
 | v0.4b | 2026-04-22 | Claude + owner | **§8.5 multi-model LLM routing** with per-feature exclusive assignment, encrypted credential storage, `/settings` page replacing v0.4a stub. **§5.1 adds** `hardware.preferredServer`, `build.bomOverrides`, `LlmFeatureId`, `ConfiguredModel`, `settings` store slice. **§5.2 adds** `configured_models`, `settings_kv` tables. **§6.4 adds** BoM override UI (§6.4.x) and export behavior (§6.4.y). **§6.6.3 updated** Quick Sizing step 2 for LLM-assist; **§6.6.5** LLM-assist recommender spec (activates v0.4a stub). **§6.2.y** routes RFI extraction through assigned model. |
+| v0.5 | 2026-04-26 | Claude + owner | **§8.6 Dynamic Catalogs:** hybrid seed + DB storage for servers, GPUs, LLM models; append-only seed merge on boot; admin UI at `/settings/catalogs/*`; manual + URL-assisted entry with `catalog-extract` LLM feature; origin tracking (`seed` / `seed-edited` / `user`). **§5.2** adds 5 new tables (servers, server_gpu_configs, gpus, llm_models, workload_references). **§5.1 `LlmFeatureId`** adds `catalog-extract`. **§8.5.x** disabled-state + dynamic button labels (fixes "Ask Claude" routing regression). **§6.0.z** sidebar version display (build SHA + date from build-time env vars). **§6.1.z** Workload tab reference URLs block. **§6.5.x** ExplainBox maximize / modal view. |
 
 ---
 

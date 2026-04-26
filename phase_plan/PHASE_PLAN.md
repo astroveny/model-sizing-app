@@ -13,7 +13,7 @@
 | [phase_plan_2.md](./phase_plan_2.md) | Phase 3 — Build Section · Phase 4 — RFI · Phase 5 — Export |
 | [phase_plan_3.md](./phase_plan_3.md) | Phase 6 — Polish & LLM Expansion · Phase 7 — UX Redesign · Phase 8 — Bug Fixes |
 | [phase_plan_4.md](./phase_plan_4.md) | Phase 9 — Build Report Export · Phase 10 — LLM Settings · Phase 11 — UX Polish Round 2 |
-| [phase_plan_5.md](./phase_plan_5.md) | Phase 12 — Server & BoM Override · Future phases · Troubleshooting · Revision log |
+| [phase_plan_5.md](./phase_plan_5.md) | Phase 12 — Server & BoM Override · Phase 13 — Dynamic Catalogs + UX Additions · Future phases · Troubleshooting · Revision log |
 
 ---
 
@@ -33,9 +33,10 @@
 | 9 | Build Report Export | ☑ done |
 | 10 | LLM Settings & Multi-Model Routing | ☑ done |
 | 11 | UX Polish Round 2 | ☑ done |
-| 12 | Server & BoM Override | ◐ P12.9 remaining |
+| 12 | Server & BoM Override | ☑ done |
+| 13 | Dynamic Catalogs + UX Additions | ☐ not started |
 
-**Next step:** [P12.9 — Smoke test](./phase_plan_5.md#-p129--smoke-test)
+**Next step:** [P8.20 — ExplainBox routing regression](./phase_plan_3.md#-p820--explainbox-routing-regression)
 
 ---
 
