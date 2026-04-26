@@ -81,7 +81,7 @@
 
 **Exit criteria:** All three catalogs editable via `/settings/catalogs/*`; URL-assisted extraction works for at least one catalog; all use sites read from DB; version visible in sidebar.
 
-### ☐ P13.1 — Schema migration
+### ☑ P13.1 — Schema migration
 - **Action:** Add the 5 tables from PRD §5.2 / §A.6 (servers, server_gpu_configs, gpus, llm_models, workload_references) via a new Drizzle migration.
 - **Deliverable:** migration file + Drizzle types
 - **Verify:** `npm run db:migrate`; all 5 tables exist; `npm run typecheck` passes
