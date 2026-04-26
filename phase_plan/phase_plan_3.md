@@ -356,7 +356,7 @@
 - **Deliverable:** code fix + integration test (assign feature to OpenAI provider, click Ask AI, verify request goes to OpenAI endpoint)
 - **Refs:** PRD §8.5.x (v0.5)
 
-### ☐ P8.21 — DOMMatrix regression
+### ☑ P8.21 — DOMMatrix regression
 - **Action:** "DOMMatrix is not defined" error has returned on RFP file upload (regression from P8.13). Diagnose:
   1. `git log --all -p -- package.json | grep -A2 -B2 "pdfjs\|pdf-parse"` — find when pdfjs-dist reintroduced
   2. `grep -rn "pdfjs\|pdf-parse" --include="*.ts" --include="*.tsx" .` — confirm current usage across all upload paths
