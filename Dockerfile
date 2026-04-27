@@ -48,8 +48,9 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Seed catalog files (seeded into DB on first boot via seed-loader)
-COPY --from=builder /app/data/seed ./data/seed
+# Seed catalog files at /app/catalog-seed — outside the ./data volume mount so they
+# are never shadowed when docker-compose binds ./data:/app/data on a new server.
+COPY --from=builder /app/data/seed ./catalog-seed
 # Non-catalog static data
 COPY --from=builder /app/data/instances.json ./data/instances.json
 COPY --from=builder /app/data/throughput.json ./data/throughput.json

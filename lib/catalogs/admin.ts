@@ -11,8 +11,13 @@ function nextOrigin(current: string): Origin {
   return current === "seed" ? "seed-edited" : (current as Origin);
 }
 
+function seedDir(): string {
+  const baked = "/app/catalog-seed";
+  return fs.existsSync(baked) ? baked : path.join(process.cwd(), "data", "seed");
+}
+
 function readSeed<T>(filename: string): T {
-  const p = path.join(process.cwd(), "data", "seed", filename);
+  const p = path.join(seedDir(), filename);
   return JSON.parse(fs.readFileSync(p, "utf-8")) as T;
 }
 

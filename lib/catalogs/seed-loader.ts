@@ -6,8 +6,15 @@ import * as schema from "@/lib/db/schema";
 
 type Db = ReturnType<typeof drizzle<typeof schema>>;
 
+function seedDir(): string {
+  // In Docker, seeds are baked at /app/catalog-seed/ to avoid being shadowed
+  // by the ./data:/app/data volume mount used for DB persistence.
+  const baked = "/app/catalog-seed";
+  return fs.existsSync(baked) ? baked : path.join(process.cwd(), "data", "seed");
+}
+
 function readSeed<T>(filename: string): T {
-  const p = path.join(process.cwd(), "data", "seed", filename);
+  const p = path.join(seedDir(), filename);
   return JSON.parse(fs.readFileSync(p, "utf-8")) as T;
 }
 
