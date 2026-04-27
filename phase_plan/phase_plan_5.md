@@ -114,7 +114,7 @@
 - **Verify:** Full smoke test — Discovery → Build → Export — functions identically to v0.4b. No JSON read errors in server logs.
 - **Refs:** PRD §8.6.7
 
-### ☐ P13.5 — Catalog write API
+### ☑ P13.5 — Catalog write API
 - **Action:** `lib/catalogs/admin.ts` — `createServer()`, `updateServer()`, `deprecateServer()`, `deleteServer()` (only `origin='user'` rows deletable; `seed` / `seed-edited` rows can only be deprecated). Same pattern for gpus, llm_models, workload_references. On any update to a `seed` row → set `origin='seed-edited'`. On reset-to-seed → restore values from seed file and set `origin='seed'`. Invalidate read cache on all writes.
 - **Deliverable:** CRUD functions + tests for origin transitions
 - **Refs:** PRD §8.6.1
