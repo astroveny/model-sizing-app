@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { ExplainBox } from "@/components/ExplainBox";
 import { SkippableField } from "@/components/discovery/SkippableField";
+import { WorkloadReferences } from "@/components/discovery/WorkloadReferences";
 import { useProjectStore } from "@/lib/store";
 import type { Quantization } from "@/lib/store";
 
@@ -107,6 +108,7 @@ export function WorkloadForm() {
       {/* Left: form fields                                                    */}
       {/* ------------------------------------------------------------------ */}
       <div className="space-y-8 min-w-0">
+        <WorkloadReferences />
         {/* Model */}
         <Section title="Model">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

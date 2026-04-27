@@ -8,6 +8,7 @@ import { SidebarNavItem } from "./SidebarNavItem";
 import { SidebarNewProjectButton } from "./SidebarNewProjectButton";
 import { SidebarCurrentProject } from "./SidebarCurrentProject";
 import { SidebarThemeToggle } from "./SidebarThemeToggle";
+import { SidebarVersion } from "./SidebarVersion";
 
 const STORAGE_KEY = "ml-sizer:sidebar-collapsed";
 
@@ -91,6 +92,8 @@ export function Sidebar() {
         <div className="my-2 border-t border-[var(--border-muted)]" />
         <SidebarCurrentProject collapsed={isCollapsed} />
       </div>
+
+      <SidebarVersion collapsed={isCollapsed} />
     </aside>
   );
 }

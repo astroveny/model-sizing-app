@@ -161,27 +161,27 @@
 - **Deliverable:** page + dialogs + prompt
 - **Refs:** PRD §8.6.4
 
-### ☐ P13.13 — Workload references admin page (lightweight)
+### ☑ P13.13 — Workload references admin page (lightweight)
 - **Action:** Create `app/settings/catalogs/workload-references/page.tsx`. Simpler than other catalogs — just `label`, `url`, `description`, `sort_order`. Manual entry only; no URL extraction needed.
 - **Deliverable:** page + add/edit dialog
 - **Refs:** PRD §6.1.z
 
-### ☐ P13.14 — Workload tab references block
+### ☑ P13.14 — Workload tab references block
 - **Action:** Create `components/discovery/WorkloadReferences.tsx`. Renders a horizontal flex row of link-buttons from `listWorkloadReferences()`. Each opens in a new tab. Tooltip shows `description`. Hidden entirely when no active references. Place at the top of `WorkloadForm.tsx` content area.
 - **Deliverable:** component + integration in WorkloadForm
 - **Refs:** PRD §6.1.z
 
-### ☐ P13.15 — ExplainBox maximize button
+### ☑ P13.15 — ExplainBox maximize button
 - **Action:** Add maximize icon (`Maximize2` from lucide-react) to ExplainBox header. Clicking opens a shadcn Dialog with the same Explain + Example + Ask AI content. Dialog: `max-w-2xl`, `max-h-[80vh]`, scrollable body. Close: × button, Esc, click-outside. Body scroll-lock while open (shadcn Dialog handles this). On phone: full-screen per responsive-design.md §3.5.
 - **Deliverable:** maximize trigger + modal mode in ExplainBox
 - **Refs:** PRD §6.5.x
 
-### ☐ P13.16 — ExplainBox routing parity in modal
+### ☑ P13.16 — ExplainBox routing parity in modal
 - **Action:** Verify the Ask AI call path inside the maximize modal uses `getLlmProviderForFeature('explain-field')` (same fix as P8.20, not a separate call path). Confirm by integration test: maximize → click Ask AI → request goes to the assigned model's endpoint.
 - **Deliverable:** verified by test
 - **Refs:** P8.20, PRD §6.5.x
 
-### ☐ P13.17 — Sidebar version footer component
+### ☑ P13.17 — Sidebar version footer component
 - **Action:** Create `components/Sidebar/SidebarVersion.tsx`. Reads:
   - `process.env.NEXT_PUBLIC_BUILD_SHA` (set by P8.22)
   - `process.env.NEXT_PUBLIC_BUILD_DATE`
@@ -190,7 +190,7 @@
 - **Deliverable:** component
 - **Refs:** PRD §6.0.z
 
-### ☐ P13.18 — Sidebar version integration
+### ☑ P13.18 — Sidebar version integration
 - **Action:** Place `<SidebarVersion>` in the Sidebar footer, above the collapse toggle. Confirm:
   - Hidden when sidebar is collapsed (no label visible; tooltip still works on hover)
   - Present and readable when expanded

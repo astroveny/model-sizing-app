@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HelpCircle, Sparkles, AlertTriangle, Link2, Loader2, RotateCcw } from "lucide-react";
+import { HelpCircle, Sparkles, AlertTriangle, Link2, Loader2, RotateCcw, Maximize2 } from "lucide-react";
 import { getExplainEntry } from "@/lib/explain/loader";
 import { useProjectStore } from "@/lib/store";
 import { llmComplete, LlmFeatureUnassignedError } from "@/lib/llm/client";
@@ -40,6 +41,7 @@ export function ExplainBox({ fieldId, label }: Props) {
   const [error, setError] = useState<string | null>(null);
   // null = unassigned/loading, string = assigned model label
   const [assignedLabel, setAssignedLabel] = useState<string | null>(null);
+  const [maximized, setMaximized] = useState(false);
 
   useEffect(() => {
     getFeatureLabels().then((labels) => {
@@ -107,18 +109,8 @@ export function ExplainBox({ fieldId, label }: Props) {
     setError(null);
   }
 
-  return (
-    <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-subtle)] p-3 text-sm">
-      <div className="mb-2 flex items-center gap-1.5 font-medium text-[var(--text-secondary)]">
-        <HelpCircle className="h-3.5 w-3.5 shrink-0" />
-        <span className="truncate">{title}</span>
-        {isOverridden && (
-          <span className="ml-auto text-[10px] font-normal text-[var(--accent-primary)] bg-[var(--accent-primary)]/10 px-1.5 py-0.5 rounded">
-            AI
-          </span>
-        )}
-      </div>
-
+  const innerContent = (
+    <>
       {entry ? (
         <Tabs defaultValue="explain">
           <TabsList className="h-7 mb-2">
@@ -224,6 +216,45 @@ export function ExplainBox({ fieldId, label }: Props) {
           </Button>
         )}
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-subtle)] p-3 text-sm">
+        <div className="mb-2 flex items-center gap-1.5 font-medium text-[var(--text-secondary)]">
+          <HelpCircle className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">{title}</span>
+          {isOverridden && (
+            <span className="ml-auto text-[10px] font-normal text-[var(--accent-primary)] bg-[var(--accent-primary)]/10 px-1.5 py-0.5 rounded">
+              AI
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setMaximized(true)}
+            className="ml-auto p-0.5 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            aria-label="Expand explanation"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        {innerContent}
+      </div>
+
+      <Dialog open={maximized} onOpenChange={(o) => { if (!o) setMaximized(false); }}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-1.5">
+              <HelpCircle className="h-4 w-4 shrink-0" />
+              {title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="text-sm">
+            {innerContent}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
