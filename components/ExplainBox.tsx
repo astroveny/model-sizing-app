@@ -196,10 +196,11 @@ export function ExplainBox({ fieldId, label }: Props) {
       const parsed = JSON.parse(result.text) as { explain?: string; example?: string };
       if (!parsed.explain || !parsed.example) throw new Error("Unexpected response shape");
 
-      updateField(`explainOverrides.${fieldId}`, {
-        fieldId,
-        explain: parsed.explain,
-        example: parsed.example,
+      // Use whole-object update so fieldId (which may contain dots) is stored
+      // as a single key, not traversed as a nested path by setDeep.
+      updateField("explainOverrides", {
+        ...(activeProject.explainOverrides ?? {}),
+        [fieldId]: { fieldId, explain: parsed.explain, example: parsed.example },
       });
     } catch (err) {
       if (err instanceof LlmFeatureUnassignedError) {
@@ -213,7 +214,9 @@ export function ExplainBox({ fieldId, label }: Props) {
   }
 
   function handleReset() {
-    updateField(`explainOverrides.${fieldId}`, undefined);
+    const next = { ...(activeProject?.explainOverrides ?? {}) };
+    delete next[fieldId];
+    updateField("explainOverrides", next);
     setError(null);
   }
 
