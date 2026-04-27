@@ -151,7 +151,7 @@
 - **Verify:** Paste a real Dell PowerEdge spec URL; extraction returns sensible fields for at least 5 of the server schema fields
 - **Refs:** PRD §8.6.6
 
-### ☐ P13.11 — GPUs admin page + dialogs
+### ☑ P13.11 — GPUs admin page + dialogs
 - **Action:** Apply P13.7–P13.10 patterns to GPUs catalog. URL extraction prompt: `lib/llm/prompts/catalog-extract-gpu.ts`. Key GPU fields to verify: `vram_gb`, `memory_bandwidth_gbps`, `fp16_tflops`, `tdp_watts`.
 - **Deliverable:** page + dialogs + prompt
 - **Refs:** PRD §8.6.3
