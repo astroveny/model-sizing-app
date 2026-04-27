@@ -19,6 +19,7 @@ export default function SettingsPage() {
     "explain-sizing": null,
     "build-report-summary": null,
     "quick-sizing-assist": null,
+    "catalog-extract": null,
   });
   const [addOpen, setAddOpen] = useState(false);
 

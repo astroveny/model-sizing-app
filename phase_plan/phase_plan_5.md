@@ -134,7 +134,7 @@
 - **Deliverable:** dialog component
 - **Refs:** PRD §8.6.6
 
-### ☐ P13.9 — `catalog-extract` LLM feature wiring
+### ☑ P13.9 — `catalog-extract` LLM feature wiring
 - **Action:** Add `'catalog-extract'` to the `LlmFeatureId` union in `lib/store.ts` (or wherever the type lives). Verify it surfaces automatically in `/settings/llm` feature assignment UI (the existing per-feature checkbox mechanism). Run `npm run typecheck` — fix any exhaustive-match errors.
 - **Deliverable:** type update + typecheck passing
 - **Refs:** PRD §8.5 (v0.5)

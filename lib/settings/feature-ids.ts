@@ -6,7 +6,8 @@ export type LlmFeatureId =
   | "explain-field"
   | "explain-sizing"
   | "build-report-summary"
-  | "quick-sizing-assist";
+  | "quick-sizing-assist"
+  | "catalog-extract";
 
 export const ALL_FEATURES: LlmFeatureId[] = [
   "rfp-extract",
@@ -15,6 +16,7 @@ export const ALL_FEATURES: LlmFeatureId[] = [
   "explain-sizing",
   "build-report-summary",
   "quick-sizing-assist",
+  "catalog-extract",
 ];
 
 export const FEATURE_LABELS: Record<LlmFeatureId, string> = {
@@ -24,4 +26,5 @@ export const FEATURE_LABELS: Record<LlmFeatureId, string> = {
   "explain-sizing": "Explain Sizing (Why this choice?)",
   "build-report-summary": "Build Report Summary",
   "quick-sizing-assist": "Quick Sizing Assist",
+  "catalog-extract": "Catalog Extraction (from spec URLs)",
 };

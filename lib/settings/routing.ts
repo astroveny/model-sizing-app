@@ -17,6 +17,7 @@ export function getRouting(): Record<LlmFeatureId, string | null> {
     "explain-sizing": null,
     "build-report-summary": null,
     "quick-sizing-assist": null,
+    "catalog-extract": null,
   };
   for (const row of rows) {
     const features = JSON.parse(row.assignedFeaturesJson) as LlmFeatureId[];
