@@ -139,7 +139,7 @@
 - **Deliverable:** type update + typecheck passing
 - **Refs:** PRD §8.5 (v0.5)
 
-### ☐ P13.10 — URL-assisted extraction (server)
+### ☑ P13.10 — URL-assisted extraction (server)
 - **Action:**
   - In Add Server dialog, add "Extract from URL" tab alongside "Manual entry"
   - User pastes URL → server-side fetch via new utility (`lib/catalogs/url-fetch.ts`): timeout 10s, redirect handling, user-agent set, max body 500KB

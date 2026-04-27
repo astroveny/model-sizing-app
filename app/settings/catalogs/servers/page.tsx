@@ -29,9 +29,18 @@ export default function ServersAdminPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editServer, setEditServer] = useState<ServerRow | null>(null);
 
+  const [catalogExtractAssigned, setCatalogExtractAssigned] = useState(false);
+
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/admin/catalogs/servers");
-    if (res.ok) setData(await res.json() as RowData);
+    const [serversRes, routingRes] = await Promise.all([
+      fetch("/api/admin/catalogs/servers"),
+      fetch("/api/settings/routing"),
+    ]);
+    if (serversRes.ok) setData(await serversRes.json() as RowData);
+    if (routingRes.ok) {
+      const routing = await routingRes.json() as Record<string, string | null>;
+      setCatalogExtractAssigned(!!routing["catalog-extract"]);
+    }
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
@@ -184,6 +193,7 @@ export default function ServersAdminPage() {
         open={dialogOpen}
         server={editServer}
         gpus={gpus}
+        catalogExtractAssigned={catalogExtractAssigned}
         onClose={() => setDialogOpen(false)}
         onSaved={() => { refresh(); toast.success(editServer ? "Server updated" : "Server added"); }}
       />

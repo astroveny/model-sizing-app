@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Link2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import type { ServerRow, GpuRow } from "@/lib/catalogs/index";
+
+type Tab = "manual" | "extract";
 
 interface GpuConfigDraft {
   key: string;
@@ -26,6 +28,7 @@ interface ServerDialogProps {
   open: boolean;
   server: ServerRow | null;
   gpus: GpuRow[];
+  catalogExtractAssigned: boolean;
   onClose: () => void;
   onSaved: () => void;
 }
@@ -69,8 +72,12 @@ const EMPTY_FORM = {
   tdpWatts: "", rackUnits: "", releaseYear: "", specSheetUrl: "", notes: "",
 };
 
-export function ServerDialog({ open, server, gpus, onClose, onSaved }: ServerDialogProps) {
+export function ServerDialog({ open, server, gpus, catalogExtractAssigned, onClose, onSaved }: ServerDialogProps) {
   const firstGpuId = gpus[0]?.id ?? "";
+  const [tab, setTab] = useState<Tab>("manual");
+  const [extractUrl, setExtractUrl] = useState("");
+  const [extracting, setExtracting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [configs, setConfigs] = useState<GpuConfigDraft[]>([]);
   const [saving, setSaving] = useState(false);
@@ -86,6 +93,9 @@ export function ServerDialog({ open, server, gpus, onClose, onSaved }: ServerDia
         setConfigs([emptyConfig("0", firstGpuId)]);
       }
       setError(null);
+      setExtractError(null);
+      setExtractUrl("");
+      setTab("manual");
     }
   }, [open, server, firstGpuId]);
 
@@ -117,6 +127,55 @@ export function ServerDialog({ open, server, gpus, onClose, onSaved }: ServerDia
 
   function setDefault(key: string) {
     setConfigs((cs) => cs.map((c) => ({ ...c, isDefault: c.key === key })));
+  }
+
+  async function handleExtract() {
+    if (!extractUrl.trim()) return;
+    setExtracting(true);
+    setExtractError(null);
+    try {
+      const res = await fetch("/api/admin/catalogs/servers/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: extractUrl.trim() }),
+      });
+      const body = await res.json() as { extracted?: Record<string, unknown>; error?: string };
+      if (!res.ok) throw new Error(body.error ?? "Extraction failed");
+      const ex = body.extracted ?? {};
+      // Pre-fill form
+      setForm((f) => ({
+        ...f,
+        vendor: String(ex.vendor ?? f.vendor),
+        model: String(ex.model ?? f.model),
+        cpu: String(ex.cpu ?? f.cpu),
+        memoryGb: ex.memory_gb != null ? String(ex.memory_gb) : f.memoryGb,
+        storage: String(ex.storage ?? f.storage),
+        network: String(ex.network ?? f.network),
+        tdpWatts: ex.tdp_watts != null ? String(ex.tdp_watts) : f.tdpWatts,
+        rackUnits: ex.rack_units != null ? String(ex.rack_units) : f.rackUnits,
+        releaseYear: ex.release_year != null ? String(ex.release_year) : f.releaseYear,
+        specSheetUrl: String(ex.spec_sheet_url ?? f.specSheetUrl),
+        notes: String(ex.notes ?? f.notes),
+      }));
+      // Pre-fill GPU configs if provided
+      type GpuConfigRaw = { gpu_id?: string; gpu_count?: number; interconnect?: string; list_price_usd?: number | null; is_default?: boolean };
+      const rawConfigs = Array.isArray(ex.gpu_configs) ? (ex.gpu_configs as GpuConfigRaw[]) : [];
+      if (rawConfigs.length > 0) {
+        setConfigs(rawConfigs.map((c, i) => ({
+          key: String(i),
+          gpuId: String(c.gpu_id ?? firstGpuId),
+          gpuCount: Number(c.gpu_count ?? 8),
+          interconnect: String(c.interconnect ?? "nvlink"),
+          listPriceUsd: c.list_price_usd != null ? String(c.list_price_usd) : "",
+          isDefault: !!c.is_default,
+        })));
+      }
+      setTab("manual");
+    } catch (err) {
+      setExtractError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setExtracting(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -178,6 +237,48 @@ export function ServerDialog({ open, server, gpus, onClose, onSaved }: ServerDia
         <DialogHeader>
           <DialogTitle>{server ? "Edit Server" : "Add Server"}</DialogTitle>
         </DialogHeader>
+
+        {/* Tab bar (only shown when adding, or on seed-edited/user rows with a spec URL) */}
+        <div className="flex rounded-md border border-[var(--border-default)] overflow-hidden text-sm mb-1">
+          <button
+            type="button"
+            onClick={() => setTab("manual")}
+            className={`flex-1 px-3 py-1.5 transition-colors ${tab === "manual" ? "bg-[var(--accent-primary)] text-white" : "text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]"}`}
+          >
+            Manual entry
+          </button>
+          <button
+            type="button"
+            onClick={() => { if (catalogExtractAssigned) setTab("extract"); }}
+            disabled={!catalogExtractAssigned}
+            title={!catalogExtractAssigned ? "Configure a model for 'Catalog Extraction' in Settings → LLM" : undefined}
+            className={`flex-1 px-3 py-1.5 transition-colors flex items-center justify-center gap-1.5 ${tab === "extract" ? "bg-[var(--accent-primary)] text-white" : !catalogExtractAssigned ? "text-[var(--text-muted)] cursor-not-allowed opacity-50" : "text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]"}`}
+          >
+            <Link2 className="h-3.5 w-3.5" />
+            Extract from URL
+          </button>
+        </div>
+
+        {tab === "extract" && (
+          <div className="space-y-3 pb-2">
+            <p className="text-xs text-[var(--text-secondary)]">
+              Paste a vendor spec sheet URL. The page will be fetched and analyzed by AI to pre-fill the form.
+              Review all fields before saving.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                value={extractUrl}
+                onChange={(e) => setExtractUrl(e.target.value)}
+                placeholder="https://www.dell.com/en-us/shop/…"
+                className="flex-1"
+              />
+              <Button type="button" onClick={handleExtract} disabled={extracting || !extractUrl.trim()}>
+                {extracting ? <><Loader2 className="h-4 w-4 animate-spin mr-1.5" />Extracting…</> : "Extract"}
+              </Button>
+            </div>
+            {extractError && <p className="text-sm text-red-500">{extractError}</p>}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Basic fields */}
