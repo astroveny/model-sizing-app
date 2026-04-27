@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { getProject } from "@/lib/db/projects";
 import { buildBomExport } from "@/lib/export/build-bom-export";
+import { buildServerCatalogSnapshot } from "@/lib/sizing/catalog";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const ReactPDF = require("@react-pdf/renderer") as typeof import("@react-pdf/renderer");
 import { SizingPdfDocument } from "@/lib/export/pdf";
@@ -17,7 +18,8 @@ export async function GET(req: NextRequest) {
   const project = getProject(id);
   if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
 
-  const bom = buildBomExport(project);
+  const catalog = buildServerCatalogSnapshot();
+  const bom = buildBomExport(project, catalog);
 
   try {
     const pdfBuffer = await ReactPDF.renderToBuffer(

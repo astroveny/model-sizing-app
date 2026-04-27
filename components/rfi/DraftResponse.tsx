@@ -6,7 +6,7 @@ import { useBuildDerived } from "@/lib/hooks/useBuildDerived";
 import { llmComplete, LlmFeatureUnassignedError } from "@/lib/llm/client";
 import { DRAFT_RESPONSE_SYSTEM, buildDraftResponsePrompt } from "@/lib/llm/prompts/draft-response";
 import { Loader2, Copy, Check } from "lucide-react";
-import { getBestServer } from "@/lib/sizing/catalog";
+import { useCatalog } from "@/lib/catalogs/client";
 
 export function DraftResponse() {
   const [loading, setLoading] = useState(false);
@@ -20,6 +20,7 @@ export function DraftResponse() {
   const deployPattern  = useProjectStore((s) => s.activeProject?.deploymentPattern ?? "internal-inference");
   const updateField    = useProjectStore((s) => s.updateField);
   const result         = useBuildDerived();
+  const catalog        = useCatalog();
 
   async function generate() {
     if (!result) return;
@@ -28,7 +29,7 @@ export function DraftResponse() {
 
     try {
       const { input, capacity, optimizations } = result;
-      const server = getBestServer(input.gpu.id);
+      const server = catalog?.getBestServer(input.gpu.id);
       const endToEndMs = optimizations.adjustedTtftMs + optimizations.adjustedItlMs * input.avgOutputTokens;
 
       const ctx = {

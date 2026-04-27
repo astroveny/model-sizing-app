@@ -10,14 +10,7 @@ import {
 } from "@/components/ui/select";
 import type { BomItem } from "@/lib/store";
 import type { BomExport } from "@/lib/export/bom-schema";
-import gpusData from "@/data/gpus.json";
-import serversData from "@/data/servers.json";
-
-type GpuEntry    = { id: string; model: string; vendor: string; vram_gb: number; list_price_usd?: number; memory_bandwidth_gbps: number };
-type ServerEntry = { id: string; vendor: string; model: string; supported_gpu_ids: string[]; max_gpus: number; rack_units: number; list_price_usd?: number };
-
-const ALL_GPUS    = gpusData.gpus    as GpuEntry[];
-const ALL_SERVERS = serversData.servers as ServerEntry[];
+import { useCatalog } from "@/lib/catalogs/client";
 
 /** Stable key for a BoM line. Used as bomOverrides map key. */
 export function bomItemKey(item: { category: string; name: string }): string {
@@ -41,6 +34,8 @@ interface BomTableProps {
 }
 
 export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onClearOverride }: BomTableProps) {
+  const catalog = useCatalog();
+
   const effectiveItems: EffectiveItem[] = bom.items.map((item) => {
     const key = bomItemKey(item);
     const patch = bomOverrides[key];
@@ -71,7 +66,7 @@ export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onCle
       onClearOverride(item.key);
       return;
     }
-    const s = ALL_SERVERS.find((sv) => sv.id === serverId);
+    const s = catalog?.servers.find((sv) => sv.id === serverId);
     if (!s) return;
     const qty = item.quantity;
     onSetOverride(item.key, {
@@ -88,7 +83,7 @@ export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onCle
       onClearOverride(item.key);
       return;
     }
-    const g = ALL_GPUS.find((gp) => gp.id === gpuId);
+    const g = catalog?.gpus.find((gp) => gp.id === gpuId);
     if (!g) return;
     const qty = item.quantity;
     onSetOverride(item.key, {
@@ -100,7 +95,7 @@ export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onCle
     });
   }
 
-  const compatibleServers = ALL_SERVERS.filter((s) => s.supported_gpu_ids.includes(currentGpuId));
+  const compatibleServers = catalog?.servers.filter((s) => s.supported_gpu_ids.includes(currentGpuId)) ?? [];
 
   return (
     <div className="overflow-auto">
@@ -143,7 +138,7 @@ export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onCle
               <td className="py-2 pr-3">
                 {item.category === "server" && (
                   <Select
-                    value={item.overridden ? (ALL_SERVERS.find((s) => s.model === item.name)?.id ?? "__current__") : "__current__"}
+                    value={item.overridden ? (catalog?.servers.find((s) => s.model === item.name)?.id ?? "__current__") : "__current__"}
                     onValueChange={(v) => v !== null && handleServerSwap(item, v)}
                   >
                     <SelectTrigger className="h-7 text-xs w-40">
@@ -163,7 +158,7 @@ export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onCle
                 )}
                 {item.category === "gpu" && (
                   <Select
-                    value={item.overridden ? (ALL_GPUS.find((g) => g.model === item.name)?.id ?? "__current__") : "__current__"}
+                    value={item.overridden ? (catalog?.gpus.find((g) => g.model === item.name)?.id ?? "__current__") : "__current__"}
                     onValueChange={(v) => v !== null && handleGpuSwap(item, v)}
                   >
                     <SelectTrigger className="h-7 text-xs w-40">
@@ -173,7 +168,7 @@ export function BomTable({ bom, bomOverrides, currentGpuId, onSetOverride, onCle
                       <SelectItem value="__current__">
                         {item.overridden ? "Reset to default" : "Keep current"}
                       </SelectItem>
-                      {ALL_GPUS.map((g) => (
+                      {(catalog?.gpus ?? []).map((g) => (
                         <SelectItem key={g.id} value={g.id}>
                           {g.vendor === "nvidia" ? "NVIDIA" : "AMD"} {g.model}
                         </SelectItem>

@@ -14,6 +14,7 @@ import { buildExportFilename } from "@/lib/export/filename";
 import { saveProjectAction } from "@/lib/actions/projects";
 import { toast } from "sonner";
 import type { BomItem } from "@/lib/store";
+import { useCatalog, getCatalogSnapshotSync } from "@/lib/catalogs/client";
 
 type Generating = "proposal-pdf" | "build-report-pdf" | "proposal-docx" | "build-report-md" | "bom-json" | null;
 
@@ -38,6 +39,7 @@ export default function ExportPage() {
   const project = useProjectStore((s) => s.activeProject);
   const setBomOverride = useProjectStore((s) => s.setBomOverride);
   const clearBomOverride = useProjectStore((s) => s.clearBomOverride);
+  const catalog = useCatalog();
 
   const [generating, setGenerating] = useState<Generating>(null);
   const [pricingDismissed, setPricingDismissed] = useState(() => {
@@ -51,9 +53,9 @@ export default function ExportPage() {
   }
 
   const bom = useMemo(() => {
-    if (!project) return null;
-    return buildBomExport(project);
-  }, [project]);
+    if (!project || !catalog) return null;
+    return buildBomExport(project, catalog);
+  }, [project, catalog]);
 
   const bomOverrides = useMemo<Record<string, Partial<BomItem>>>(() => {
     return (project?.build?.bomOverrides as Record<string, Partial<BomItem>>) ?? {};
@@ -67,21 +69,20 @@ export default function ExportPage() {
     return hw.preferredGpu ?? (hw.preferredVendor === "amd" ? "mi300x" : "h100-sxm");
   }, [project]);
 
-  if (!project || !bom) {
+  if (!project) {
     return <div className="p-8 text-[var(--text-secondary)]">No project loaded.</div>;
   }
 
-  const slug = project.name;
-
   // --- download helpers ---
-  // Use getState() to read the latest Zustand state at click time, bypassing
-  // the stale-closure problem (blur fires setBomOverride → React hasn't re-rendered
-  // yet when the user immediately clicks download).
+  // Use getState() + getCatalogSnapshotSync() to read the latest state at click time,
+  // bypassing the stale-closure problem (blur fires setBomOverride → React hasn't
+  // re-rendered yet when the user immediately clicks download).
 
   async function downloadProposalPdf() {
     const p = useProjectStore.getState().activeProject;
-    if (!p) return;
-    const freshBom = buildBomExport(p);
+    const cat = getCatalogSnapshotSync();
+    if (!p || !cat) return;
+    const freshBom = buildBomExport(p, cat);
     setGenerating("proposal-pdf");
     try {
       const { pdf } = await import("@react-pdf/renderer");
@@ -100,8 +101,9 @@ export default function ExportPage() {
 
   async function downloadBuildReportPdf() {
     const p = useProjectStore.getState().activeProject;
-    if (!p) return;
-    const report = extractBuildReport(p);
+    const cat = getCatalogSnapshotSync();
+    if (!p || !cat) return;
+    const report = extractBuildReport(p, cat);
     if (!report) {
       toast.error("Complete Discovery (model params + concurrent users) first.");
       return;
@@ -153,8 +155,9 @@ export default function ExportPage() {
 
   function downloadJsonBom() {
     const p = useProjectStore.getState().activeProject;
-    if (!p) return;
-    const freshBom = buildBomExport(p);
+    const cat = getCatalogSnapshotSync();
+    if (!p || !cat) return;
+    const freshBom = buildBomExport(p, cat);
     const json = JSON.stringify(freshBom, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     downloadBlob(blob, buildExportFilename(p.name, "bom", "json"));
@@ -311,7 +314,7 @@ export default function ExportPage() {
         <CardHeader>
           <CardTitle className="text-base">Bill of Materials</CardTitle>
           <CardDescription>
-            {bom.items.length} items — edit unit prices or swap items per row. All exports reflect your changes.
+            {(bom?.items.length ?? 0)} items — edit unit prices or swap items per row. All exports reflect your changes.
             {hasOverrides && (
               <span className="ml-2 text-[var(--accent-primary)] text-xs">(includes overrides)</span>
             )}
@@ -333,9 +336,9 @@ export default function ExportPage() {
               </button>
             </div>
           )}
-          {bom.items.length === 0 ? (
+          {!bom || bom.items.length === 0 ? (
             <p className="text-sm text-[var(--text-secondary)]">
-              Complete Discovery to generate the bill of materials.
+              {!catalog ? "Loading catalog…" : "Complete Discovery to generate the bill of materials."}
             </p>
           ) : (
             <BomTable

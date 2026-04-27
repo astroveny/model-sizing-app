@@ -1,7 +1,7 @@
 "use client";
 
 import type { BuildDerivedResult } from "@/lib/hooks/useBuildDerived";
-import { getBestServer } from "@/lib/sizing/catalog";
+import { useCatalog } from "@/lib/catalogs/client";
 import { ExplainSizingButton } from "./ExplainSizingButton";
 import { useProjectStore } from "@/lib/store";
 
@@ -21,7 +21,8 @@ function Row({ label, value, sub }: { label: string; value: string; sub?: string
 
 export function HardwarePanel({ result }: Props) {
   const { input, sharding, capacity, memory } = result;
-  const server = getBestServer(input.gpu.id);
+  const catalog = useCatalog();
+  const server = catalog?.getBestServer(input.gpu.id);
   const project = useProjectStore((s) => s.activeProject);
   const endToEndMs = result.optimizations.adjustedTtftMs + result.optimizations.adjustedItlMs * input.avgOutputTokens;
 

@@ -1,7 +1,7 @@
 "use client";
 
 import type { BuildDerivedResult } from "@/lib/hooks/useBuildDerived";
-import { getBestServer } from "@/lib/sizing/catalog";
+import { useCatalog } from "@/lib/catalogs/client";
 
 type Props = { result: BuildDerivedResult };
 
@@ -12,7 +12,8 @@ const LABEL_W = 28; // unit number column width
 
 export function RackLayout({ result }: Props) {
   const { capacity, input } = result;
-  const server = getBestServer(input.gpu.id);
+  const catalog = useCatalog();
+  const server = catalog?.getBestServer(input.gpu.id);
   const serverU = server?.rack_units ?? 4;
   const count = capacity.serverCount;
   const powerPerServer = server ? (server.tdp_watts / 1000).toFixed(1) : "?";

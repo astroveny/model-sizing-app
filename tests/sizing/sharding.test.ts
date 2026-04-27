@@ -9,14 +9,30 @@
 import { describe, it, expect } from "vitest";
 import { computeSharding } from "@/lib/sizing/sharding";
 import { computeMemory } from "@/lib/sizing/memory";
-import { getGpuById } from "@/lib/sizing/catalog";
 import type { SizingInput, Gpu } from "@/lib/sizing/types";
 
-function gpu(id: string): Gpu {
-  const g = getGpuById(id);
-  if (!g) throw new Error(`GPU not found: ${id}`);
-  return g;
-}
+const H100_SXM: Gpu = {
+  id: "h100-sxm",
+  vendor: "nvidia",
+  family: "hopper",
+  model: "H100 SXM5",
+  vram_gb: 80,
+  memory_bandwidth_gbps: 3350,
+  fp16_tflops: 989,
+  bf16_tflops: 989,
+  fp8_tflops: 1979,
+  int8_tops: 1979,
+  int4_tops: 3958,
+  tdp_watts: 700,
+  interconnect: {
+    intra_node: "nvlink-4",
+    intra_node_bandwidth_gbps: 900,
+    form_factor: "sxm5",
+  },
+  supported_features: ["flash-attention-3", "transformer-engine", "fp8-native", "mig"],
+  list_price_usd: 30000,
+  availability: "available",
+};
 
 // Llama 405B on H100-SXM — requires PP > 1, so inter-node fabric kicks in
 const INPUT_405B_ROCE: SizingInput = {
@@ -33,7 +49,7 @@ const INPUT_405B_ROCE: SizingInput = {
   concurrentUsers: 10,
   targetEndToEndMs: 30000,
   peakBurstMultiplier: 1.5,
-  gpu: gpu("h100-sxm"),
+  gpu: H100_SXM,
   fp8KvCache: false,
   speculativeDecoding: false,
   prefixCaching: false,

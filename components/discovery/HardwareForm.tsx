@@ -14,9 +14,7 @@ import {
 import { ExplainBox } from "@/components/ExplainBox";
 import { SkippableField } from "@/components/discovery/SkippableField";
 import { useProjectStore } from "@/lib/store";
-import serversData from "@/data/servers.json";
-
-type ServerEntry = { id: string; vendor: string; model: string; supported_gpu_ids: string[] };
+import { useCatalog } from "@/lib/catalogs/client";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -80,14 +78,14 @@ export function HardwareForm() {
   const hardware = useProjectStore((s) => s.activeProject?.discovery.hardware);
   const constraints = useProjectStore((s) => s.activeProject?.discovery.constraints);
   const updateField = useProjectStore((s) => s.updateField);
+  const catalog = useCatalog();
 
   const filteredServers = useMemo(() => {
-    if (!hardware) return [];
-    const allServers = (serversData.servers as ServerEntry[]);
+    if (!hardware || !catalog) return [];
     const vendor = hardware.preferredVendor;
     const gpuId = hardware.preferredGpu?.toLowerCase();
 
-    return allServers.filter((s) => {
+    return catalog.servers.filter((s) => {
       const lv = s.vendor.toLowerCase();
       const vendorMatch =
         vendor === "either" ||
@@ -96,7 +94,7 @@ export function HardwareForm() {
       const gpuMatch = !gpuId || s.supported_gpu_ids.some((g) => g.includes(gpuId) || gpuId.includes(g));
       return vendorMatch && gpuMatch;
     });
-  }, [hardware]);
+  }, [hardware, catalog]);
 
   if (!hardware || !constraints) {
     return <p className="text-sm text-[var(--text-secondary)] p-6">Loading…</p>;

@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { getProject } from "@/lib/db/projects";
 import { buildBomExport } from "@/lib/export/build-bom-export";
+import { buildServerCatalogSnapshot } from "@/lib/sizing/catalog";
 import { buildDocx } from "@/lib/export/docx";
 import { writeAudit } from "@/lib/db/audit";
 import { buildExportFilename } from "@/lib/export/filename";
@@ -14,7 +15,8 @@ export async function GET(req: NextRequest) {
   const project = getProject(id);
   if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
 
-  const bom = buildBomExport(project);
+  const catalog = buildServerCatalogSnapshot();
+  const bom = buildBomExport(project, catalog);
 
   try {
     const docxBuffer = await buildDocx(project, bom);

@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { getProject } from "@/lib/db/projects";
 import { extractBuildReport } from "@/lib/export/build-report-extract";
+import { buildServerCatalogSnapshot } from "@/lib/sizing/catalog";
 import { BuildReportPdfDocument } from "@/lib/export/build-report-pdf";
 import { writeAudit } from "@/lib/db/audit";
 import { buildExportFilename } from "@/lib/export/filename";
@@ -17,7 +18,8 @@ export async function GET(req: NextRequest) {
   const project = getProject(id);
   if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
 
-  const report = extractBuildReport(project);
+  const catalog = buildServerCatalogSnapshot();
+  const report = extractBuildReport(project, catalog);
   if (!report) {
     return NextResponse.json(
       { error: "Discovery incomplete — fill in model parameters and concurrent users first." },

@@ -13,8 +13,8 @@ import { defaultProject } from "@/lib/store";
 import { DISCOVERY_DEFAULTS } from "@/lib/discovery/defaults";
 import { SKIPPABLE_FIELDS } from "@/lib/discovery/field-meta";
 import { recommend, recommendWithLlm } from "@/lib/quick-sizing/recommender";
-import type { QuickSizingInput, ModelCandidate } from "@/lib/quick-sizing/recommender";
-import modelsData from "@/data/models.json";
+import type { QuickSizingInput, ModelCandidate, ModelEntry } from "@/lib/quick-sizing/recommender";
+import { useCatalog } from "@/lib/catalogs/client";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -65,17 +65,14 @@ const TARGET_OPTIONS: { value: DeploymentTarget; label: string }[] = [
 // Model search
 // ---------------------------------------------------------------------------
 
-interface ModelEntry { id: string; name: string; params_b: number; family: string }
-const ALL_MODELS = modelsData.models as ModelEntry[];
-
-function searchModels(query: string): ModelEntry[] {
+function searchModels(query: string, models: ModelEntry[]): ModelEntry[] {
   if (!query.trim()) return [];
   const q = query.toLowerCase();
-  return ALL_MODELS.filter(
+  return models.filter(
     (m) =>
       m.name.toLowerCase().includes(q) ||
       m.id.toLowerCase().includes(q) ||
-      m.family.toLowerCase().includes(q)
+      (m.family ?? "").toLowerCase().includes(q)
   ).slice(0, 5);
 }
 
@@ -85,6 +82,14 @@ function searchModels(query: string): ModelEntry[] {
 
 export default function QuickSizingPage() {
   const router = useRouter();
+  const catalog = useCatalog();
+  const allModels: ModelEntry[] = catalog?.llmModels.map((m) => ({
+    id: m.id,
+    name: m.name ?? m.id,
+    params_b: m.paramsB ?? 0,
+    architecture: (m.architecture ?? "dense") as "dense" | "moe",
+    family: m.family ?? undefined,
+  })) ?? [];
   const [step, setStep] = useState(1);
   const [busy, setBusy] = useState(false);
   const [candidates, setCandidates] = useState<ModelCandidate[]>([]);
@@ -108,7 +113,7 @@ export default function QuickSizingPage() {
 
   function handleModelSearch(q: string) {
     setModelSearchQuery(q);
-    setModelSearchResults(searchModels(q));
+    setModelSearchResults(searchModels(q, allModels));
   }
 
   function pickKnownModel(m: ModelEntry) {
@@ -131,8 +136,8 @@ export default function QuickSizingPage() {
       knownModelId: form.modelChoice === "known" ? form.knownModelId : undefined,
     };
     const recs = form.modelChoice === "recommend"
-      ? await recommendWithLlm(input)
-      : recommend(input);
+      ? await recommendWithLlm(input, allModels)
+      : recommend(input, allModels);
     setCandidates(recs);
     if (recs.length === 1) {
       setSelectedCandidate(recs[0]);
@@ -150,7 +155,7 @@ export default function QuickSizingPage() {
     project.deploymentTarget = form.deploymentTarget;
 
     // Apply model
-    const modelEntry = ALL_MODELS.find((m) => m.id === candidate.modelId);
+    const modelEntry = allModels.find((m) => m.id === candidate.modelId);
     if (modelEntry) {
       project.discovery.model.name = modelEntry.name;
       project.discovery.model.family = modelEntry.family;

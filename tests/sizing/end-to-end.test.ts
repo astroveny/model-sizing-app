@@ -6,12 +6,46 @@
 
 import { describe, it, expect } from "vitest";
 import { computeSizing } from "@/lib/sizing/index";
-import { getGpuById } from "@/lib/sizing/catalog";
 import type { SizingInput, Gpu } from "@/lib/sizing/types";
 
+const GPUS: Record<string, Gpu> = {
+  "h100-sxm": {
+    id: "h100-sxm", vendor: "nvidia", family: "hopper", model: "H100 SXM5",
+    vram_gb: 80, memory_bandwidth_gbps: 3350, fp16_tflops: 989, bf16_tflops: 989,
+    fp8_tflops: 1979, int8_tops: 1979, int4_tops: 3958, tdp_watts: 700,
+    interconnect: { intra_node: "nvlink-4", intra_node_bandwidth_gbps: 900, form_factor: "sxm5" },
+    supported_features: ["flash-attention-3", "transformer-engine", "fp8-native", "mig"],
+    list_price_usd: 30000, availability: "available",
+  },
+  "h200-sxm": {
+    id: "h200-sxm", vendor: "nvidia", family: "hopper", model: "H200 SXM5",
+    vram_gb: 141, memory_bandwidth_gbps: 4800, fp16_tflops: 989, bf16_tflops: 989,
+    fp8_tflops: 1979, int8_tops: 1979, int4_tops: 3958, tdp_watts: 700,
+    interconnect: { intra_node: "nvlink-4", intra_node_bandwidth_gbps: 900, form_factor: "sxm5" },
+    supported_features: ["flash-attention-3", "transformer-engine", "fp8-native", "mig"],
+    list_price_usd: 32000, availability: "available",
+  },
+  "l40s": {
+    id: "l40s", vendor: "nvidia", family: "ada", model: "L40S",
+    vram_gb: 48, memory_bandwidth_gbps: 864, fp16_tflops: 362, bf16_tflops: 362,
+    fp8_tflops: 733, int8_tops: 733, int4_tops: 1466, tdp_watts: 350,
+    interconnect: { intra_node: "pcie-4", intra_node_bandwidth_gbps: 64, form_factor: "pcie" },
+    supported_features: ["fp8-native"],
+    list_price_usd: 8000, availability: "available",
+  },
+  "mi300x": {
+    id: "mi300x", vendor: "amd", family: "mi300", model: "Instinct MI300X",
+    vram_gb: 192, memory_bandwidth_gbps: 5300, fp16_tflops: 1307, bf16_tflops: 1307,
+    fp8_tflops: 2614, int8_tops: 2614, int4_tops: 5227, tdp_watts: 750,
+    interconnect: { intra_node: "infinity-fabric", intra_node_bandwidth_gbps: 896, form_factor: "oam" },
+    supported_features: ["flash-attention-3", "fp8-native", "sr-iov"],
+    list_price_usd: 15000, availability: "available",
+  },
+};
+
 function gpu(id: string): Gpu {
-  const g = getGpuById(id);
-  if (!g) throw new Error(`GPU not found: ${id}`);
+  const g = GPUS[id];
+  if (!g) throw new Error(`GPU fixture not found: ${id}`);
   return g;
 }
 

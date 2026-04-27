@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { computeSizing } from "@/lib/sizing/index";
-import { getGpuById } from "@/lib/sizing/catalog";
+import { useCatalog } from "@/lib/catalogs/client";
 import type { SizingInput } from "@/lib/sizing/types";
 import type { BuildDerivedResult } from "@/lib/hooks/useBuildDerived";
 
@@ -28,8 +28,9 @@ function CompareCol({ label, nvidia, amd, unit = "", lowerIsBetter = true }:
 }
 
 export function VendorComparison({ baseInput }: Props) {
-  const nvidiaGpu = getGpuById(NVIDIA_BEST);
-  const amdGpu    = getGpuById(AMD_BEST);
+  const catalog = useCatalog();
+  const nvidiaGpu = catalog?.getGpuById(NVIDIA_BEST);
+  const amdGpu    = catalog?.getGpuById(AMD_BEST);
 
   const { nvidia, amd } = useMemo(() => {
     if (!nvidiaGpu || !amdGpu) return { nvidia: null, amd: null };

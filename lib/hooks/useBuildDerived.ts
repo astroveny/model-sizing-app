@@ -1,18 +1,11 @@
 import { useMemo } from "react";
 import { useProjectStore } from "@/lib/store";
 import { computeSizing } from "@/lib/sizing/index";
-import { getGpuById, modelCatalog } from "@/lib/sizing/catalog";
+import { useCatalog } from "@/lib/catalogs/client";
 import type { SizingInput, SizingEngineResult } from "@/lib/sizing/types";
 import type { DiscoveryState, DeploymentPattern } from "@/lib/store";
+import type { ClientCatalogSnapshot } from "@/lib/catalogs/client";
 
-// Default GPU when user has not selected one
-const DEFAULT_GPU_ID = "h100-sxm";
-const DEFAULT_GPU_AMD = "mi300x";
-
-/**
- * Model architecture defaults by parameter bucket.
- * Used when the exact model is not in catalog.
- */
 function inferArchParams(paramsB: number): { numLayers: number; numKvHeads: number; headDim: number } {
   if (paramsB <= 9)   return { numLayers: 32, numKvHeads: 8, headDim: 128 };
   if (paramsB <= 16)  return { numLayers: 40, numKvHeads: 8, headDim: 128 };
@@ -22,16 +15,14 @@ function inferArchParams(paramsB: number): { numLayers: number; numKvHeads: numb
   return { numLayers: 126, numKvHeads: 8, headDim: 128 };
 }
 
-/** Find best catalog match by params_b proximity */
-function lookupModelParams(paramsB: number, architecture: "dense" | "moe") {
-  const candidates = modelCatalog.filter((m) => m.architecture === architecture);
+function lookupModelParams(paramsB: number, architecture: "dense" | "moe", catalog: ClientCatalogSnapshot) {
+  const candidates = catalog.modelCatalog.filter((m) => m.architecture === architecture);
   if (candidates.length === 0) return null;
   return candidates.reduce((best, m) =>
     Math.abs(m.params_b - paramsB) < Math.abs(best.params_b - paramsB) ? m : best
   );
 }
 
-/** Map store deployment pattern IDs to sizing engine pattern IDs */
 function mapPattern(pattern: DeploymentPattern): string {
   const map: Record<DeploymentPattern, string> = {
     "internal-inference": "internal-tool",
@@ -44,23 +35,21 @@ function mapPattern(pattern: DeploymentPattern): string {
 
 function toSizingInput(
   discovery: DiscoveryState,
-  deploymentPattern: DeploymentPattern
+  deploymentPattern: DeploymentPattern,
+  catalog: ClientCatalogSnapshot
 ): SizingInput | null {
   const { model, load, hardware, modelPlatform } = discovery;
 
-  // Guard: must have params and concurrentUsers
   if (!model.params || !load.concurrentUsers) return null;
 
-  // GPU selection
   let gpuId = hardware.preferredGpu ?? "";
   if (!gpuId) {
-    gpuId = hardware.preferredVendor === "amd" ? DEFAULT_GPU_AMD : DEFAULT_GPU_ID;
+    gpuId = hardware.preferredVendor === "amd" ? "mi300x" : "h100-sxm";
   }
-  const gpu = getGpuById(gpuId) ?? getGpuById(DEFAULT_GPU_ID);
+  const gpu = catalog.getGpuById(gpuId) ?? catalog.getGpuById("h100-sxm");
   if (!gpu) return null;
 
-  // Model architecture params
-  const catalogMatch = lookupModelParams(model.params, model.architecture);
+  const catalogMatch = lookupModelParams(model.params, model.architecture, catalog);
   const arch = catalogMatch ?? inferArchParams(model.params);
 
   const paramsB = model.params;
@@ -100,12 +89,13 @@ export type BuildDerivedResult = SizingEngineResult & { input: SizingInput };
 export function useBuildDerived(): BuildDerivedResult | null {
   const discovery = useProjectStore((s) => s.activeProject?.discovery);
   const deploymentPattern = useProjectStore((s) => s.activeProject?.deploymentPattern);
+  const catalog = useCatalog();
 
   return useMemo(() => {
-    if (!discovery || !deploymentPattern) return null;
-    const input = toSizingInput(discovery, deploymentPattern);
+    if (!discovery || !deploymentPattern || !catalog) return null;
+    const input = toSizingInput(discovery, deploymentPattern, catalog);
     if (!input) return null;
     const result = computeSizing(input);
     return { ...result, input };
-  }, [discovery, deploymentPattern]);
+  }, [discovery, deploymentPattern, catalog]);
 }

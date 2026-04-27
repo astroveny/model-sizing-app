@@ -3,19 +3,19 @@ import type { BomExport } from "./bom-schema";
 import { BOM_SCHEMA_VERSION } from "./bom-schema";
 import { buildBom } from "@/lib/sizing/bom";
 import { computeSizing } from "@/lib/sizing/index";
-import { getGpuById, modelCatalog } from "@/lib/sizing/catalog";
+import type { CatalogSnapshot } from "@/lib/sizing/catalog";
 import type { SizingInput } from "@/lib/sizing/types";
 
-function toSizingInput(project: Project): SizingInput | null {
+function toSizingInput(project: Project, catalog: CatalogSnapshot): SizingInput | null {
   const { discovery } = project;
   const { model, load, hardware, modelPlatform } = discovery;
   if (!model.params || !load.concurrentUsers) return null;
 
   let gpuId = hardware.preferredGpu ?? (hardware.preferredVendor === "amd" ? "mi300x" : "h100-sxm");
-  const gpu = getGpuById(gpuId) ?? getGpuById("h100-sxm");
+  const gpu = catalog.getGpuById(gpuId) ?? catalog.getGpuById("h100-sxm");
   if (!gpu) return null;
 
-  const catalogMatch = modelCatalog.reduce<typeof modelCatalog[0] | null>((best, m) =>
+  const catalogMatch = catalog.modelCatalog.reduce<typeof catalog.modelCatalog[0] | null>((best, m) =>
     !best || Math.abs(m.params_b - model.params) < Math.abs(best.params_b - model.params) ? m : best, null);
 
   const numLayers  = catalogMatch?.layers       ?? 80;
@@ -48,7 +48,6 @@ function toSizingInput(project: Project): SizingInput | null {
   };
 }
 
-/** Applies bomOverrides to a flat BoM array. Key = "<category>:<name>". */
 function applyBomOverrides(
   items: BomExport["items"],
   overrides: Record<string, Partial<{ name: string; vendor?: string; unitPriceUsd?: number; totalPriceUsd?: number; notes?: string }>>
@@ -66,14 +65,14 @@ function applyBomOverrides(
   });
 }
 
-export function buildBomExport(project: Project): BomExport {
-  const input = toSizingInput(project);
+export function buildBomExport(project: Project, catalog: CatalogSnapshot): BomExport {
+  const input = toSizingInput(project, catalog);
   let items: BomExport["items"] = [];
   let sizing: BomExport["sizing"] | undefined;
 
   if (input) {
     const result = computeSizing(input);
-    const bomItems = buildBom(input, result.capacity);
+    const bomItems = buildBom(input, result.capacity, catalog);
     const rawItems = bomItems.map((item) => ({
       category: item.category,
       name: item.name,

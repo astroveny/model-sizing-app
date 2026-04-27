@@ -1,4 +1,3 @@
-import modelsData from "@/data/models.json";
 import {
   QUICK_SIZING_SYSTEM,
   buildQuickSizingPrompt,
@@ -25,16 +24,15 @@ export interface ModelCandidate {
   rationale: string;
 }
 
-interface ModelEntry {
+export interface ModelEntry {
   id: string;
   name: string;
   params_b: number;
   architecture: "dense" | "moe";
+  family?: string;
 }
 
-const ALL_MODELS = (modelsData.models as ModelEntry[]);
-
-function ruleBased(input: QuickSizingInput): ModelCandidate[] {
+function ruleBased(input: QuickSizingInput, models: ModelEntry[]): ModelCandidate[] {
   const { concurrentUsers, latency } = input;
 
   let maxParams = Infinity;
@@ -66,7 +64,7 @@ function ruleBased(input: QuickSizingInput): ModelCandidate[] {
     rationale = "Batch workload — model size not latency-constrained; larger models acceptable.";
   }
 
-  return ALL_MODELS
+  return models
     .filter((m) => m.params_b <= maxParams)
     .sort((a, b) => b.params_b - a.params_b)
     .slice(0, 3)
@@ -80,9 +78,9 @@ function ruleBased(input: QuickSizingInput): ModelCandidate[] {
 }
 
 /** Synchronous rule-based recommendation — always available. */
-export function recommend(input: QuickSizingInput): ModelCandidate[] {
+export function recommend(input: QuickSizingInput, models: ModelEntry[]): ModelCandidate[] {
   if (input.knownModelId) {
-    const m = ALL_MODELS.find((m) => m.id === input.knownModelId);
+    const m = models.find((m) => m.id === input.knownModelId);
     if (m) {
       return [{
         modelId: m.id,
@@ -93,18 +91,17 @@ export function recommend(input: QuickSizingInput): ModelCandidate[] {
       }];
     }
   }
-  return ruleBased(input);
+  return ruleBased(input, models);
 }
 
 /** LLM-assisted recommendation — calls /api/llm server-side. Falls back to rule-based on any failure. */
-export async function recommendWithLlm(input: QuickSizingInput): Promise<ModelCandidate[]> {
-  if (input.knownModelId) return recommend(input);
+export async function recommendWithLlm(input: QuickSizingInput, models: ModelEntry[]): Promise<ModelCandidate[]> {
+  if (input.knownModelId) return recommend(input, models);
 
   try {
-    // Dynamic import avoids circular dep at module load time
     const { llmComplete, LlmFeatureUnassignedError } = await import("@/lib/llm/client");
 
-    const catalog = ALL_MODELS.map(({ id, name, params_b, architecture }) => ({
+    const catalog = models.map(({ id, name, params_b, architecture }) => ({
       id, name, params_b, architecture,
     }));
 
@@ -129,16 +126,15 @@ export async function recommendWithLlm(input: QuickSizingInput): Promise<ModelCa
       candidates?: Array<{ modelId: string; rationale: string }>;
     };
 
-    if (!parsed.candidates?.length) return ruleBased(input);
+    if (!parsed.candidates?.length) return ruleBased(input, models);
 
     const out: ModelCandidate[] = [];
     for (const c of parsed.candidates) {
-      const m = ALL_MODELS.find((m) => m.id === c.modelId);
+      const m = models.find((m) => m.id === c.modelId);
       if (m) out.push({ modelId: m.id, name: m.name, paramsB: m.params_b, architecture: m.architecture, rationale: c.rationale });
     }
-    return out.length ? out : ruleBased(input);
+    return out.length ? out : ruleBased(input, models);
   } catch {
-    // LlmFeatureUnassignedError or any other failure → graceful fallback
-    return ruleBased(input);
+    return ruleBased(input, models);
   }
 }

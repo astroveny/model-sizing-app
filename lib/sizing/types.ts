@@ -64,7 +64,6 @@ export type ModelCatalogEntry = {
   active_params_b?: number;
   layers: number;
   hidden_size: number;
-  num_heads: number;
   num_kv_heads: number;
   head_dim: number;
   architecture: "dense" | "moe";

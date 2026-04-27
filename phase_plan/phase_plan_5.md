@@ -104,7 +104,7 @@
 - **Deliverable:** read module + unit tests
 - **Refs:** PRD §8.6.7
 
-### ☐ P13.4 — Migrate read sites
+### ☑ P13.4 — Migrate read sites
 - **Action:** Replace every call that reads from the old static JSON files. Audit:
   ```bash
   grep -rn "data/gpus\.json\|data/servers\.json\|data/models\.json" --include="*.ts" --include="*.tsx" .

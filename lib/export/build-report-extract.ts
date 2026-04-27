@@ -4,7 +4,7 @@ import type { Project } from "@/lib/store";
 import type { SizingInput } from "@/lib/sizing/types";
 import { computeSizing } from "@/lib/sizing/index";
 import { buildBom } from "@/lib/sizing/bom";
-import { getGpuById, resolveServer, modelCatalog } from "@/lib/sizing/catalog";
+import type { CatalogSnapshot } from "@/lib/sizing/catalog";
 import {
   BUILD_REPORT_VERSION,
   type BuildReport,
@@ -12,19 +12,18 @@ import {
   type BuildReportBomRow,
 } from "./build-report-spec";
 
-// Legacy key prefix kept for reading old data; new overrides use build.bomOverrides
 const BOM_PRICE_PREFIX = "bom:price:";
 
-function toSizingInput(project: Project): SizingInput | null {
+function toSizingInput(project: Project, catalog: CatalogSnapshot): SizingInput | null {
   const { discovery } = project;
   const { model, load, hardware, modelPlatform } = discovery;
   if (!model.params || !load.concurrentUsers) return null;
 
   const gpuId = hardware.preferredGpu ?? (hardware.preferredVendor === "amd" ? "mi300x" : "h100-sxm");
-  const gpu = getGpuById(gpuId) ?? getGpuById("h100-sxm");
+  const gpu = catalog.getGpuById(gpuId) ?? catalog.getGpuById("h100-sxm");
   if (!gpu) return null;
 
-  const catalogMatch = modelCatalog.reduce<typeof modelCatalog[0] | null>(
+  const catalogMatch = catalog.modelCatalog.reduce<typeof catalog.modelCatalog[0] | null>(
     (best, m) =>
       !best || Math.abs(m.params_b - model.params) < Math.abs(best.params_b - model.params) ? m : best,
     null
@@ -82,25 +81,16 @@ function buildAssumptions(input: SizingInput, project: Project): BuildReportAssu
   ];
 }
 
-/**
- * Pure function: extracts a complete BuildReport from a Project.
- * Returns null when Discovery is incomplete (no model params / no concurrent users).
- * All panel data is derived fresh from computeSizing() + discovery state —
- * build.final is NOT used as it is never populated by the UI.
- */
-export function extractBuildReport(project: Project): BuildReport | null {
-  const input = toSizingInput(project);
+export function extractBuildReport(project: Project, catalog: CatalogSnapshot): BuildReport | null {
+  const input = toSizingInput(project, catalog);
   if (!input) return null;
 
   const sizing = computeSizing(input);
-  const bomItems = buildBom(input, sizing.capacity);
+  const bomItems = buildBom(input, sizing.capacity, catalog);
 
-  // Read per-item overrides from build.bomOverrides (new model, P12.4)
-  // Fall back to legacy build.overrides["bom:price:*"] for older projects
   type BomPatch = { name?: string; vendor?: string; unitPriceUsd?: number; totalPriceUsd?: number; notes?: string };
   const bomOverrides = (project.build.bomOverrides ?? {}) as Record<string, BomPatch>;
 
-  // Also pick up legacy price overrides for backward compat
   const legacyPrices: Record<string, number> = {};
   for (const [k, v] of Object.entries(project.build.overrides as Record<string, unknown>)) {
     if (k.startsWith(BOM_PRICE_PREFIX) && typeof v === "number") {
@@ -133,8 +123,7 @@ export function extractBuildReport(project: Project): BuildReport | null {
   const { discovery } = project;
   const { infra, modelPlatform: mp, application: app } = discovery;
 
-  // Hardware: derived from sizing engine + GPU/server catalog
-  const { server } = resolveServer(input.gpu.id, input.preferredServerId);
+  const { server } = catalog.resolveServer(input.gpu.id, input.preferredServerId);
   const gpusPerServer = server?.max_gpus ?? sizing.sharding.gpusPerReplica;
   const endToEndMs = sizing.optimizations.adjustedTtftMs + sizing.optimizations.adjustedItlMs * input.avgOutputTokens;
 
@@ -174,7 +163,6 @@ export function extractBuildReport(project: Project): BuildReport | null {
 
     infra: {
       orchestrator: infra.orchestrator,
-      // TODO: restore when node pool rendering is fixed
       loadBalancer: infra.orchestrator === "kubernetes" ? "K8s Service + Ingress" : "Native LB",
       airGapped:    infra.airGapped,
       gitops:       infra.gitops && infra.gitops !== "none" ? infra.gitops : "Not configured",
@@ -208,8 +196,6 @@ export function extractBuildReport(project: Project): BuildReport | null {
 
     bom,
 
-    // Use fresh sizing notes; project.build.notes is populated only by the UI
-    // and is not persisted server-side — always prefer the computed result.
     engineNotes: sizing.notes,
 
     hasOverrides,

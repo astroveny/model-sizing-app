@@ -2,16 +2,16 @@
 
 import type { BomItem } from "@/lib/store";
 import type { SizingInput, CapacityResult } from "./types";
-import { resolveServer } from "./catalog";
+import type { CatalogSnapshot } from "./catalog";
 
 /**
  * Transform sizing results into a flat Bill of Materials.
  * Pricing comes from catalog list_price_usd; zero when unknown.
  */
-export function buildBom(input: SizingInput, capacity: CapacityResult): BomItem[] {
+export function buildBom(input: SizingInput, capacity: CapacityResult, catalog: CatalogSnapshot): BomItem[] {
   const items: BomItem[] = [];
 
-  const { server } = resolveServer(input.gpu.id, input.preferredServerId);
+  const { server } = catalog.resolveServer(input.gpu.id, input.preferredServerId);
 
   // GPUs
   items.push({
