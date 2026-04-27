@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { getProject } from "@/lib/db/projects";
 import { buildBomExport } from "@/lib/export/build-bom-export";
-import { buildServerCatalogSnapshot } from "@/lib/sizing/catalog";
+import { buildServerCatalogSnapshot } from "@/lib/sizing/server-catalog";
 import { buildDocx } from "@/lib/export/docx";
 import { writeAudit } from "@/lib/db/audit";
 import { buildExportFilename } from "@/lib/export/filename";

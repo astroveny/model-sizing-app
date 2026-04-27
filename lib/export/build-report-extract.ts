@@ -85,7 +85,7 @@ export function extractBuildReport(project: Project, catalog: CatalogSnapshot): 
   const input = toSizingInput(project, catalog);
   if (!input) return null;
 
-  const sizing = computeSizing(input);
+  const sizing = computeSizing(input, catalog);
   const bomItems = buildBom(input, sizing.capacity, catalog);
 
   type BomPatch = { name?: string; vendor?: string; unitPriceUsd?: number; totalPriceUsd?: number; notes?: string };

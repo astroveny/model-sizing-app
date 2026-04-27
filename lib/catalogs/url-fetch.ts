@@ -15,10 +15,34 @@ export class UrlFetchError extends Error {
   }
 }
 
+function stripHtml(html: string): string {
+  return html
+    // Remove script/style blocks entirely
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
+    // Block-level elements → newline for readability
+    .replace(/<\/?(div|p|br|li|h[1-6]|tr|td|th|section|article|header|footer|nav|main|table)[^>]*>/gi, "\n")
+    // Remove all remaining tags
+    .replace(/<[^>]+>/g, " ")
+    // Decode common entities
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, n: string) => String.fromCharCode(parseInt(n, 10)))
+    // Collapse whitespace
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 /**
  * Server-side fetch of a spec-sheet URL.
  * Enforces timeout, size cap, and user-agent.
- * Returns the truncated text body.
+ * Returns cleaned (HTML-stripped) text body.
  */
 export async function fetchSpecPage(rawUrl: string): Promise<FetchedPage> {
   let url: URL;
@@ -63,14 +87,20 @@ export async function fetchSpecPage(rawUrl: string): Promise<FetchedPage> {
       chunks.push(value);
     }
 
-    const bytes = new Uint8Array(total > MAX_BODY_BYTES ? MAX_BODY_BYTES : total);
+    const byteCount = Math.min(total, MAX_BODY_BYTES);
+    const bytes = new Uint8Array(byteCount);
     let offset = 0;
     for (const chunk of chunks) {
-      bytes.set(chunk, offset);
-      offset += chunk.byteLength;
+      const copyLen = Math.min(chunk.byteLength, byteCount - offset);
+      bytes.set(chunk.subarray(0, copyLen), offset);
+      offset += copyLen;
+      if (offset >= byteCount) break;
     }
 
-    const text = new TextDecoder().decode(bytes);
+    const raw = new TextDecoder().decode(bytes);
+    const isHtml = contentType.includes("html") || raw.trimStart().startsWith("<");
+    const text = isHtml ? stripHtml(raw) : raw;
+
     return { url: url.toString(), contentType, text };
   } catch (err) {
     if (err instanceof UrlFetchError) throw err;

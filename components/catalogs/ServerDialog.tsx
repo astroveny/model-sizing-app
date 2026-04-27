@@ -233,7 +233,7 @@ export function ServerDialog({ open, server, gpus, catalogExtractAssigned, onClo
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{server ? "Edit Server" : "Add Server"}</DialogTitle>
         </DialogHeader>

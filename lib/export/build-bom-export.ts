@@ -71,7 +71,7 @@ export function buildBomExport(project: Project, catalog: CatalogSnapshot): BomE
   let sizing: BomExport["sizing"] | undefined;
 
   if (input) {
-    const result = computeSizing(input);
+    const result = computeSizing(input, catalog);
     const bomItems = buildBom(input, result.capacity, catalog);
     const rawItems = bomItems.map((item) => ({
       category: item.category,

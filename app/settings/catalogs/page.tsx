@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Cpu, Server, BookOpen, BarChart2 } from "lucide-react";
+import { ChevronRight, ChevronLeft, Cpu, Server, BookOpen, BarChart2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { listGpus, listServers, listLlmModels, listWorkloadReferences } from "@/lib/catalogs/index";
 
@@ -53,6 +53,9 @@ export default function CatalogsIndexPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
+      <Link href="/settings" className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+        <ChevronLeft className="h-4 w-4" /> Settings
+      </Link>
       <div>
         <h2 className="text-2xl font-semibold">Catalogs</h2>
         <p className="text-[var(--text-secondary)] mt-1 text-sm">

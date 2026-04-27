@@ -95,7 +95,7 @@ export function useBuildDerived(): BuildDerivedResult | null {
     if (!discovery || !deploymentPattern || !catalog) return null;
     const input = toSizingInput(discovery, deploymentPattern, catalog);
     if (!input) return null;
-    const result = computeSizing(input);
+    const result = computeSizing(input, catalog);
     return { ...result, input };
   }, [discovery, deploymentPattern, catalog]);
 }

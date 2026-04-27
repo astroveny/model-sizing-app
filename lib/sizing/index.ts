@@ -2,6 +2,7 @@
 // Ref: docs/sizing-math.md §1 (pipeline order)
 
 import type { SizingInput, SizingEngineResult } from "./types";
+import type { CatalogSnapshot } from "./catalog";
 import { computeMemory } from "./memory";
 import { computeSharding } from "./sharding";
 import { computePrefill } from "./prefill";
@@ -10,7 +11,6 @@ import { applyOptimizations } from "./optimizations";
 import { applyDeploymentPattern } from "./patterns";
 import { computeCapacity } from "./capacity";
 import { generateNotes } from "./notes";
-import { resolveServer } from "./catalog";
 
 /**
  * Full sizing pipeline: memory → sharding → prefill → decode →
@@ -19,17 +19,19 @@ import { resolveServer } from "./catalog";
  * All functions are pure; no I/O, no randomness.
  * Ref: PRD §7.1
  */
-export function computeSizing(input: SizingInput): SizingEngineResult {
+export function computeSizing(input: SizingInput, catalog?: CatalogSnapshot): SizingEngineResult {
   const memory = computeMemory(input);
   const sharding = computeSharding(input, memory);
   const prefill = computePrefill(input, sharding);
   const decode = computeDecode(input, sharding);
   const optimizations = applyOptimizations(input, memory, prefill, decode);
   const pattern = applyDeploymentPattern(input);
-  const capacity = computeCapacity(input, sharding, optimizations, pattern);
+  const capacity = computeCapacity(input, sharding, optimizations, pattern, catalog);
 
-  const engineNotes = generateNotes(input, memory, sharding, prefill, decode, optimizations, capacity);
-  const { incompatibilityNote } = resolveServer(input.gpu.id, input.preferredServerId);
+  const engineNotes = generateNotes(input, memory, sharding, prefill, decode, optimizations, capacity, catalog);
+  const { incompatibilityNote } = catalog
+    ? catalog.resolveServer(input.gpu.id, input.preferredServerId)
+    : { incompatibilityNote: null };
   const noteMessages = [
     ...(incompatibilityNote ? [`[WARNING] ${incompatibilityNote}`] : []),
     ...engineNotes.map((n) => `[${n.category.toUpperCase()}] ${n.message}`),

@@ -184,7 +184,7 @@ export function GpuDialog({ open, gpu, catalogExtractAssigned, onClose, onSaved 
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{gpu ? "Edit GPU" : "Add GPU"}</DialogTitle>
         </DialogHeader>

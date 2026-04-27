@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { getProject } from "@/lib/db/projects";
 import { buildBomExport } from "@/lib/export/build-bom-export";
-import { buildServerCatalogSnapshot } from "@/lib/sizing/catalog";
+import { buildServerCatalogSnapshot } from "@/lib/sizing/server-catalog";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const ReactPDF = require("@react-pdf/renderer") as typeof import("@react-pdf/renderer");
 import { SizingPdfDocument } from "@/lib/export/pdf";

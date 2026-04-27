@@ -2,60 +2,10 @@ import type { Gpu, Server, CloudInstance, ModelCatalogEntry, ThroughputTable } f
 
 import instancesRaw from "@/data/instances.json";
 import throughputRaw from "@/data/throughput.json";
-import { listGpus, listServers, listLlmModels } from "@/lib/catalogs/index";
-import { adaptGpu, adaptServer, adaptModel } from "@/lib/catalogs/adapters";
 
 // Cloud instances and throughput remain static JSON (not migrated in P13.4)
 export const instances: CloudInstance[] = (instancesRaw as { instances: CloudInstance[] }).instances;
 export const throughputTable: ThroughputTable = throughputRaw as unknown as ThroughputTable;
-
-// Catalog getters — lazy, read from DB via lib/catalogs/index (server-side only)
-export function getGpus(): Gpu[] {
-  return listGpus().map(adaptGpu);
-}
-
-export function getServers(): Server[] {
-  return listServers().map(adaptServer);
-}
-
-export function getModelCatalog(): ModelCatalogEntry[] {
-  return listLlmModels().map(adaptModel);
-}
-
-
-export function getGpuById(id: string): Gpu | undefined {
-  return getGpus().find((g) => g.id === id);
-}
-
-export function getModelById(id: string): ModelCatalogEntry | undefined {
-  return getModelCatalog().find((m) => m.id === id);
-}
-
-export function getServerById(id: string): Server | undefined {
-  return getServers().find((s) => s.id === id);
-}
-
-export function getBestServer(gpuId: string): Server | undefined {
-  return getServers().find((s) => s.supported_gpu_ids.includes(gpuId));
-}
-
-export function resolveServer(
-  gpuId: string,
-  preferredServerId?: string
-): { server: Server | undefined; incompatibilityNote: string | null } {
-  if (preferredServerId) {
-    const preferred = getServerById(preferredServerId);
-    if (preferred) {
-      if (preferred.supported_gpu_ids.includes(gpuId)) {
-        return { server: preferred, incompatibilityNote: null };
-      }
-      const auto = getBestServer(gpuId);
-      const note = `Preferred server "${preferred.model}" doesn't support ${gpuId}; auto-selected "${auto?.model ?? "unknown"}" instead.`;
-      return { server: auto, incompatibilityNote: note };
-    }
-  }
-  return { server: getBestServer(gpuId), incompatibilityNote: null };
-}
 
 export function lookupThroughput(
   gpuId: string,
@@ -94,28 +44,3 @@ export interface CatalogSnapshot {
   modelCatalog: ModelCatalogEntry[];
 }
 
-/** Build a CatalogSnapshot from the DB (server-side only). */
-export function buildServerCatalogSnapshot(): CatalogSnapshot {
-  const gpus = getGpus();
-  const servers = getServers();
-  const models = getModelCatalog();
-  return {
-    getGpuById: (id) => gpus.find((g) => g.id === id),
-    getBestServer: (gpuId) => servers.find((s) => s.supported_gpu_ids.includes(gpuId)),
-    resolveServer: (gpuId, preferred) => {
-      if (preferred) {
-        const s = servers.find((sv) => sv.id === preferred);
-        if (s) {
-          if (s.supported_gpu_ids.includes(gpuId)) return { server: s, incompatibilityNote: null };
-          const auto = servers.find((sv) => sv.supported_gpu_ids.includes(gpuId));
-          return {
-            server: auto,
-            incompatibilityNote: `Preferred server "${s.model}" doesn't support ${gpuId}; auto-selected "${auto?.model ?? "unknown"}" instead.`,
-          };
-        }
-      }
-      return { server: servers.find((s) => s.supported_gpu_ids.includes(gpuId)), incompatibilityNote: null };
-    },
-    modelCatalog: models,
-  };
-}

@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Plus, Search, RotateCcw, Pencil, Ban, Trash2 } from "lucide-react";
+import { Plus, Search, RotateCcw, Pencil, Ban, Trash2, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { OriginBadge } from "@/components/catalogs/OriginBadge";
@@ -65,6 +66,9 @@ export default function WorkloadReferencesAdminPage() {
 
   return (
     <div className="space-y-5 max-w-4xl">
+      <Link href="/settings/catalogs" className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+        <ChevronLeft className="h-4 w-4" /> Catalogs
+      </Link>
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold">Workload References</h2>

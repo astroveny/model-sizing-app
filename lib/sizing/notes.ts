@@ -9,7 +9,7 @@ import type {
   OptimizationsResult,
   CapacityResult,
 } from "./types";
-import { getGpuById } from "./catalog";
+import type { CatalogSnapshot } from "./catalog";
 
 /**
  * Generates human-readable sizing notes for the Build section.
@@ -27,7 +27,8 @@ export function generateNotes(
   prefill: PrefillResult,
   decode: DecodeResult,
   optimizations: OptimizationsResult,
-  capacity: CapacityResult
+  capacity: CapacityResult,
+  catalog?: CatalogSnapshot
 ): EngineNote[] {
   const notes: EngineNote[] = [];
 
@@ -74,8 +75,8 @@ export function generateNotes(
   }
 
   // --- MI300X alternative ---
-  if (input.gpu.vendor === "nvidia" && sharding.tensorParallelism >= 4) {
-    const mi300x = getGpuById("mi300x");
+  if (catalog && input.gpu.vendor === "nvidia" && sharding.tensorParallelism >= 4) {
+    const mi300x = catalog.getGpuById("mi300x");
     if (mi300x) {
       const mi300xMinGpus = Math.ceil(memory.vramTotalGb / mi300x.vram_gb);
       if (mi300xMinGpus < sharding.gpusPerReplica) {
