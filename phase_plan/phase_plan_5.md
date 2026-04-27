@@ -119,7 +119,7 @@
 - **Deliverable:** CRUD functions + tests for origin transitions
 - **Refs:** PRD §8.6.1
 
-### ☐ P13.6 — Settings catalogs index page
+### ☑ P13.6 — Settings catalogs index page
 - **Action:** Create `app/settings/catalogs/page.tsx` — index with cards: Servers, GPUs, LLM Models, Workload References. Each card links to its admin page and shows row count + deprecated count.
 - **Deliverable:** page
 - **Refs:** PRD §8.6.5

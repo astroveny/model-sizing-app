@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Settings2 } from "lucide-react";
+import { Plus, Settings2, Database, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModelRow } from "@/components/settings/ModelRow";
 import { FeatureRoutingSummary } from "@/components/settings/FeatureRoutingSummary";
@@ -70,6 +71,22 @@ export default function SettingsPage() {
       </section>
 
       <FeatureRoutingSummary routing={routing} models={models} />
+
+      <section>
+        <Link
+          href="/settings/catalogs"
+          className="flex items-center justify-between rounded-lg border border-[var(--border-default)] px-4 py-3 hover:border-[var(--accent-primary)] transition-colors group"
+        >
+          <div className="flex items-center gap-3">
+            <Database className="h-4 w-4 text-[var(--text-secondary)]" />
+            <div>
+              <p className="text-sm font-medium">Hardware &amp; Model Catalogs</p>
+              <p className="text-xs text-[var(--text-secondary)]">Manage GPUs, servers, LLM models, and workload references.</p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-[var(--text-secondary)] group-hover:text-[var(--accent-primary)] transition-colors" />
+        </Link>
+      </section>
 
       <AddModelDialog open={addOpen} onClose={() => setAddOpen(false)} onAdded={refresh} />
     </div>

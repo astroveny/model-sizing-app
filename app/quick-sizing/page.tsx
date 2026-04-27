@@ -157,8 +157,8 @@ export default function QuickSizingPage() {
     // Apply model
     const modelEntry = allModels.find((m) => m.id === candidate.modelId);
     if (modelEntry) {
-      project.discovery.model.name = modelEntry.name;
-      project.discovery.model.family = modelEntry.family;
+      project.discovery.model.name = modelEntry.name ?? "";
+      project.discovery.model.family = modelEntry.family ?? "";
       project.discovery.model.params = candidate.paramsB;
       project.discovery.model.architecture = candidate.architecture;
     }
