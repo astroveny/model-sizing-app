@@ -124,12 +124,12 @@
 - **Deliverable:** page
 - **Refs:** PRD §8.6.5
 
-### ☐ P13.7 — Servers admin page
+### ☑ P13.7 — Servers admin page
 - **Action:** Create `app/settings/catalogs/servers/page.tsx`. Table: vendor, model, GPU configs summary (e.g., "8×H100, 8×H200"), TDP, origin badge, actions. Search by vendor/model. Deprecated rows hidden by default with "Show deprecated" toggle. "Add Server" button.
 - **Deliverable:** page + table component
 - **Refs:** PRD §8.6.5
 
-### ☐ P13.8 — Add/Edit Server dialog (manual)
+### ☑ P13.8 — Add/Edit Server dialog (manual)
 - **Action:** Modal (shadcn Dialog) with form fields per §8.6.2. Nested editor for `server_gpu_configs` rows (add/remove). Validation. On submit → `createServer()` or `updateServer()`. "Reset to seed" button shown on `seed-edited` rows.
 - **Deliverable:** dialog component
 - **Refs:** PRD §8.6.6
