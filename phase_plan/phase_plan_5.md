@@ -156,7 +156,7 @@
 - **Deliverable:** page + dialogs + prompt
 - **Refs:** PRD §8.6.3
 
-### ☐ P13.12 — LLM models admin page + dialogs
+### ☑ P13.12 — LLM models admin page + dialogs
 - **Action:** Apply same patterns to LLM models. URL extraction prompt: `lib/llm/prompts/catalog-extract-llm-model.ts`. Common test source: Hugging Face model card pages (expose specs in structured meta). Key fields: `params_b`, `layers`, `hidden_size`, `num_kv_heads`, `head_dim`, `context_length_max`.
 - **Deliverable:** page + dialogs + prompt
 - **Refs:** PRD §8.6.4
